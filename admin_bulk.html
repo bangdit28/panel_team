@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN COMMANDER V105</title>
+    <title>ADMIN V107 (DYNAMIC COUNTRY)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -11,71 +11,50 @@
         .box { width: 100%; max-width: 600px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         h2 { margin-top: 0; color: #00ff88; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
-        /* NOTIFICATION CONTROL */
-        .notif-control { background: #1a1a1a; padding: 15px; border: 1px dashed #ffd700; border-radius: 8px; margin-bottom: 20px; }
-        .notif-input { width: 100%; padding: 10px; background: #000; color: #ffd700; border: 1px solid #555; box-sizing: border-box; margin-bottom: 10px; font-weight: bold; }
-        
-        /* STATS GRID */
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #222; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #444; }
-        .stat-num { font-size: 24px; font-weight: bold; display: block; margin-bottom: 5px; }
-        .stat-label { font-size: 10px; color: #aaa; }
-        
-        .c-green { color: #00e676; } .c-blue { color: #2979ff; } .c-red { color: #ff1744; }
+        /* COUNTRY MANAGER */
+        .country-form { display: flex; gap: 10px; margin-bottom: 15px; }
+        .country-list { max-height: 200px; overflow-y: auto; border: 1px dashed #555; padding: 10px; }
+        .c-item { display: flex; justify-content: space-between; background: #222; padding: 8px; margin-bottom: 5px; border-radius: 5px; align-items: center; }
+        .c-del { background: #d32f2f; color: #fff; border: none; padding: 5px 10px; cursor: pointer; font-size: 10px; border-radius: 3px; }
 
-        /* UPLOAD FORM */
-        textarea { width: 100%; height: 100px; background: #000; border: 1px solid #333; color: #ccc; padding: 10px; box-sizing: border-box; }
-        select, button { width: 100%; padding: 10px; margin-top: 5px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; margin-top: 5px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
         
-        .btn-send { background: #ffd700; color: #000; }
-        .btn-clear-notif { background: #555; color: #fff; margin-top: 5px; }
+        .btn-add { background: #00e5ff; color: #000; width: auto; flex: 1; }
         .btn-up { background: #00ff88; color: #000; margin-top: 10px; }
         .btn-del { background: #d32f2f; color: #fff; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- NOTIFIKASI CONTROLLER -->
-    <div class="box notif-control">
-        <label style="color:#ffd700; font-weight:bold;">📢 KIRIM PENGUMUMAN KE TEAM:</label>
-        <input type="text" id="notifMsg" class="notif-input" placeholder="Tulis pesan running text disini...">
-        <button class="btn-send" onclick="sendNotif()">📡 KIRIM NOTIFIKASI BERJALAN</button>
-        <button class="btn-clear-notif" onclick="clearNotif()">❌ HAPUS PENGUMUMAN</button>
-        <div id="currentNotif" style="font-size:10px; color:#aaa; margin-top:5px;">Status: -</div>
-    </div>
-
-    <!-- MONITORING -->
+    <!-- PENGATURAN NEGARA (FITUR BARU) -->
     <div class="box">
-        <h2>📊 LIVE STATS</h2>
-        <div class="grid-stats">
-            <div class="stat-card" style="border-color: #00e676;">
-                <span id="countAvail" class="stat-num c-green">0</span>
-                <span class="stat-label">STOK READY</span>
-            </div>
-            <div class="stat-card" style="border-color: #2979ff;">
-                <span id="countActive" class="stat-num c-blue">0</span>
-                <span class="stat-label">SEDANG DIPAKAI</span>
-            </div>
-            <div class="stat-card" style="border-color: #ff1744;">
-                <span id="countTrash" class="stat-num c-red">0</span>
-                <span class="stat-label">DONE / BAD</span>
-            </div>
+        <h2>⚙️ ATUR LIST NEGARA</h2>
+        <p style="font-size:11px; color:#aaa;">Negara yang ditambahkan di sini akan muncul di Panel Team.</p>
+        
+        <div class="country-form">
+            <input type="text" id="cCode" placeholder="Kode (Cth: ID)" style="width:30%;">
+            <input type="text" id="cName" placeholder="Nama (Cth: INDONESIA +62)">
+            <button class="btn-add" onclick="addCountry()">➕ TAMBAH</button>
+        </div>
+
+        <div id="countryListDisplay" class="country-list">
+            Loading list...
         </div>
     </div>
 
-    <!-- UPLOAD -->
+    <!-- UPLOAD STOK -->
     <div class="box">
-        <h2>📥 TAMBAH STOK</h2>
-        <select id="countrySelect" style="background:#222; color:#fff; margin-bottom:10px;">
-            <option value="ID">🇮🇩 INDONESIA</option>
-            <option value="US">🇺🇸 USA</option>
-            <option value="UK">🇬🇧 INGGRIS</option>
-            <option value="CI">🇨🇮 IVORY COAST</option>
-            <option value="OTHER">🌍 LAINNYA</option>
+        <h2>📥 TAMBAH STOK NOMOR</h2>
+        <label>PILIH NEGARA:</label>
+        <select id="countrySelect">
+            <option>Loading...</option>
         </select>
-        <textarea id="numList" placeholder="Paste nomor disini..."></textarea>
+
+        <textarea id="numList" placeholder="Paste nomor dari IvaSMS disini..." style="margin-top:10px; height:100px;"></textarea>
+
         <button class="btn-up" onclick="uploadStock()">🚀 UPLOAD STOK</button>
-        <button class="btn-del" onclick="clearAll()">🗑️ RESET DATABASE</button>
+        <button class="btn-del" onclick="clearAll()">🗑️ HAPUS SEMUA DATA</button>
     </div>
 
     <script>
@@ -93,51 +72,67 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- NOTIFICATION LOGIC ---
-        function sendNotif() {
-            const msg = document.getElementById('notifMsg').value;
-            if(!msg) return alert("Pesan kosong!");
+        // --- 1. MANAGEMEN NEGARA ---
+        
+        // Baca Data Negara Realtime
+        db.ref('settings/countries').on('value', snap => {
+            const data = snap.val();
+            const listDiv = document.getElementById('countryListDisplay');
+            const selectDiv = document.getElementById('countrySelect');
             
-            db.ref('system/notification').set(msg);
-            alert("Notifikasi dikirim ke semua Panel Team!");
-        }
+            listDiv.innerHTML = "";
+            selectDiv.innerHTML = "";
 
-        function clearNotif() {
-            db.ref('system/notification').remove();
-            document.getElementById('notifMsg').value = "";
-            alert("Notifikasi dihapus.");
-        }
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    // Isi List Manager
+                    const item = document.createElement('div');
+                    item.className = 'c-item';
+                    item.innerHTML = `<span><b>${key}</b> - ${data[key]}</span> <button class="c-del" onclick="delCountry('${key}')">HAPUS</button>`;
+                    listDiv.appendChild(item);
 
-        // Monitor Status Notif Sendiri
-        db.ref('system/notification').on('value', snap => {
-            const val = snap.val();
-            document.getElementById('currentNotif').innerText = val ? `Sedang Tayang: "${val}"` : "Status: Tidak ada pengumuman.";
-        });
-
-        // --- STATS MONITOR ---
-        db.ref('stock').on('value', (snapshot) => {
-            const data = snapshot.val();
-            let avail=0, active=0, trash=0;
-            if (data) {
-                Object.values(data).forEach(item => {
-                    if (item.status === 'AVAILABLE') avail++;
-                    else if (item.status === 'TAKEN') active++;
-                    else if (item.status === 'DONE' || item.status === 'BAD') trash++;
+                    // Isi Dropdown Upload
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = data[key];
+                    selectDiv.appendChild(opt);
                 });
+            } else {
+                listDiv.innerHTML = "<span style='color:red'>Belum ada negara. Tambahkan dulu!</span>";
+                selectDiv.innerHTML = "<option>Kosong</option>";
             }
-            document.getElementById('countAvail').innerText = avail;
-            document.getElementById('countActive').innerText = active;
-            document.getElementById('countTrash').innerText = trash;
         });
 
-        // --- UPLOAD LOGIC ---
+        function addCountry() {
+            const code = document.getElementById('cCode').value.toUpperCase().trim();
+            const name = document.getElementById('cName').value.trim();
+
+            if(!code || !name) return alert("Isi Kode dan Nama!");
+
+            db.ref('settings/countries/' + code).set(name);
+            
+            document.getElementById('cCode').value = "";
+            document.getElementById('cName').value = "";
+        }
+
+        window.delCountry = function(code) {
+            if(confirm("Hapus negara ini dari list?")) {
+                db.ref('settings/countries/' + code).remove();
+            }
+        }
+
+        // --- 2. UPLOAD STOCK ---
         function uploadStock() {
             const raw = document.getElementById('numList').value;
             const country = document.getElementById('countrySelect').value;
+            
             if(!raw) return alert("Nomor kosong!");
+            if(!country || country === 'Kosong') return alert("Pilih negara dulu!");
+
             const lines = raw.split(/\n/);
             let updates = {};
             let count = 0;
+
             lines.forEach(line => {
                 let cleanNum = line.replace(/\D/g, ''); 
                 if(cleanNum.length > 6) {
@@ -147,6 +142,7 @@
                     count++;
                 }
             });
+
             if(count > 0) {
                 db.ref('stock').update(updates, (e) => {
                     if(!e) { alert(`SUKSES! ${count} Nomor Masuk.`); document.getElementById('numList').value = ""; }
