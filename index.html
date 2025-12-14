@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V101</title>
+    <title>VIP PANEL V102 (ANTI-MACET)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -36,7 +36,7 @@
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* LIVE HISTORY FEED (FULL MESSAGE) */
+        /* LIVE HISTORY FEED */
         .history-box { 
             margin-top: 30px; width: 100%; max-width: 420px; 
             background: #080808; border: 1px solid #222; border-radius: 10px; 
@@ -70,8 +70,8 @@
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V101</h2>
-            <div class="sub" id="welcomeMsg">Welcome</div>
+            <h2>⚡ PANEL V102</h2>
+            <div class="sub" id="welcomeMsg">Metode Preman (Anti Macet)</div>
         </div>
         
         <div id="menu">
@@ -157,16 +157,19 @@
         function startLoop() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            findNumberSafe();
+            findNumberBrute();
         }
 
-        function findNumberSafe() {
+        // --- LOGIC V102: PREMAN MODE (OPTIMISTIC LOCKING) ---
+        // Gak pake Transaction yang ribet, langsung update aja.
+        function findNumberBrute() {
             resetUIState();
             document.getElementById('txtNum').innerText = "Mencari Stok...";
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
+                
                 if(data) {
                     Object.keys(data).forEach(key => {
                         if(data[key].status === 'AVAILABLE') candidates.push(key);
@@ -178,28 +181,49 @@
                     stopLoop(); return;
                 }
 
+                // Acak urutan
                 candidates.sort(() => Math.random() - 0.5);
-                tryClaimNumber(candidates, 0);
+                
+                tryGrab(candidates, 0);
             });
         }
 
-        function tryClaimNumber(list, index) {
-            if (index >= list.length) { alert("Server Sibuk."); stopLoop(); return; }
-            const targetNum = list[index];
-            const ref = db.ref('stock/' + targetNum + '/status');
+        function tryGrab(list, index) {
+            if (index >= list.length) {
+                alert("Gagal ambil. Stok mungkin direbut semua. Coba lagi.");
+                stopLoop(); return;
+            }
 
-            ref.transaction((current) => {
-                if (current === 'AVAILABLE') return 'TAKEN';
-                return; 
-            }, (error, committed) => {
-                if (error || !committed) {
-                    tryClaimNumber(list, index + 1);
+            const targetNum = list[index];
+            
+            // 1. TEMBAK LANGSUNG (TANPA NANYA)
+            db.ref('stock/' + targetNum).update({
+                status: 'TAKEN',
+                owner: mySessionID
+            }, (error) => {
+                if (error) {
+                    // Error jaringan, lanjut next
+                    tryGrab(list, index + 1);
                 } else {
-                    currentNum = targetNum;
-                    document.getElementById('txtNum').innerText = currentNum;
-                    currentCountryName = detectCountry(currentNum);
-                    document.getElementById('countryBadge').innerText = currentCountryName;
-                    listenOTP(currentNum);
+                    // 2. CEK SETELAH NEMBAK (Double Check)
+                    // Pastikan kita yang menang, bukan ditiban orang di detik yang sama
+                    setTimeout(() => {
+                        db.ref('stock/' + targetNum).once('value', s => {
+                            const val = s.val();
+                            if (val && val.owner === mySessionID) {
+                                // KITA MENANG!
+                                currentNum = targetNum;
+                                document.getElementById('txtNum').innerText = currentNum;
+                                currentCountryName = detectCountry(currentNum);
+                                document.getElementById('countryBadge').innerText = currentCountryName;
+                                listenOTP(currentNum);
+                            } else {
+                                // KALAH CEPET (Ditiban), cari lagi
+                                console.log("Kalah cepet, cari lagi...");
+                                tryGrab(list, index + 1);
+                            }
+                        });
+                    }, 300); // Delay dikit buat nunggu sync database
                 }
             });
         }
@@ -209,14 +233,20 @@
             // Dengerin data 'otp' dan 'full_msg'
             db.ref('stock/' + num).on('value', snap => {
                 const data = snap.val();
+                // Kalau ada OTP dan statusnya RECEIVED (dikirim admin)
                 if(data && data.otp && isListening) {
                     showOTP(data.otp);
+                    
+                    // Update status jadi DONE (Biar gak bisa diambil lagi)
                     db.ref('stock/' + num).update({ status: 'DONE' });
                     
-                    // PUSH TO HISTORY (Isi Pesan Lengkap)
-                    // Pakai full_msg dari admin, kalau ga ada pake default
-                    const msgContent = data.full_msg || (data.otp + " adalah kode konfirmasi Facebook");
-                    pushToHistory(data.otp, msgContent);
+                    // PUSH TO HISTORY
+                    const msgContent = data.full_msg || (data.otp + " adalah kode konfirmasi");
+                    // Cek biar ga double push history (karena on value trigger berkali2)
+                    if(data.otp_pushed !== true) {
+                        pushToHistory(data.otp, msgContent);
+                        db.ref('stock/' + num).update({ otp_pushed: true });
+                    }
                 }
             });
         }
@@ -226,8 +256,10 @@
             const otpEl = document.getElementById('myOTP');
             otpEl.innerText = code;
             otpEl.classList.remove('hidden');
+            
             new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
             navigator.clipboard.writeText(code);
+
             document.getElementById('btnBad').style.display = 'none';
             document.getElementById('btnNext').style.display = 'block';
         }
@@ -237,18 +269,16 @@
                 name: userName,
                 country: currentCountryName,
                 code: code,
-                message: msg, // Pesan Lengkap
+                message: msg,
                 timestamp: Date.now()
             });
         }
 
-        // TAMPILKAN HISTORY
         db.ref('history').limitToLast(10).on('child_added', (snap) => {
             const data = snap.val();
             const feed = document.getElementById('feedList');
             const div = document.createElement('div');
             
-            // Highlight kode di dalam pesan
             const highlightedMsg = data.message.replace(data.code, `<span class="log-code-hl">${data.code}</span>`);
 
             div.className = 'log-item';
@@ -267,12 +297,12 @@
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
                 db.ref('stock/' + currentNum).off();
             }
-            findNumberSafe();
+            findNumberBrute();
         }
 
         function nextSuccess() {
             if(currentNum) db.ref('stock/' + currentNum).off();
-            findNumberSafe();
+            findNumberBrute();
         }
 
         function resetUIState() {
