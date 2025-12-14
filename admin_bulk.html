@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN BULK STOCK</title>
+    <title>ADMIN STOCK MANAGER V92</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -11,45 +11,46 @@
         .box { max-width: 600px; margin: 0 auto; border: 2px solid #00ff88; padding: 20px; border-radius: 10px; }
         
         textarea { width: 100%; height: 200px; background: #111; border: 1px solid #333; color: #fff; padding: 10px; box-sizing: border-box; }
-        select, button { width: 100%; padding: 10px; margin-top: 10px; background: #00ff88; color: #000; border: none; font-weight: bold; cursor: pointer; }
-        .btn-clear { background: #d32f2f; color: #fff; margin-top: 20px; }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 14px; }
         
-        .info { font-size: 11px; color: #aaa; margin-bottom: 10px; text-align: left; }
+        .btn-up { background: #00ff88; color: #000; }
+        .btn-del { background: #d32f2f; color: #fff; margin-top: 30px; }
+        
+        h2 { margin-top: 0; }
+        .stats { margin-top: 10px; color: yellow; border: 1px dashed #333; padding: 10px; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>🏭 GUDANG NOMOR (BULK)</h2>
+        <h2>🏭 GUDANG NOMOR V92</h2>
         
-        <div class="info">
-            1. Copy nomor dari IvaSMS (Format bebas, script akan ambil angkanya saja).<br>
-            2. Pastikan nomor sesuai dengan format di tabel Live SMS IvaSMS (biasanya tanpa +).
+        <div class="stats" id="dbStats">
+            Loading Data...
         </div>
 
-        <select id="countrySelect">
-            <option value="ID">🇮🇩 INDONESIA (+62)</option>
-            <option value="US">🇺🇸 USA (+1)</option>
-            <option value="UK">🇬🇧 INGGRIS (+44)</option>
-            <option value="MY">🇲🇾 MALAYSIA (+60)</option>
+        <hr style="border-color:#333; margin: 20px 0;">
+
+        <label>PILIH NEGARA STOK:</label>
+        <select id="countrySelect" style="background:#222; color:#fff; border:1px solid #444;">
+            <option value="ID">🇮🇩 INDONESIA</option>
+            <option value="US">🇺🇸 USA</option>
+            <option value="UK">🇬🇧 INGGRIS</option>
+            <option value="MY">🇲🇾 MALAYSIA</option>
+            <option value="CI">🇨🇮 IVORY COAST</option>
             <option value="OTHER">🌍 MIXED / LAINNYA</option>
         </select>
 
-        <textarea id="numList" placeholder="Paste 1000 nomor disini...
-Contoh:
-212600192
-212600193
-..."></textarea>
+        <p style="text-align:left; font-size:11px; color:#aaa; margin-bottom:5px;">PASTE NOMOR DARI IVASMS (Bisa ribuan baris):</p>
+        <textarea id="numList" placeholder="212600192&#10;212600193&#10;..."></textarea>
 
-        <button onclick="uploadStock()">🚀 UPLOAD STOK</button>
+        <button class="btn-up" onclick="uploadStock()">🚀 UPLOAD STOK BARU</button>
         
-        <div id="status" style="margin-top:10px; color:yellow;"></div>
-
-        <button class="btn-clear" onclick="clearAll()">🗑️ HAPUS SEMUA DATABASE</button>
+        <button class="btn-del" onclick="clearAll()">🗑️ HAPUS SEMUA DATABASE (RESET)</button>
     </div>
 
     <script>
-        // 🔥 CONFIG FIREBASE 🔥
+        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -63,42 +64,54 @@ Contoh:
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Monitor Jumlah Stok
+        db.ref('stock').on('value', snap => {
+            const val = snap.val();
+            const count = val ? Object.keys(val).length : 0;
+            document.getElementById('dbStats').innerText = `TOTAL STOK SAAT INI: ${count} NOMOR`;
+        });
+
         function uploadStock() {
             const raw = document.getElementById('numList').value;
             const country = document.getElementById('countrySelect').value;
             
-            if(!raw) return alert("Kosong bro!");
+            if(!raw) return alert("Nomor kosong!");
 
-            // Pecah per baris
             const lines = raw.split(/\n/);
             let count = 0;
+            
+            // Batch upload biar ga berat
+            let updates = {};
 
             lines.forEach(line => {
-                // Ambil hanya angka (Hapus +, spasi, -)
-                // Contoh: +62 812-345 -> 62812345
-                let cleanNum = line.replace(/\D/g, ''); 
-
-                if(cleanNum.length > 5) {
-                    // Simpan ke Firebase dengan Key = Nomor HP (Biar gampang dicari script)
-                    db.ref('stock/' + cleanNum).set({
+                let cleanNum = line.replace(/\D/g, ''); // Ambil angka doang
+                if(cleanNum.length > 6) {
+                    updates[cleanNum] = {
                         number: cleanNum,
                         country: country,
                         otp: "",
-                        status: "AVAILABLE", // Status: AVAILABLE, TAKEN, DONE
+                        status: "AVAILABLE",
                         timestamp: Date.now()
-                    });
+                    };
                     count++;
                 }
             });
 
-            document.getElementById('status').innerText = `SUKSES! ${count} Nomor ${country} diupload.`;
-            document.getElementById('numList').value = "";
+            if(count > 0) {
+                db.ref('stock').update(updates, (error) => {
+                    if(error) alert("Error: " + error.message);
+                    else {
+                        alert(`BERHASIL! ${count} Nomor ${country} Masuk Database.`);
+                        document.getElementById('numList').value = "";
+                    }
+                });
+            }
         }
 
         function clearAll() {
-            if(confirm("Yakin hapus semua stok? Team bakal disconnect.")) {
+            if(confirm("YAKIN HAPUS SEMUA? Team akan kehilangan akses nomor saat ini!")) {
                 db.ref('stock').remove();
-                alert("Database Bersih!");
+                alert("DATABASE BERSIH! Silakan upload stok baru.");
             }
         }
     </script>
