@@ -3,51 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V105 (NOTIF)</title>
+    <title>VIP PANEL V106 (COUNTRY LOOP)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
         .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; }
         
-        /* NEWS TICKER (NOTIFIKASI BERJALAN) */
+        /* NEWS TICKER */
         .news-container {
             width: 100%; background: rgba(255, 215, 0, 0.1); 
             border: 1px solid #ffd700; border-radius: 6px;
             margin-bottom: 15px; overflow: hidden; white-space: nowrap;
-            display: none; /* Default sembunyi */
+            display: none;
         }
         .news-text {
             display: inline-block; padding: 8px; font-size: 12px; 
             font-weight: bold; color: #ffd700; font-family: monospace;
             animation: marquee 10s linear infinite;
         }
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         h2 { margin: 0; color: #f43f5e; } 
         .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
 
-        /* NOMOR & OTP */
-        .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
-        .country-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
+        /* NOMOR DISPLAY */
+        .display-num { 
+            font-size: 26px; font-family: monospace; background: #000; 
+            padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; 
+            margin: 10px 0; cursor: pointer; color: #fff; position: relative;
+        }
+        .country-tag { 
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
+            background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; 
+            padding: 2px 8px; border-radius: 4px;
+        }
+
+        /* OTP AREA */
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
 
-        /* BUTTONS */
+        /* CONTROLS */
+        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-start { background: #f43f5e; color: #fff; }
+        
+        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
         /* HISTORY */
-        .history-box { margin-top: 30px; width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 250px; overflow-y: auto; }
+        .history-box { 
+            margin-top: 30px; width: 100%; max-width: 420px; 
+            background: #080808; border: 1px solid #222; border-radius: 10px; 
+            padding: 10px; text-align: left; height: 250px; overflow-y: auto;
+        }
+        .history-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
+        .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; }
+        .history-date { font-size: 10px; color: #666; font-family: monospace; }
+        
         .log-item { font-size: 11px; margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid #333; background: #111; animation: slideIn 0.3s; }
+        .log-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
         .log-user { color: #f43f5e; font-weight: bold; }
+        .log-time { color: #555; font-size: 9px; }
         .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; }
         .log-code-hl { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
 
@@ -59,11 +78,12 @@
 <body>
 
     <div class="box">
-        <!-- NOTIFIKASI BERJALAN (NEWS TICKER) -->
+        <!-- NOTIFIKASI -->
         <div id="newsContainer" class="news-container">
             <div id="newsText" class="news-text">...</div>
         </div>
 
+        <!-- LOGIN SCREEN -->
         <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
             <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
@@ -71,17 +91,28 @@
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V105</h2>
-            <div class="sub" id="welcomeMsg">Live Notification System</div>
+            <h2>⚡ PANEL V106</h2>
+            <div class="sub" id="welcomeMsg">Country Loop System</div>
         </div>
         
+        <!-- MENU PILIH NEGARA -->
         <div id="menu">
-            <button class="btn-start" onclick="startLoop()">🚀 AMBIL NOMOR (AUTO)</button>
+            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA STOK</label>
+            <select id="countryPick">
+                <option value="ID">🇮🇩 INDONESIA</option>
+                <option value="US">🇺🇸 USA</option>
+                <option value="UK">🇬🇧 INGGRIS</option>
+                <option value="CI">🇨🇮 IVORY COAST</option>
+                <option value="MY">🇲🇾 MALAYSIA</option>
+                <option value="OTHER">🌍 MIXED / LAINNYA</option>
+            </select>
+            <button class="btn-start" onclick="startLoop()">🚀 MULAI FARMING</button>
         </div>
 
+        <!-- AREA KERJA (ACTIVE) -->
         <div id="active" class="hidden">
             <div class="display-num" id="myNum" onclick="copyNum()">
-                <div id="countryBadge" class="country-tag">UNK</div>
+                <div id="countryBadge" class="country-tag">...</div>
                 <span id="txtNum">Mencari...</span>
             </div>
             
@@ -92,20 +123,22 @@
 
             <button id="btnBad" class="btn-bad" onclick="nextBad()">❌ GAK MASUK? GANTI</button>
             <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT NOMOR BARU</button>
-            <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
+            <button class="btn-stop" onclick="stopLoop()">⏹️ STOP & GANTI NEGARA</button>
         </div>
     </div>
 
+    <!-- HISTORY FEED -->
     <div class="history-box">
-        <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
-            <span style="font-size:11px; color:#f43f5e; font-weight:bold;">🔴 LIVE SMS FEED</span>
+        <div class="history-header">
+            <span class="history-title">🔴 LIVE SMS FEED</span>
+            <span class="history-date" id="dateDisplay">...</span>
         </div>
         <div id="feedList"></div>
     </div>
 
     <script>
         // ==========================================
-        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
+        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
         // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
@@ -122,31 +155,31 @@
         const db = firebase.database();
         
         let currentNum = null;
+        let selectedRegion = ""; // Menyimpan negara yang dipilih
         let userName = localStorage.getItem('vip_username') || "";
         let currentCountryName = "Unknown";
         let isListening = false;
         let lastProcessedOTP = ""; 
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
-        const todayString = new Date().toDateString();
+
+        // Header Tanggal
+        const today = new Date();
+        document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+        const todayString = today.toDateString();
 
         const COUNTRY_MAP = {
             '62': 'INDONESIA 🇮🇩', '1': 'USA 🇺🇸', '44': 'UK 🇬🇧', '225': 'IVORY COAST 🇨🇮',
-            '212': 'MOROCCO 🇲🇦', '60': 'MALAYSIA 🇲🇾', '7': 'RUSSIA 🇷🇺', '84': 'VIETNAM 🇻🇳',
-            '63': 'PHILIPPINES 🇵🇭', '66': 'THAILAND 🇹🇭', '234': 'NIGERIA 🇳🇬', '33': 'FRANCE 🇫🇷'
+            '212': 'MOROCCO 🇲🇦', '60': 'MALAYSIA 🇲🇾', '7': 'RUSSIA 🇷🇺', '84': 'VIETNAM 🇻🇳'
         };
 
-        // --- SISTEM NOTIFIKASI LIVE ---
+        // NOTIFIKASI
         db.ref('system/notification').on('value', snap => {
             const msg = snap.val();
             const container = document.getElementById('newsContainer');
-            const text = document.getElementById('newsText');
-            
             if(msg) {
-                text.innerText = "📢 INFO: " + msg;
+                document.getElementById('newsText').innerText = "📢 INFO: " + msg;
                 container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
+            } else container.style.display = 'none';
         });
 
         if(userName) {
@@ -161,7 +194,7 @@
                 localStorage.setItem('vip_username', name);
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('welcomeMsg').innerText = "Operator: " + userName;
-            } else { alert("Isi nama dulu!"); }
+            } else alert("Isi nama dulu!");
         }
 
         function detectCountry(num) {
@@ -169,31 +202,44 @@
                 const prefix = num.substring(0, len);
                 if (COUNTRY_MAP[prefix]) return COUNTRY_MAP[prefix];
             }
-            return "INTERNATIONAL 🌍";
+            return selectedRegion; // Fallback ke kode negara yg dipilih
         }
 
+        // --- START LOOPING (KUNCI NEGARA) ---
         function startLoop() {
+            // 1. Simpan Pilihan Negara
+            selectedRegion = document.getElementById('countryPick').value;
+            
+            // 2. Ganti Tampilan
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            findNumberBrute();
+            
+            // 3. Mulai Cari
+            findNumberSafe();
         }
 
-        function findNumberBrute() {
+        function findNumberSafe() {
             resetUIState();
-            document.getElementById('txtNum').innerText = "Mencari Stok...";
+            document.getElementById('txtNum').innerText = "Mencari Stok " + selectedRegion + "...";
+            document.getElementById('countryBadge').innerText = "...";
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
+                
                 if(data) {
                     Object.keys(data).forEach(key => {
-                        if(data[key].status === 'AVAILABLE') candidates.push(key);
+                        // FILTER: Cuma ambil yang AVAILABLE DAN Negaranya COCOK
+                        if(data[key].status === 'AVAILABLE' && data[key].country === selectedRegion) {
+                            candidates.push(key);
+                        }
                     });
                 }
 
                 if(candidates.length === 0) {
-                    alert(`STOK HABIS! Minta Admin upload.`);
-                    stopLoop(); return;
+                    alert(`STOK ${selectedRegion} HABIS!\nSilakan pilih negara lain atau minta Admin upload.`);
+                    stopLoop(); // Balik ke menu
+                    return;
                 }
 
                 candidates.sort(() => Math.random() - 0.5);
@@ -203,7 +249,10 @@
 
         function tryGrab(list, index) {
             if (index >= list.length) {
-                alert("Gagal ambil (Rebutan). Coba lagi."); stopLoop(); return;
+                alert("Gagal ambil (Collision High). Coba lagi."); 
+                // Di V106, kalau gagal grab semua kandidat, kita coba cari lagi dari awal
+                setTimeout(findNumberSafe, 1000); 
+                return;
             }
             const targetNum = list[index];
             
@@ -220,8 +269,11 @@
                             if (val && val.owner === mySessionID) {
                                 currentNum = targetNum;
                                 document.getElementById('txtNum').innerText = currentNum;
+                                
+                                // Update Badge Negara
                                 currentCountryName = detectCountry(currentNum);
                                 document.getElementById('countryBadge').innerText = currentCountryName;
+                                
                                 copyText(currentNum);
                                 listenOTP(currentNum);
                             } else {
@@ -265,11 +317,7 @@
 
         function pushToHistory(code, msg) {
             db.ref('history').push({
-                name: userName,
-                country: currentCountryName,
-                code: code,
-                message: msg,
-                timestamp: Date.now()
+                name: userName, country: currentCountryName, code: code, message: msg, timestamp: Date.now()
             });
         }
 
@@ -286,32 +334,43 @@
             const div = document.createElement('div');
             div.className = 'log-item';
             div.innerHTML = `
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:10px;color:#888;">
+                <div class="log-top">
                     <div><span class="log-user">${data.name}</span> <span>${data.country}</span></div>
-                    <span>${timeStr}</span>
+                    <span class="log-time">${timeStr}</span>
                 </div>
                 <span class="log-msg">${censoredMsg}</span>
             `;
             feed.insertBefore(div, feed.firstChild);
         });
 
+        // --- ACTIONS (TETAP DI DALAM LOOP) ---
+        
         function nextBad() {
             if(currentNum) {
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
                 db.ref('stock/' + currentNum).off();
             }
-            findNumberBrute();
+            // Langsung cari nomor baru dengan NEGARA YANG SAMA
+            findNumberSafe();
         }
 
         function nextSuccess() {
             if(currentNum) db.ref('stock/' + currentNum).off();
-            findNumberBrute();
+            // Langsung cari nomor baru dengan NEGARA YANG SAMA
+            findNumberSafe();
         }
 
+        // --- TOMBOL STOP (BALIK KE MENU) ---
         function stopLoop() {
             if(currentNum) db.ref('stock/' + currentNum).off();
+            
+            // Reset UI
             document.getElementById('active').classList.add('hidden');
             document.getElementById('menu').classList.remove('hidden');
+            
+            // Reset status tombol
+            const btn = document.querySelector('.btn-start');
+            btn.innerText = "🚀 MULAI FARMING";
         }
 
         function resetUIState() {
