@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP OTP PANEL</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        /* TAMPILAN ALA PANEL PREMIUM */
+        :root { --main: #2979ff; --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        
+        .header { width: 100%; max-width: 400px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-weight: 900; font-size: 20px; color: var(--main); letter-spacing: 1px; }
+        .balance { background: #334155; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #4ade80; display: flex; align-items: center; gap: 5px; }
+
+        .panel-box { background: var(--card); width: 100%; max-width: 400px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 1px solid #334155; text-align: center; }
+        
+        /* LAYOUT ORDER */
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { font-size: 11px; color: #94a3b8; font-weight: bold; display: block; margin-bottom: 5px; }
+        .fake-select { width: 100%; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 12px; border-radius: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        
+        .btn-order { width: 100%; padding: 15px; background: var(--main); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 15px rgba(41, 121, 255, 0.3); }
+        .btn-order:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        
+        /* NOMOR AKTIF UI */
+        .order-active { display: none; margin-top: 10px; }
+        .number-box { font-family: 'Consolas', monospace; font-size: 26px; color: #fff; background: #000; padding: 20px; border-radius: 10px; border: 2px dashed #334155; margin-bottom: 15px; cursor: pointer; position: relative; }
+        .click-hint { font-size: 10px; color: #64748b; position: absolute; bottom: 5px; width: 100%; left: 0; }
+        
+        /* OTP UI */
+        .otp-area { margin-top: 20px; padding-top: 20px; border-top: 1px solid #334155; }
+        .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; text-shadow: 0 0 20px rgba(74, 222, 128, 0.3); cursor: pointer; }
+        .otp-loading { font-size: 12px; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        /* SPINNER */
+        .spinner { width: 14px; height: 14px; border: 2px solid #64748b; border-top: 2px solid var(--main); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        .btn-cancel { background: #ef4444; margin-top: 20px; font-size: 12px; padding: 10px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">⚡ VIP SENDER</div>
+        <div class="balance">SALDO: $500.00</div>
+    </div>
+
+    <div class="panel-box">
+        <!-- FORM PEMBELIAN -->
+        <div id="viewForm">
+            <div class="form-group">
+                <label>LAYANAN</label>
+                <div class="fake-select"><span>🔵 Facebook</span><span>▼</span></div>
+            </div>
+            <div class="form-group">
+                <label>NEGARA / SERVER</label>
+                <div class="fake-select"><span>🌍 Mixed World (Auto)</span><span>▼</span></div>
+            </div>
+            <div class="form-group">
+                <label>HARGA</label>
+                <div class="fake-select" style="color: #4ade80;"><span>$0.10 / SMS</span></div>
+            </div>
+            
+            <button class="btn-order" onclick="requestNumber()">🛒 BELI NOMOR</button>
+        </div>
+
+        <!-- TAMPILAN NOMOR (ACTIVE) -->
+        <div id="viewActive" class="order-active">
+            <label style="text-align:center;">NOMOR AKTIF (KLIK SALIN)</label>
+            
+            <div class="number-box" onclick="copyText('numVal')">
+                <span id="numVal">Loading...</span>
+                <div class="click-hint">KLIK UNTUK COPY</div>
+            </div>
+
+            <div class="otp-area">
+                <!-- LOADING -->
+                <div id="otpLoad" class="otp-loading">
+                    <div class="spinner"></div> Menunggu SMS Masuk...
+                </div>
+                <!-- RESULT -->
+                <div id="otpRes" class="otp-code hidden" onclick="copyText('otpRes')">
+                    ---
+                </div>
+            </div>
+
+            <button class="btn-order btn-cancel" onclick="cancelOrder()">❌ GANTI NOMOR / BATAL</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ⚠️ PASTE CONFIG FIREBASE SAMA PERSIS ⚠️
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxxxx...",
+            authDomain: "xxxx.firebaseapp.com",
+            databaseURL: "https://xxxx.firebasedatabase.app",
+            projectId: "xxxx",
+            storageBucket: "xxxx.appspot.com",
+            messagingSenderId: "xxxx",
+            appId: "xxxx"
+        };
+        // ==========================================
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let isOrderActive = false;
+
+        function requestNumber() {
+            // Simulasi Loading Beli
+            const btn = document.querySelector('.btn-order');
+            btn.innerHTML = "🔄 MENGHUBUNGKAN SERVER...";
+            btn.style.opacity = "0.7";
+
+            // Baca data dari Firebase (yang dikirim Admin)
+            db.ref('session').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                
+                if (data && data.number) {
+                    startSession(data.number);
+                } else {
+                    alert("⚠️ SERVER SIBUK / ADMIN BELUM BUKA NOMOR!\nSilakan hubungi Admin.");
+                    btn.innerHTML = "🛒 BELI NOMOR";
+                    btn.style.opacity = "1";
+                }
+            });
+        }
+
+        function startSession(number) {
+            isOrderActive = true;
+            document.getElementById('viewForm').classList.add('hidden');
+            document.getElementById('viewActive').style.display = 'block';
+            document.getElementById('numVal').innerText = number;
+            
+            // Mulai dengar OTP Realtime
+            db.ref('session/otp').on('value', (snap) => {
+                const code = snap.val();
+                if (code && code !== 'WAITING...' && isOrderActive) {
+                    showOTP(code);
+                }
+            });
+        }
+
+        function showOTP(code) {
+            document.getElementById('otpLoad').classList.add('hidden');
+            const res = document.getElementById('otpRes');
+            res.classList.remove('hidden');
+            res.innerText = code;
+            
+            // Bunyi Beep
+            const audio = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
+            audio.play().catch(e=>{});
+            
+            // Auto Copy (Browser modern)
+            navigator.clipboard.writeText(code).catch(e=>{});
+        }
+
+        function cancelOrder() {
+            if(confirm("Batalkan order dan cari nomor baru?")) {
+                isOrderActive = false;
+                db.ref('session/otp').off(); // Stop dengerin
+                
+                // Reset UI
+                document.getElementById('viewActive').style.display = 'none';
+                document.getElementById('viewForm').classList.remove('hidden');
+                
+                // Reset Element
+                document.querySelector('.btn-order').innerHTML = "🛒 BELI NOMOR";
+                document.querySelector('.btn-order').style.opacity = "1";
+                document.getElementById('otpLoad').classList.remove('hidden');
+                document.getElementById('otpResult').classList.add('hidden');
+            }
+        }
+
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            if(text.includes('Loading')) return;
+            navigator.clipboard.writeText(text);
+            alert("Disalin: " + text);
+        }
+    </script>
+</body>
+</html>
