@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN BULK STOCK</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background: #000; color: #00ff88; font-family: monospace; padding: 20px; text-align: center; }
+        .box { max-width: 600px; margin: 0 auto; border: 2px solid #00ff88; padding: 20px; border-radius: 10px; }
+        
+        textarea { width: 100%; height: 200px; background: #111; border: 1px solid #333; color: #fff; padding: 10px; box-sizing: border-box; }
+        select, button { width: 100%; padding: 10px; margin-top: 10px; background: #00ff88; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .btn-clear { background: #d32f2f; color: #fff; margin-top: 20px; }
+        
+        .info { font-size: 11px; color: #aaa; margin-bottom: 10px; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>🏭 GUDANG NOMOR (BULK)</h2>
+        
+        <div class="info">
+            1. Copy nomor dari IvaSMS (Format bebas, script akan ambil angkanya saja).<br>
+            2. Pastikan nomor sesuai dengan format di tabel Live SMS IvaSMS (biasanya tanpa +).
+        </div>
+
+        <select id="countrySelect">
+            <option value="ID">🇮🇩 INDONESIA (+62)</option>
+            <option value="US">🇺🇸 USA (+1)</option>
+            <option value="UK">🇬🇧 INGGRIS (+44)</option>
+            <option value="MY">🇲🇾 MALAYSIA (+60)</option>
+            <option value="OTHER">🌍 MIXED / LAINNYA</option>
+        </select>
+
+        <textarea id="numList" placeholder="Paste 1000 nomor disini...
+Contoh:
+212600192
+212600193
+..."></textarea>
+
+        <button onclick="uploadStock()">🚀 UPLOAD STOK</button>
+        
+        <div id="status" style="margin-top:10px; color:yellow;"></div>
+
+        <button class="btn-clear" onclick="clearAll()">🗑️ HAPUS SEMUA DATABASE</button>
+    </div>
+
+    <script>
+        // 🔥 CONFIG FIREBASE 🔥
+        const firebaseConfig = {
+  apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
+  authDomain: "vipotpsystem.firebaseapp.com",
+  databaseURL: "https://vipotpsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "vipotpsystem",
+  storageBucket: "vipotpsystem.firebasestorage.app",
+  messagingSenderId: "1041472357696",
+  appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
+};
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function uploadStock() {
+            const raw = document.getElementById('numList').value;
+            const country = document.getElementById('countrySelect').value;
+            
+            if(!raw) return alert("Kosong bro!");
+
+            // Pecah per baris
+            const lines = raw.split(/\n/);
+            let count = 0;
+
+            lines.forEach(line => {
+                // Ambil hanya angka (Hapus +, spasi, -)
+                // Contoh: +62 812-345 -> 62812345
+                let cleanNum = line.replace(/\D/g, ''); 
+
+                if(cleanNum.length > 5) {
+                    // Simpan ke Firebase dengan Key = Nomor HP (Biar gampang dicari script)
+                    db.ref('stock/' + cleanNum).set({
+                        number: cleanNum,
+                        country: country,
+                        otp: "",
+                        status: "AVAILABLE", // Status: AVAILABLE, TAKEN, DONE
+                        timestamp: Date.now()
+                    });
+                    count++;
+                }
+            });
+
+            document.getElementById('status').innerText = `SUKSES! ${count} Nomor ${country} diupload.`;
+            document.getElementById('numList').value = "";
+        }
+
+        function clearAll() {
+            if(confirm("Yakin hapus semua stok? Team bakal disconnect.")) {
+                db.ref('stock').remove();
+                alert("Database Bersih!");
+            }
+        }
+    </script>
+</body>
+</html>
