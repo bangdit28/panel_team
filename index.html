@@ -3,55 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V100 (STABLE)</title>
+    <title>VIP PANEL V101</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
-        .box { width: 100%; max-width: 420px; background: #111; padding: 25px; border-radius: 15px; border: 1px solid #333; text-align: center; box-shadow: 0 0 30px rgba(0,255,136,0.1); position: relative; overflow: hidden; }
+        body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
-        h2 { margin: 0; color: #00ff88; text-transform: uppercase; letter-spacing: 1px; } 
+        h2 { margin: 0; color: #f43f5e; } 
         .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
-
-        /* LOGIN OVERLAY */
-        #loginScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .login-input { padding: 12px; border-radius: 8px; border: 1px solid #00ff88; background: #111; color: #fff; text-align: center; font-weight: bold; width: 70%; margin-bottom: 10px; }
 
         /* NOMOR DISPLAY */
         .display-num { 
-            font-size: 26px; font-family: monospace; background: #080808; 
-            padding: 15px; border-radius: 10px; border: 1px dashed #444; 
+            font-size: 26px; font-family: monospace; background: #000; 
+            padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; 
             margin: 10px 0; cursor: pointer; color: #fff; position: relative;
         }
         .country-tag { 
             position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            background: #00ff88; color: #000; font-size: 9px; font-weight: bold; 
+            background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; 
             padding: 2px 8px; border-radius: 4px;
         }
 
         /* OTP AREA */
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
-        .otp-code { font-size: 40px; font-weight: bold; color: #00ff88; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
+        .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
 
-        /* BUTTONS */
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-start { background: #00ff88; color: #000; box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+        .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* LIVE HISTORY FEED */
+        /* LIVE HISTORY FEED (FULL MESSAGE) */
         .history-box { 
             margin-top: 30px; width: 100%; max-width: 420px; 
             background: #080808; border: 1px solid #222; border-radius: 10px; 
-            padding: 10px; text-align: left; height: 150px; overflow-y: auto;
+            padding: 10px; text-align: left; height: 200px; overflow-y: auto;
         }
         .history-title { font-size: 10px; color: #555; margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; }
-        .log-item { font-size: 11px; margin-bottom: 5px; padding: 5px; border-radius: 4px; border-left: 2px solid #333; background: #111; animation: slideIn 0.3s; }
-        .log-name { color: #00ff88; font-weight: bold; }
-        .log-country { color: #aaa; }
-        .log-code { color: #fff; float: right; font-weight: bold; }
+        
+        .log-item { 
+            font-size: 11px; margin-bottom: 8px; padding: 8px; 
+            border-radius: 6px; border-left: 3px solid #333; background: #111; 
+            animation: slideIn 0.3s; 
+        }
+        .log-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
+        .log-user { color: #f43f5e; font-weight: bold; }
+        .log-msg { color: #ccc; font-style: italic; font-family: monospace; }
+        .log-code-hl { color: #4ade80; font-weight: bold; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
@@ -61,27 +62,25 @@
 <body>
 
     <div class="box">
-        <div id="loginScreen">
-            <h3 style="color:#00ff88; margin-bottom:5px;">NAMA TEAM:</h3>
-            <input type="text" id="inputName" class="login-input" placeholder="Contoh: Asep">
-            <button class="btn-start" style="width:70%" onclick="loginUser()">MASUK</button>
+        <!-- LOGIN -->
+        <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
+            <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
+            <button class="btn-start" style="width:70%; margin-top:10px;" onclick="loginUser()">MASUK</button>
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V100</h2>
+            <h2>⚡ PANEL V101</h2>
             <div class="sub" id="welcomeMsg">Welcome</div>
         </div>
         
         <div id="menu">
-            <div style="margin-bottom:20px; font-size:12px; color:#aaa;">
-                Klik tombol untuk mengambil nomor stok Admin secara acak (Direct Mode).
-            </div>
             <button class="btn-start" onclick="startLoop()">🚀 AMBIL NOMOR (AUTO)</button>
         </div>
 
         <div id="active" class="hidden">
             <div class="display-num" id="myNum" onclick="copyNum()">
-                <div id="countryBadge" class="country-tag">...</div>
+                <div id="countryBadge" class="country-tag">UNK</div>
                 <span id="txtNum">Mencari...</span>
             </div>
             
@@ -96,14 +95,15 @@
         </div>
     </div>
 
+    <!-- FEED HISTORY PESAN PENUH -->
     <div class="history-box">
-        <div class="history-title">🔴 LIVE HISTORY</div>
+        <div class="history-title">🔴 LIVE SMS FEED</div>
         <div id="feedList"></div>
     </div>
 
     <script>
         // ==========================================
-        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
+        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
         // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
@@ -123,14 +123,12 @@
         let userName = localStorage.getItem('vip_username') || "";
         let currentCountryName = "Unknown";
         let isListening = false;
-        // ID Unik untuk user ini (Session ID) buat validasi kepemilikan
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
 
         const COUNTRY_MAP = {
             '62': 'INDONESIA 🇮🇩', '1': 'USA 🇺🇸', '44': 'UK 🇬🇧', '225': 'IVORY COAST 🇨🇮',
             '212': 'MOROCCO 🇲🇦', '60': 'MALAYSIA 🇲🇾', '7': 'RUSSIA 🇷🇺', '84': 'VIETNAM 🇻🇳',
-            '63': 'PHILIPPINES 🇵🇭', '66': 'THAILAND 🇹🇭', '234': 'NIGERIA 🇳🇬', '33': 'FRANCE 🇫🇷',
-            '49': 'GERMANY 🇩🇪'
+            '63': 'PHILIPPINES 🇵🇭', '66': 'THAILAND 🇹🇭', '234': 'NIGERIA 🇳🇬', '33': 'FRANCE 🇫🇷'
         };
 
         if(userName) {
@@ -159,19 +157,16 @@
         function startLoop() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            findNumberDirect();
+            findNumberSafe();
         }
 
-        // --- LOGIC V100: DIRECT GRAB (ANTI-MACET) ---
-        function findNumberDirect() {
+        function findNumberSafe() {
             resetUIState();
             document.getElementById('txtNum').innerText = "Mencari Stok...";
-            document.getElementById('countryBadge').innerText = "...";
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
-                
                 if(data) {
                     Object.keys(data).forEach(key => {
                         if(data[key].status === 'AVAILABLE') candidates.push(key);
@@ -183,53 +178,45 @@
                     stopLoop(); return;
                 }
 
-                // Acak urutan biar gak semua orang narget nomor yg sama
                 candidates.sort(() => Math.random() - 0.5);
-                
-                // Coba ambil nomor pertama yg available
-                const targetNum = candidates[0];
-                
-                // DIRECT UPDATE (Tanpa Transaction ribet)
-                // Kita pake update multi-path untuk lock owner juga
-                const updates = {};
-                updates['stock/' + targetNum + '/status'] = 'TAKEN';
-                updates['stock/' + targetNum + '/owner'] = mySessionID;
+                tryClaimNumber(candidates, 0);
+            });
+        }
 
-                db.ref().update(updates, (error) => {
-                    if (error) {
-                        // Kalau error permission atau jaringan, coba lagi
-                        setTimeout(findNumberDirect, 500); 
-                    } else {
-                        // Cek Double Lock (Verifikasi akhir)
-                        // Pastikan nomor ini beneran punya kita (gak ditiban orang lain yg lebih cepet 1ms)
-                        db.ref('stock/' + targetNum).once('value', s => {
-                            const val = s.val();
-                            if (val && val.owner === mySessionID) {
-                                // SUCCESS
-                                currentNum = targetNum;
-                                document.getElementById('txtNum').innerText = currentNum;
-                                currentCountryName = detectCountry(currentNum);
-                                document.getElementById('countryBadge').innerText = currentCountryName;
-                                listenOTP(currentNum);
-                            } else {
-                                // GAGAL (Keduluan), cari lagi
-                                setTimeout(findNumberDirect, 200);
-                            }
-                        });
-                    }
-                });
+        function tryClaimNumber(list, index) {
+            if (index >= list.length) { alert("Server Sibuk."); stopLoop(); return; }
+            const targetNum = list[index];
+            const ref = db.ref('stock/' + targetNum + '/status');
+
+            ref.transaction((current) => {
+                if (current === 'AVAILABLE') return 'TAKEN';
+                return; 
+            }, (error, committed) => {
+                if (error || !committed) {
+                    tryClaimNumber(list, index + 1);
+                } else {
+                    currentNum = targetNum;
+                    document.getElementById('txtNum').innerText = currentNum;
+                    currentCountryName = detectCountry(currentNum);
+                    document.getElementById('countryBadge').innerText = currentCountryName;
+                    listenOTP(currentNum);
+                }
             });
         }
 
         function listenOTP(num) {
             isListening = true;
-            db.ref('stock/' + num + '/otp').on('value', snap => {
-                const code = snap.val();
-                if(code && isListening) {
-                    showOTP(code);
-                    // Update status DONE biar hangus
+            // Dengerin data 'otp' dan 'full_msg'
+            db.ref('stock/' + num).on('value', snap => {
+                const data = snap.val();
+                if(data && data.otp && isListening) {
+                    showOTP(data.otp);
                     db.ref('stock/' + num).update({ status: 'DONE' });
-                    pushToHistory(code);
+                    
+                    // PUSH TO HISTORY (Isi Pesan Lengkap)
+                    // Pakai full_msg dari admin, kalau ga ada pake default
+                    const msgContent = data.full_msg || (data.otp + " adalah kode konfirmasi Facebook");
+                    pushToHistory(data.otp, msgContent);
                 }
             });
         }
@@ -239,49 +226,53 @@
             const otpEl = document.getElementById('myOTP');
             otpEl.innerText = code;
             otpEl.classList.remove('hidden');
-            
             new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
             navigator.clipboard.writeText(code);
-
             document.getElementById('btnBad').style.display = 'none';
             document.getElementById('btnNext').style.display = 'block';
         }
 
-        function pushToHistory(code) {
+        function pushToHistory(code, msg) {
             db.ref('history').push({
                 name: userName,
                 country: currentCountryName,
                 code: code,
+                message: msg, // Pesan Lengkap
                 timestamp: Date.now()
             });
         }
 
+        // TAMPILKAN HISTORY
         db.ref('history').limitToLast(10).on('child_added', (snap) => {
             const data = snap.val();
             const feed = document.getElementById('feedList');
             const div = document.createElement('div');
+            
+            // Highlight kode di dalam pesan
+            const highlightedMsg = data.message.replace(data.code, `<span class="log-code-hl">${data.code}</span>`);
+
             div.className = 'log-item';
-            div.innerHTML = `<span class="log-name">${data.name}</span> <span class="log-country">(${data.country})</span> <span class="log-code">${data.code}</span>`;
+            div.innerHTML = `
+                <div class="log-header">
+                    <span class="log-user">${data.name}</span>
+                    <span>${data.country}</span>
+                </div>
+                <div class="log-msg">${highlightedMsg}</div>
+            `;
             feed.insertBefore(div, feed.firstChild);
         });
 
         function nextBad() {
             if(currentNum) {
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
-                db.ref('stock/' + currentNum + '/otp').off();
+                db.ref('stock/' + currentNum).off();
             }
-            findNumberDirect();
+            findNumberSafe();
         }
 
         function nextSuccess() {
-            if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
-            findNumberDirect();
-        }
-
-        function stopLoop() {
-            if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
-            document.getElementById('active').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
+            if(currentNum) db.ref('stock/' + currentNum).off();
+            findNumberSafe();
         }
 
         function resetUIState() {
@@ -292,12 +283,14 @@
             document.getElementById('btnNext').style.display = 'none';
         }
 
-        function copyNum() {
-            navigator.clipboard.writeText(document.getElementById('txtNum').innerText);
+        function stopLoop() {
+            if(currentNum) db.ref('stock/' + currentNum).off();
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
         }
-        function copyOTP() {
-            navigator.clipboard.writeText(document.getElementById('myOTP').innerText);
-        }
+
+        function copyNum() { navigator.clipboard.writeText(document.getElementById('txtNum').innerText); }
+        function copyOTP() { navigator.clipboard.writeText(document.getElementById('myOTP').innerText); }
     </script>
 </body>
 </html>
