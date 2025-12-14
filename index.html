@@ -3,60 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V104 (FINAL)</title>
+    <title>VIP PANEL V105 (NOTIF)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
-        .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; }
         
+        /* NEWS TICKER (NOTIFIKASI BERJALAN) */
+        .news-container {
+            width: 100%; background: rgba(255, 215, 0, 0.1); 
+            border: 1px solid #ffd700; border-radius: 6px;
+            margin-bottom: 15px; overflow: hidden; white-space: nowrap;
+            display: none; /* Default sembunyi */
+        }
+        .news-text {
+            display: inline-block; padding: 8px; font-size: 12px; 
+            font-weight: bold; color: #ffd700; font-family: monospace;
+            animation: marquee 10s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
         h2 { margin: 0; color: #f43f5e; } 
         .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
 
-        /* NOMOR DISPLAY */
-        .display-num { 
-            font-size: 26px; font-family: monospace; background: #000; 
-            padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; cursor: pointer; color: #fff; position: relative;
-        }
-        .country-tag { 
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; 
-            padding: 2px 8px; border-radius: 4px;
-        }
-
-        /* OTP AREA */
+        /* NOMOR & OTP */
+        .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
+        .country-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
 
+        /* BUTTONS */
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* LIVE HISTORY FEED (V104 UPGRADE) */
-        .history-box { 
-            margin-top: 30px; width: 100%; max-width: 420px; 
-            background: #080808; border: 1px solid #222; border-radius: 10px; 
-            padding: 10px; text-align: left; height: 250px; overflow-y: auto;
-        }
-        .history-header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px;
-        }
-        .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; }
-        .history-date { font-size: 10px; color: #666; font-family: monospace; }
-        
-        .log-item { 
-            font-size: 11px; margin-bottom: 8px; padding: 8px; 
-            border-radius: 6px; border-left: 3px solid #333; background: #111; 
-            animation: slideIn 0.3s; 
-        }
-        .log-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
+        /* HISTORY */
+        .history-box { margin-top: 30px; width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 250px; overflow-y: auto; }
+        .log-item { font-size: 11px; margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid #333; background: #111; animation: slideIn 0.3s; }
         .log-user { color: #f43f5e; font-weight: bold; }
-        .log-time { color: #555; font-size: 9px; }
         .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; }
         .log-code-hl { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
 
@@ -68,7 +59,11 @@
 <body>
 
     <div class="box">
-        <!-- LOGIN -->
+        <!-- NOTIFIKASI BERJALAN (NEWS TICKER) -->
+        <div id="newsContainer" class="news-container">
+            <div id="newsText" class="news-text">...</div>
+        </div>
+
         <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
             <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
@@ -76,8 +71,8 @@
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V104</h2>
-            <div class="sub" id="welcomeMsg">Auto Copy & Daily Reset</div>
+            <h2>⚡ PANEL V105</h2>
+            <div class="sub" id="welcomeMsg">Live Notification System</div>
         </div>
         
         <div id="menu">
@@ -101,18 +96,16 @@
         </div>
     </div>
 
-    <!-- FEED HISTORY -->
     <div class="history-box">
-        <div class="history-header">
-            <span class="history-title">🔴 LIVE SMS FEED</span>
-            <span class="history-date" id="dateDisplay">...</span>
+        <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
+            <span style="font-size:11px; color:#f43f5e; font-weight:bold;">🔴 LIVE SMS FEED</span>
         </div>
         <div id="feedList"></div>
     </div>
 
     <script>
         // ==========================================
-        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
+        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
         // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
@@ -134,18 +127,27 @@
         let isListening = false;
         let lastProcessedOTP = ""; 
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
-
-        // SET TANGGAL HARI INI DI HEADER
-        const today = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-        document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID', options);
-        const todayString = today.toDateString(); // Untuk filter reset 24 jam
+        const todayString = new Date().toDateString();
 
         const COUNTRY_MAP = {
             '62': 'INDONESIA 🇮🇩', '1': 'USA 🇺🇸', '44': 'UK 🇬🇧', '225': 'IVORY COAST 🇨🇮',
             '212': 'MOROCCO 🇲🇦', '60': 'MALAYSIA 🇲🇾', '7': 'RUSSIA 🇷🇺', '84': 'VIETNAM 🇻🇳',
             '63': 'PHILIPPINES 🇵🇭', '66': 'THAILAND 🇹🇭', '234': 'NIGERIA 🇳🇬', '33': 'FRANCE 🇫🇷'
         };
+
+        // --- SISTEM NOTIFIKASI LIVE ---
+        db.ref('system/notification').on('value', snap => {
+            const msg = snap.val();
+            const container = document.getElementById('newsContainer');
+            const text = document.getElementById('newsText');
+            
+            if(msg) {
+                text.innerText = "📢 INFO: " + msg;
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        });
 
         if(userName) {
             document.getElementById('loginScreen').style.display = 'none';
@@ -220,7 +222,7 @@
                                 document.getElementById('txtNum').innerText = currentNum;
                                 currentCountryName = detectCountry(currentNum);
                                 document.getElementById('countryBadge').innerText = currentCountryName;
-                                copyText(currentNum); 
+                                copyText(currentNum);
                                 listenOTP(currentNum);
                             } else {
                                 tryGrab(list, index + 1);
@@ -234,7 +236,6 @@
         function listenOTP(num) {
             isListening = true;
             lastProcessedOTP = ""; 
-
             db.ref('stock/' + num).on('value', snap => {
                 const data = snap.val();
                 if(data && data.otp && isListening && data.otp !== lastProcessedOTP) {
@@ -256,10 +257,8 @@
             const otpEl = document.getElementById('myOTP');
             otpEl.innerText = code;
             otpEl.classList.remove('hidden');
-            
             new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
             copyText(code);
-
             document.getElementById('btnBad').style.display = 'none';
             document.getElementById('btnNext').style.display = 'block';
         }
@@ -270,45 +269,29 @@
                 country: currentCountryName,
                 code: code,
                 message: msg,
-                timestamp: Date.now() // Simpan waktu asli
+                timestamp: Date.now()
             });
         }
 
-        // --- ENGINE HISTORY (V104 UPDATE) ---
         db.ref('history').limitToLast(50).on('child_added', (snap) => {
             const data = snap.val();
-            
-            // 1. FILTER 24 JAM (RESET HARIAN)
-            // Cek apakah tanggal log sama dengan hari ini?
             const logDate = new Date(data.timestamp).toDateString();
-            if (logDate !== todayString) {
-                return; // Skip data kemarin/lama
-            }
+            if (logDate !== todayString) return;
 
-            // 2. FORMAT JAM (HH:MM)
-            const timeObj = new Date(data.timestamp);
-            const timeStr = timeObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-            // 3. SENSOR KODE
+            const timeStr = new Date(data.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             let censoredMsg = data.message.replace(data.code, `<span class="log-code-hl">XXXXX</span>`);
             if(!censoredMsg.includes('XXXXX')) censoredMsg += ' <span class="log-code-hl">XXXXX</span>';
 
             const feed = document.getElementById('feedList');
             const div = document.createElement('div');
-
             div.className = 'log-item';
             div.innerHTML = `
-                <div class="log-top">
-                    <div>
-                        <span class="log-user">${data.name}</span>
-                        <span>${data.country}</span>
-                    </div>
-                    <span class="log-time">${timeStr}</span>
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:10px;color:#888;">
+                    <div><span class="log-user">${data.name}</span> <span>${data.country}</span></div>
+                    <span>${timeStr}</span>
                 </div>
-                <div class="log-msg">${censoredMsg}</div>
+                <span class="log-msg">${censoredMsg}</span>
             `;
-            
-            // Masukkan paling atas
             feed.insertBefore(div, feed.firstChild);
         });
 
@@ -341,10 +324,7 @@
 
         function copyNum() { copyText(document.getElementById('txtNum').innerText); }
         function copyOTP() { copyText(document.getElementById('myOTP').innerText); }
-        
-        function copyText(val) {
-            navigator.clipboard.writeText(val).then(() => {}).catch(err => {});
-        }
+        function copyText(val) { navigator.clipboard.writeText(val).then(()=>{},()=>{}); }
     </script>
 </body>
 </html>
