@@ -3,59 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP OTP PANEL PRO</title>
+    <title>VIP OTP PANEL V81</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; }
+        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
-        .display-num { font-size: 28px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #555; margin: 15px 0; cursor: pointer; color: #fff; }
-        .otp-box { font-size: 40px; font-weight: bold; color: #4ade80; margin-top: 10px; letter-spacing: 5px; animation: pulse 1s infinite; }
+        .header { margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        h2 { margin: 0; color: #38bdf8; }
+        .sub { font-size: 11px; color: #94a3b8; }
+
+        /* NOMOR AKTIF */
+        .display-num { 
+            font-size: 26px; font-family: monospace; background: #000; 
+            padding: 15px; border-radius: 8px; border: 1px dashed #555; 
+            margin: 15px 0; cursor: pointer; color: #fff; position: relative;
+        }
+        .display-num:active { background: #111; border-color: #38bdf8; }
+        .label-copy { font-size: 9px; color: #555; position: absolute; bottom: 2px; right: 5px; }
+
+        /* AREA OTP */
+        .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .otp-code { font-size: 42px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; text-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
+        .waiting { font-size: 12px; color: yellow; display: flex; gap: 5px; align-items: center; }
+        .spinner { width: 12px; height: 12px; border: 2px solid #555; border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+
+        /* CONTROLS */
+        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
         
-        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border:none; font-weight:bold; }
-        select { background: #334155; color: #fff; }
-        .btn-buy { background: #2979ff; color: #fff; cursor: pointer; }
-        .btn-cancel { background: #ef4444; color: #fff; cursor: pointer; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-buy { background: #38bdf8; color: #000; }
+        .btn-buy:hover { background: #fff; }
         
+        .btn-bad { background: #ef4444; color: #fff; margin-top: 15px; }
+        .btn-done { background: #22c55e; color: #000; margin-top: 10px; display: none; } /* Muncul pas OTP masuk */
+
         .hidden { display: none; }
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 50% { opacity: 0.7; } }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ VIP SENDER PRO</h2>
+        <div class="header">
+            <h2>⚡ PANEL V81</h2>
+            <div class="sub">SMART FILTER: AUTO BURN USED NUMBERS</div>
+        </div>
         
         <!-- MENU PILIH -->
         <div id="menu">
-            <label>PILIH NEGARA</label>
+            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
             <select id="countryPick">
-                <option value="ID">🇮🇩 INDONESIA</option>
-                <option value="US">🇺🇸 USA</option>
-                <option value="UK">🇬🇧 INGGRIS</option>
-                <option value="MY">🇲🇾 MALAYSIA</option>
-                <option value="OTHER">🌍 MIXED</option>
+                <option value="ID">🇮🇩 INDONESIA (+62)</option>
+                <option value="US">🇺🇸 USA (+1)</option>
+                <option value="UK">🇬🇧 INGGRIS (+44)</option>
+                <option value="MY">🇲🇾 MALAYSIA (+60)</option>
+                <option value="OTHER">🌍 MIXED / LAINNYA</option>
             </select>
-            <button class="btn-buy" onclick="findNumber()">🛒 AMBIL NOMOR</button>
+            <button class="btn-buy" onclick="findNumber()">🛒 CARI NOMOR BAGUS</button>
         </div>
 
         <!-- MENU AKTIF -->
         <div id="active" class="hidden">
-            <div style="font-size:11px; color:#aaa;">NOMOR ANDA</div>
-            <div class="display-num" id="myNum" onclick="copyNum()">...</div>
+            <div style="text-align:left; font-size:11px; color:#aaa;">NOMOR AKTIF:</div>
             
-            <div style="border-top:1px solid #333; padding-top:10px;">
-                <div id="status" style="font-size:12px; color:yellow;">Menunggu SMS...</div>
-                <div id="myOTP" class="otp-box hidden">---</div>
+            <div class="display-num" id="myNum" onclick="copyNum()">
+                ...
+                <div class="label-copy">KLIK SALIN</div>
+            </div>
+            
+            <div style="border-top:1px solid #334155; margin-top:10px; padding-top:10px;">
+                <div class="otp-area">
+                    <div id="statusWait" class="waiting"><div class="spinner"></div> MENUNGGU SMS...</div>
+                    <div id="myOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
+                </div>
             </div>
 
-            <button class="btn-cancel" onclick="stopSession()">❌ SELESAI / GANTI</button>
+            <!-- Tombol kalau GAGAL -->
+            <button id="btnBad" class="btn-bad" onclick="reportBad()">❌ GAK MASUK? GANTI (REPORT BAD)</button>
+            
+            <!-- Tombol kalau SUKSES -->
+            <button id="btnDone" class="btn-done" onclick="finishSuccess()">✅ SELESAI (AMBIL LAGI)</button>
         </div>
     </div>
 
     <script>
-        // 🔥 PASTE CONFIG FIREBASE SAMA 🔥
+        // ==========================================
+        // 🔥 PASTE CONFIG FIREBASE LO DISINI 🔥
+        // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -65,25 +102,31 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
+        // ==========================================
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
         let currentNum = null;
+        let isListening = false;
 
+        // 1. CARI NOMOR
         function findNumber() {
             const region = document.getElementById('countryPick').value;
             const btn = document.querySelector('.btn-buy');
-            btn.innerHTML = "🔍 MENCARI STOK...";
+            btn.innerHTML = "🔍 MENCARI DI DATABASE...";
+            btn.disabled = true;
 
-            // Query cari nomor yg AVAILABLE di negara tsb
-            // Ini query sederhana (client side filtering biar gampang)
+            // Query nomor yang statusnya AVAILABLE (Bukan BAD, Bukan DONE, Bukan TAKEN)
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let found = null;
 
                 if(data) {
-                    // Loop cari yg cocok
                     const keys = Object.keys(data);
+                    // Acak urutan pencarian biar gak rebutan sama team lain
+                    keys.sort(() => Math.random() - 0.5);
+
                     for(let key of keys) {
                         if(data[key].country === region && data[key].status === 'AVAILABLE') {
                             found = data[key];
@@ -93,55 +136,99 @@
                 }
 
                 if(found) {
-                    // Booking nomor biar ga diambil orang lain
                     currentNum = found.number;
+                    // Tandai TAKEN biar ga diambil team lain
                     db.ref('stock/' + currentNum).update({ status: 'TAKEN' });
                     
-                    showActive(found.number);
+                    showActiveUI(found.number);
                     listenOTP(found.number);
                 } else {
-                    alert("STOK HABIS UNTUK NEGARA INI! Minta admin upload.");
-                    btn.innerHTML = "🛒 AMBIL NOMOR";
+                    alert("STOK HABIS UNTUK NEGARA INI! Hubungi Admin.");
+                    btn.innerHTML = "🛒 CARI NOMOR BAGUS";
+                    btn.disabled = false;
                 }
             });
         }
 
-        function showActive(num) {
+        function showActiveUI(num) {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
             document.getElementById('myNum').innerText = num;
+            
+            // Reset UI OTP
+            document.getElementById('statusWait').classList.remove('hidden');
+            document.getElementById('myOTP').classList.add('hidden');
+            document.getElementById('btnBad').style.display = 'block'; // Tombol lapor rusak ada
+            document.getElementById('btnDone').style.display = 'none'; // Tombol selesai sembunyi
         }
 
+        // 2. DENGERIN SMS
         function listenOTP(num) {
-            // Dengerin perubahan khusus di nomor ini
+            isListening = true;
+            // Dengerin folder OTP di nomor spesifik
             db.ref('stock/' + num + '/otp').on('value', snap => {
                 const code = snap.val();
-                if(code) {
-                    document.getElementById('status').innerText = "✅ OTP SUKSES!";
-                    const otpEl = document.getElementById('myOTP');
-                    otpEl.innerText = code;
-                    otpEl.classList.remove('hidden');
-                    new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-                    navigator.clipboard.writeText(code);
+                if(code && isListening) {
+                    // OTP MASUK!!
+                    showOTP(code);
+                    
+                    // OTOMATIS TANDAI 'DONE' DI DATABASE
+                    // Supaya nomor ini hangus dan gak muncul lagi
+                    db.ref('stock/' + num).update({ status: 'DONE' });
                 }
             });
         }
 
-        function stopSession() {
-            if(confirm("Sudah selesai dengan nomor ini?")) {
-                // Tandai nomor sbg DONE (biar ga muncul lagi) atau AVAILABLE (kalau mau dipake ulang)
-                // Disini kita set DONE biar gak dipake double.
+        function showOTP(code) {
+            document.getElementById('statusWait').classList.add('hidden');
+            const otpEl = document.getElementById('myOTP');
+            otpEl.innerText = code;
+            otpEl.classList.remove('hidden');
+            
+            // Suara
+            new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
+            navigator.clipboard.writeText(code); // Auto Copy
+
+            // Ganti tombol UI
+            document.getElementById('btnBad').style.display = 'none'; // Ilangin tombol bad
+            document.getElementById('btnDone').style.display = 'block'; // Munculin tombol Next
+        }
+
+        // 3. LAPOR NOMOR BUSUK (GANTI)
+        function reportBad() {
+            if(confirm("OTP Gak Masuk? Nomor ini akan dibuang.")) {
                 if(currentNum) {
-                    db.ref('stock/' + currentNum).update({ status: 'DONE' });
-                    db.ref('stock/' + currentNum + '/otp').off(); // Matikan listener
+                    // Tandai BAD biar gak muncul lagi selamanya
+                    db.ref('stock/' + currentNum).update({ status: 'BAD' });
+                    db.ref('stock/' + currentNum + '/otp').off(); // Stop dengerin
                 }
-                location.reload();
+                resetToMenu();
             }
+        }
+
+        // 4. SELESAI (AMBIL LAGI)
+        function finishSuccess() {
+            // Status udah DONE otomatis pas OTP masuk tadi
+            if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
+            resetToMenu();
+        }
+
+        function resetToMenu() {
+            isListening = false;
+            currentNum = null;
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+            document.querySelector('.btn-buy').innerHTML = "🛒 CARI NOMOR BAGUS";
+            document.querySelector('.btn-buy').disabled = false;
         }
 
         function copyNum() {
             navigator.clipboard.writeText(document.getElementById('myNum').innerText);
-            alert("Nomor dicopy!");
+            alert("Nomor Disalin!");
+        }
+        function copyOTP() {
+            navigator.clipboard.writeText(document.getElementById('myOTP').innerText);
+            alert("OTP Disalin!");
         }
     </script>
 </body>
