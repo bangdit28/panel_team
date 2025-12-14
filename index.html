@@ -1,23 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>FIREBASE CONNECTION TEST</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANEL OTP VIP</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>body{font-family:sans-serif;padding:20px;text-align:center;background:#111;color:#fff;}button{padding:20px;font-size:20px;cursor:pointer;background:#0f0;font-weight:bold;border:none;border-radius:10px;}</style>
+    <style>
+        body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .box { width: 90%; max-width: 400px; background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { color: #2979ff; margin: 0 0 20px 0; }
+        
+        .number-area { font-size: 24px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #555; margin-bottom: 20px; cursor: pointer; }
+        .otp-area { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; }
+        .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; }
+        
+        button { width: 100%; padding: 15px; background: #2979ff; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        button:hover { background: #1c64f2; }
+        
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
-    <h2>⚡ TES KONEKSI FIREBASE ⚡</h2>
-    <p id="status">Menunggu status...</p>
-    
-    <button onclick="kirimTes()">KIRIM SINYAL TEST</button>
-    <br><br>
-    <div id="output" style="font-size:30px;color:yellow;">...</div>
+
+    <div class="box">
+        <h2>⚡ VIP OTP RECEIVER</h2>
+        
+        <!-- BAGIAN 1: TOMBOL BELI -->
+        <div id="section-buy">
+            <p>Klik untuk ambil nomor dari Admin</p>
+            <button onclick="getOrder()">🛒 AMBIL NOMOR LIVE</button>
+        </div>
+
+        <!-- BAGIAN 2: MONITORING -->
+        <div id="section-active" class="hidden">
+            <div style="font-size:12px; color:#aaa; margin-bottom:5px;">NOMOR AKTIF (KLIK SALIN)</div>
+            <div class="number-area" onclick="copyNum()">
+                <span id="txtNomor">Loading...</span>
+            </div>
+
+            <div class="otp-area">
+                <div id="statusOTP" style="color:#aaa; font-size:12px;">Menunggu SMS masuk...</div>
+                <div id="txtOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
+            </div>
+            
+            <br>
+            <button style="background:#d32f2f" onclick="location.reload()">❌ RESET / GANTI</button>
+        </div>
+    </div>
 
     <script>
-        // ==========================================
-        // ⚠️ PASTE CONFIG FIREBASE DISINI ⚠️
-        // ==========================================
+        // --- PASTE CONFIG FIREBASE LO DISINI ---
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -27,45 +61,53 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
-        // ==========================================
+        // ---------------------------------------
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.database();
-            const info = document.getElementById('status');
-            const out = document.getElementById('output');
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-            // Cek Koneksi
-            const connectedRef = db.ref(".info/connected");
-            connectedRef.on("value", (snap) => {
-                if (snap.val() === true) {
-                    info.innerHTML = "✅ TERHUBUNG KE SERVER!";
-                    info.style.color = "#00ff88";
+        function getOrder() {
+            // Ambil Data Nomor dari Firebase (Yang dikirim PC Admin)
+            db.ref('session').once('value', (snap) => {
+                const data = snap.val();
+                if(data && data.number) {
+                    // Tampilkan UI Aktif
+                    document.getElementById('section-buy').classList.add('hidden');
+                    document.getElementById('section-active').classList.remove('hidden');
+                    document.getElementById('txtNomor').innerText = data.number;
+                    
+                    // Mulai Dengerin OTP
+                    listenOTP();
                 } else {
-                    info.innerHTML = "❌ GAGAL KONEK (CEK RULES / CONFIG)!";
-                    info.style.color = "red";
+                    alert("Admin belum buka nomor di PC!");
                 }
             });
+        }
 
-            // Dengerin Data
-            db.ref('test_signal').on('value', (snap) => {
-                const val = snap.val();
-                if(val) {
-                    out.innerText = "PESAN MASUK: " + val;
-                    // Bunyi Beep
-                    new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play();
+        function listenOTP() {
+            db.ref('session/otp').on('value', (snap) => {
+                const code = snap.val();
+                // Tampilkan kalau ada kode baru (bukan kosong/waiting)
+                if(code && code.length >= 5) {
+                    document.getElementById('statusOTP').innerText = "✅ OTP DITERIMA!";
+                    document.getElementById('txtOTP').innerText = code;
+                    document.getElementById('txtOTP').classList.remove('hidden');
+                    
+                    // Bunyi
+                    new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
                 }
             });
+        }
 
-            // Fungsi Kirim
-            window.kirimTes = function() {
-                const acak = Math.floor(Math.random() * 1000);
-                db.ref('test_signal').set("Halo " + acak);
-                alert("Sinyal dikirim! Cek HP atau Tab lain.");
-            }
-
-        } catch(e) {
-            alert("CONFIG ERROR! Pastikan copas config benar.");
+        function copyNum() {
+            const t = document.getElementById('txtNomor').innerText;
+            navigator.clipboard.writeText(t);
+            alert("Nomor Disalin!");
+        }
+        function copyOTP() {
+            const t = document.getElementById('txtOTP').innerText;
+            navigator.clipboard.writeText(t);
+            alert("Kode Disalin!");
         }
     </script>
 </body>
