@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANEL V93 DIAGNOSTIC</title>
+    <title>VIP PANEL V94 UNIVERSAL</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; }
+        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
         h2 { margin: 0; color: #f43f5e; } 
         
+        /* NOMOR */
         .display-num { 
             font-size: 28px; font-family: monospace; background: #000; 
             padding: 20px; border-radius: 10px; border: 2px dashed #f43f5e; 
@@ -19,19 +20,20 @@
         }
         .label-copy { font-size: 9px; color: #555; position: absolute; bottom: 5px; right: 10px; }
 
+        /* OTP */
+        .otp-area { min-height: 90px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 45px; font-weight: bold; color: #4ade80; letter-spacing: 6px; animation: pulse 1s infinite; cursor: pointer; margin-bottom: 10px; }
         .waiting { font-size: 13px; color: #fbbf24; }
 
-        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         
-        .btn-start { background: #f43f5e; color: #fff; }
+        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
         .btn-bad { background: #ef4444; color: #fff; margin-bottom: 10px; }
         .btn-next { background: #22c55e; color: #000; font-size: 16px; display: none; }
         .btn-stop { background: transparent; border: 1px solid #555; color: #888; font-size: 10px; padding: 8px; margin-top: 20px; width: auto; }
 
         /* DEBUG LOG */
-        #debugLog { font-size: 10px; color: #aaa; margin-top: 10px; text-align: left; max-height: 100px; overflow-y: auto; background: #000; padding: 5px; display: none; }
+        #debugLog { font-size: 10px; color: #aaa; margin-top: 10px; text-align: left; max-height: 100px; overflow-y: auto; background: #000; padding: 5px; border: 1px solid #333; display: none; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
@@ -41,27 +43,19 @@
 
     <div class="box">
         <div style="margin-bottom:20px; border-bottom:1px solid #334155; padding-bottom:10px;">
-            <h2>⚡ PANEL V93</h2>
-            <div style="font-size:11px; color:#94a3b8;">ANTI-COLLISION + DEBUGGER</div>
+            <h2>⚡ PANEL V94 (UNI)</h2>
+            <div style="font-size:11px; color:#94a3b8;">AMBIL SEMUA STOK NEGARA APAPUN</div>
         </div>
         
         <div id="menu">
-            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA STOK</label>
-            <select id="countryPick">
-                <option value="ID">🇮🇩 INDONESIA (+62)</option>
-                <option value="US">🇺🇸 USA (+1)</option>
-                <option value="UK">🇬🇧 INGGRIS (+44)</option>
-                <option value="MY">🇲🇾 MALAYSIA (+60)</option>
-                <option value="CI">🇨🇮 IVORY COAST</option>
-                <option value="OTHER">🌍 MIXED / LAINNYA</option>
-            </select>
-            <button class="btn-start" onclick="startLoop()">🚀 MULAI FARMING</button>
+            <button class="btn-start" onclick="startLoop()">🚀 GAS FARMING (AUTO NEGARA)</button>
+            <div style="font-size:10px; color:#666; margin-top:10px;">*Akan mengambil nomor apa saja yang tersedia di database Admin.</div>
         </div>
 
         <div id="active" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:11px; color:#aaa;">NOMOR AKTIF:</span>
-                <span id="regionBadge" style="font-size:10px; background:#334155; padding:2px 6px; border-radius:4px;">ID</span>
+                <span id="regionBadge" style="font-size:10px; background:#334155; padding:2px 6px; border-radius:4px;">AUTO</span>
             </div>
             
             <div class="display-num" id="myNum" onclick="copyNum()">
@@ -99,7 +93,6 @@
         const db = firebase.database();
         
         let currentNum = null;
-        let selectedRegion = "";
         let isListening = false;
 
         function log(msg) {
@@ -111,18 +104,16 @@
         }
 
         function startLoop() {
-            selectedRegion = document.getElementById('countryPick').value;
-            document.getElementById('regionBadge').innerText = selectedRegion;
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            document.getElementById('debugLog').innerHTML = ""; // Reset Log
+            document.getElementById('debugLog').innerHTML = ""; 
             findNumberSafe();
         }
 
         function findNumberSafe() {
             resetUIState();
-            document.getElementById('txtNum').innerText = "Mencari...";
-            log(`Mencari stok negara: ${selectedRegion}...`);
+            document.getElementById('txtNum').innerText = "Mencari Stok...";
+            log(`Mencari stok di semua negara...`);
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
@@ -130,34 +121,31 @@
                 let candidates = [];
                 if(data) {
                     Object.keys(data).forEach(key => {
-                        // Pastikan status AVAILABLE dan negaranya cocok
-                        if(data[key].country === selectedRegion && data[key].status === 'AVAILABLE') {
+                        // V94: AMBIL APAPUN YANG STATUSNYA AVAILABLE
+                        // Gak peduli negaranya apa
+                        if(data[key].status === 'AVAILABLE') {
                             candidates.push(key);
                         }
                     });
                 }
 
                 if(candidates.length === 0) {
-                    alert(`STOK HABIS untuk ${selectedRegion}!\nPastikan Admin sudah upload nomor dengan Kode Negara yang sama.`);
+                    alert(`STOK HABIS! Database Kosong.\nMinta Admin upload nomor baru.`);
                     log("Stok kosong.");
                     stopLoop();
                     return;
                 }
 
-                log(`Ditemukan ${candidates.length} nomor available.`);
+                log(`Ada ${candidates.length} nomor tersedia.`);
+                candidates.sort(() => Math.random() - 0.5); // Acak
                 
-                // Shuffle biar ga rebutan
-                candidates.sort(() => Math.random() - 0.5);
-                
-                // Coba ambil
                 tryClaimNumber(candidates, 0);
             });
         }
 
         function tryClaimNumber(list, index) {
             if (index >= list.length) {
-                alert("GAGAL MENGAMBIL NOMOR.\nSemua nomor sedang dikunci/error. Coba lagi.");
-                log("Gagal claim semua kandidat.");
+                alert("GAGAL MENGAMBIL NOMOR.\nSemua nomor sedang sibuk/error. Coba lagi.");
                 stopLoop(); return;
             }
 
@@ -168,18 +156,29 @@
 
             ref.transaction((current) => {
                 if (current === 'AVAILABLE') return 'TAKEN';
-                return; // Batal jika status udah berubah
+                return; 
             }, (error, committed) => {
                 if (error) {
-                    log(`Error Firebase: ${error.message}`);
-                    tryClaimNumber(list, index + 1);
+                    log(`ERROR FIREBASE: ${error.message}`);
+                    if(error.message.includes("PERMISSION_DENIED")) {
+                        alert("ERROR: PERMISSION DENIED!\nAdmin belum setting Rules Firebase jadi 'true'.");
+                        stopLoop();
+                    } else {
+                        tryClaimNumber(list, index + 1);
+                    }
                 } else if (!committed) {
-                    log(`Gagal claim ${targetNum} (Keduluan orang). Lanjut...`);
+                    log(`Gagal claim ${targetNum} (Keduluan). Next...`);
                     tryClaimNumber(list, index + 1);
                 } else {
                     log(`BERHASIL CLAIM: ${targetNum}`);
                     currentNum = targetNum;
                     document.getElementById('txtNum').innerText = currentNum;
+                    
+                    // Ambil info negara buat badge
+                    db.ref('stock/'+currentNum+'/country').once('value', s => {
+                        document.getElementById('regionBadge').innerText = s.val() || 'UNK';
+                    });
+
                     listenOTP(currentNum);
                 }
             });
