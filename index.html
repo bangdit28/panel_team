@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V96 (BADAK)</title>
+    <title>VIP PANEL V97 (SAFE)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -12,7 +12,6 @@
         
         h2 { margin: 0; color: #f43f5e; } 
         
-        /* NOMOR */
         .display-num { 
             font-size: 28px; font-family: monospace; background: #000; 
             padding: 20px; border-radius: 10px; border: 2px dashed #f43f5e; 
@@ -20,8 +19,6 @@
         }
         .label-copy { font-size: 9px; color: #555; position: absolute; bottom: 5px; right: 10px; }
 
-        /* OTP */
-        .otp-area { min-height: 90px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 45px; font-weight: bold; color: #4ade80; letter-spacing: 6px; animation: pulse 1s infinite; cursor: pointer; margin-bottom: 10px; }
         .waiting { font-size: 13px; color: #fbbf24; }
 
@@ -32,8 +29,7 @@
         .btn-next { background: #22c55e; color: #000; font-size: 16px; display: none; }
         .btn-stop { background: transparent; border: 1px solid #555; color: #888; font-size: 10px; padding: 8px; margin-top: 20px; width: auto; }
 
-        /* LOG ERROR */
-        #errorLog { color: red; font-size: 10px; margin-top: 10px; display: none; text-align: left; background: #000; padding: 5px; }
+        #logSystem { font-size: 10px; color: #555; margin-top: 10px; text-align: left; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
@@ -43,13 +39,14 @@
 
     <div class="box">
         <div style="margin-bottom:20px; border-bottom:1px solid #334155; padding-bottom:10px;">
-            <h2>⚡ PANEL V96 (FIX)</h2>
-            <div style="font-size:11px; color:#94a3b8;">METODE DIRECT ACCESS</div>
+            <h2>⚡ PANEL V97 SAFE</h2>
+            <div style="font-size:11px; color:#94a3b8;">SYSTEM: CLAIM & VERIFY (ANTI TABRAK)</div>
         </div>
         
         <div id="menu">
             <div style="margin-bottom:20px; font-size:12px; color:#aaa;">
-                Klik tombol di bawah untuk mengambil nomor. Pastikan Admin sudah upload stok.
+                Klik tombol di bawah untuk mengambil nomor. 
+                <br>Sistem akan memverifikasi kepemilikan agar tidak bentrok.
             </div>
             <button class="btn-start" onclick="startLoop()">🚀 AMBIL NOMOR (AUTO)</button>
         </div>
@@ -72,7 +69,7 @@
             <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT BARU</button>
             <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
             
-            <div id="errorLog"></div>
+            <div id="logSystem">System Ready.</div>
         </div>
     </div>
 
@@ -94,76 +91,109 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
+        // ID Unik untuk user ini (Session ID)
+        const mySessionID = "USER_" + Math.floor(Math.random() * 1000000);
+        
         let currentNum = null;
         let isListening = false;
+
+        function log(msg) {
+            document.getElementById('logSystem').innerText = "> " + msg;
+        }
 
         function startLoop() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            document.getElementById('errorLog').style.display = 'none';
-            findNumberDirect();
+            findNumberSafe();
         }
 
-        // --- LOGIC V96: DIRECT FINDER ---
-        function findNumberDirect() {
+        // --- LOGIC V97: CLAIM & VERIFY ---
+        function findNumberSafe() {
             resetUIState();
-            document.getElementById('txtNum').innerText = "Mencari Stok...";
+            document.getElementById('txtNum').innerText = "Mencari...";
+            log("Mengambil data stok...");
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
-                
                 let candidates = [];
                 if(data) {
                     Object.keys(data).forEach(key => {
-                        // Ambil semua yang AVAILABLE
-                        if(data[key].status === 'AVAILABLE') {
-                            candidates.push(key);
-                        }
+                        if(data[key].status === 'AVAILABLE') candidates.push(key);
                     });
                 }
 
                 if(candidates.length === 0) {
-                    alert(`DATABASE KOSONG / SEMUA TERPAKAI.\nMinta Admin upload stok baru.`);
-                    stopLoop();
-                    return;
+                    alert(`DATABASE KOSONG / STOK HABIS!`);
+                    stopLoop(); return;
                 }
 
-                // Acak urutan (PENTING BIAR GAK TABRAKAN)
+                // Acak urutan
                 candidates.sort(() => Math.random() - 0.5);
                 
-                // Ambil kandidat pertama
-                const targetNum = candidates[0];
-                
-                // LANGSUNG TEMBAK STATUS JADI 'TAKEN'
-                // Kita skip transaction yang bikin error "collision", kita pake update biasa.
-                // Karena sudah diacak, kemungkinan tabrakan sangat kecil (1 banding sisa stok).
-                db.ref('stock/' + targetNum).update({ status: 'TAKEN' }, (error) => {
-                    if (error) {
-                        showError("Firebase Error: " + error.message);
-                    } else {
-                        // BERHASIL
-                        currentNum = targetNum;
-                        document.getElementById('txtNum').innerText = currentNum;
-                        
-                        // Cek negaranya buat badge
-                        db.ref('stock/'+currentNum+'/country').once('value', s => {
-                            document.getElementById('regionBadge').innerText = s.val() || 'UNK';
-                        });
+                // Mulai proses claim
+                processClaim(candidates, 0);
+            });
+        }
 
-                        listenOTP(currentNum);
-                    }
-                });
+        function processClaim(list, index) {
+            if (index >= list.length) {
+                alert("Gagal dapat nomor (Server Penuh). Coba lagi nanti.");
+                stopLoop(); return;
+            }
+
+            const targetNum = list[index];
+            log(`Mencoba claim ${targetNum}...`);
+
+            // 1. TULIS STATUS & OWNER
+            db.ref('stock/' + targetNum).update({
+                status: 'TAKEN',
+                owner: mySessionID // Tandai ini punya gue
+            }, (error) => {
+                if(error) {
+                    processClaim(list, index + 1); // Error jaringan, next
+                } else {
+                    // 2. VERIFIKASI (Tunggu 500ms lalu cek lagi)
+                    // Ini kunci anti-tabraknya.
+                    setTimeout(() => {
+                        verifyOwnership(list, index, targetNum);
+                    }, 500);
+                }
+            });
+        }
+
+        function verifyOwnership(list, index, num) {
+            db.ref('stock/' + num).once('value', snap => {
+                const val = snap.val();
+                
+                // Cek: Apakah Owner-nya masih ID gue?
+                if (val && val.owner === mySessionID) {
+                    // SUKSES! Gak ada yang niban.
+                    log(`Berhasil! Nomor ${num} milik Anda.`);
+                    currentNum = num;
+                    document.getElementById('txtNum').innerText = currentNum;
+                    
+                    // Cek negara
+                    const country = val.country || 'UNK';
+                    document.getElementById('regionBadge').innerText = country;
+
+                    listenOTP(currentNum);
+                } else {
+                    // GAGAL! Ditiban orang lain yang lebih cepet sepersekian detik.
+                    log(`Collision! ${num} diambil orang lain. Mencari lagi...`);
+                    processClaim(list, index + 1);
+                }
             });
         }
 
         function listenOTP(num) {
             isListening = true;
-            // Dengerin folder OTP
+            log("Menunggu SMS...");
+            
             db.ref('stock/' + num + '/otp').on('value', snap => {
                 const code = snap.val();
                 if(code && isListening) {
+                    log(`OTP MASUK: ${code}`);
                     showOTP(code);
-                    // Tandai DONE (Hangus)
                     db.ref('stock/' + num).update({ status: 'DONE' });
                 }
             });
@@ -187,12 +217,12 @@
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
                 db.ref('stock/' + currentNum + '/otp').off();
             }
-            findNumberDirect();
+            findNumberSafe();
         }
 
         function nextSuccess() {
             if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
-            findNumberDirect();
+            findNumberSafe();
         }
 
         function resetUIState() {
@@ -214,12 +244,6 @@
         }
         function copyOTP() {
             navigator.clipboard.writeText(document.getElementById('myOTP').innerText);
-        }
-
-        function showError(msg) {
-            const el = document.getElementById('errorLog');
-            el.style.display = 'block';
-            el.innerText = msg;
         }
     </script>
 </body>
