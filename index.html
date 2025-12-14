@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V99 ULTIMATE</title>
+    <title>VIP PANEL V100 (STABLE)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -61,30 +61,27 @@
 <body>
 
     <div class="box">
-        <!-- LOGIN OVERLAY -->
         <div id="loginScreen">
-            <h3 style="color:#00ff88; margin-bottom:5px;">SIAPA NAMA KAMU?</h3>
-            <input type="text" id="inputName" class="login-input" placeholder="Isi Nama Panggilan...">
-            <button class="btn-start" style="width:70%" onclick="loginUser()">MASUK PANEL</button>
+            <h3 style="color:#00ff88; margin-bottom:5px;">NAMA TEAM:</h3>
+            <input type="text" id="inputName" class="login-input" placeholder="Contoh: Asep">
+            <button class="btn-start" style="width:70%" onclick="loginUser()">MASUK</button>
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V99</h2>
-            <div class="sub" id="welcomeMsg">Welcome, User</div>
+            <h2>⚡ PANEL V100</h2>
+            <div class="sub" id="welcomeMsg">Welcome</div>
         </div>
         
-        <!-- MENU UTAMA -->
         <div id="menu">
             <div style="margin-bottom:20px; font-size:12px; color:#aaa;">
-                Klik tombol untuk mengambil nomor secara acak dari database Admin.
+                Klik tombol untuk mengambil nomor stok Admin secara acak (Direct Mode).
             </div>
             <button class="btn-start" onclick="startLoop()">🚀 AMBIL NOMOR (AUTO)</button>
         </div>
 
-        <!-- LAYAR AKTIF -->
         <div id="active" class="hidden">
             <div class="display-num" id="myNum" onclick="copyNum()">
-                <div id="countryBadge" class="country-tag">UNK</div>
+                <div id="countryBadge" class="country-tag">...</div>
                 <span id="txtNum">Mencari...</span>
             </div>
             
@@ -99,12 +96,9 @@
         </div>
     </div>
 
-    <!-- LIVE HISTORY FEED -->
     <div class="history-box">
-        <div class="history-title">🔴 LIVE SUCCESS FEED</div>
-        <div id="feedList">
-            <!-- Log item masuk sini -->
-        </div>
+        <div class="history-title">🔴 LIVE HISTORY</div>
+        <div id="feedList"></div>
     </div>
 
     <script>
@@ -129,25 +123,16 @@
         let userName = localStorage.getItem('vip_username') || "";
         let currentCountryName = "Unknown";
         let isListening = false;
+        // ID Unik untuk user ini (Session ID) buat validasi kepemilikan
+        const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
 
-        // --- DATABASE PREFIX NEGARA ---
         const COUNTRY_MAP = {
-            '62': 'INDONESIA 🇮🇩',
-            '1': 'USA 🇺🇸',
-            '44': 'UNITED KINGDOM 🇬🇧',
-            '225': 'IVORY COAST 🇨🇮',
-            '212': 'MOROCCO 🇲🇦',
-            '60': 'MALAYSIA 🇲🇾',
-            '7': 'RUSSIA 🇷🇺',
-            '84': 'VIETNAM 🇻🇳',
-            '63': 'PHILIPPINES 🇵🇭',
-            '66': 'THAILAND 🇹🇭',
-            '234': 'NIGERIA 🇳🇬',
-            '33': 'FRANCE 🇫🇷',
+            '62': 'INDONESIA 🇮🇩', '1': 'USA 🇺🇸', '44': 'UK 🇬🇧', '225': 'IVORY COAST 🇨🇮',
+            '212': 'MOROCCO 🇲🇦', '60': 'MALAYSIA 🇲🇾', '7': 'RUSSIA 🇷🇺', '84': 'VIETNAM 🇻🇳',
+            '63': 'PHILIPPINES 🇵🇭', '66': 'THAILAND 🇹🇭', '234': 'NIGERIA 🇳🇬', '33': 'FRANCE 🇫🇷',
             '49': 'GERMANY 🇩🇪'
         };
 
-        // 1. LOGIN SYSTEM
         if(userName) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('welcomeMsg').innerText = "Operator: " + userName;
@@ -160,31 +145,25 @@
                 localStorage.setItem('vip_username', name);
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('welcomeMsg').innerText = "Operator: " + userName;
-            } else {
-                alert("Isi nama dulu bro!");
-            }
+            } else { alert("Isi nama dulu!"); }
         }
 
-        // 2. DETEKSI NEGARA DARI NOMOR
         function detectCountry(num) {
-            // Cek 3 digit pertama, lalu 2 digit, lalu 1 digit
             for (let len = 3; len >= 1; len--) {
                 const prefix = num.substring(0, len);
-                if (COUNTRY_MAP[prefix]) {
-                    return COUNTRY_MAP[prefix];
-                }
+                if (COUNTRY_MAP[prefix]) return COUNTRY_MAP[prefix];
             }
             return "INTERNATIONAL 🌍";
         }
 
-        // 3. START FLOW
         function startLoop() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            findNumberSafe();
+            findNumberDirect();
         }
 
-        function findNumberSafe() {
+        // --- LOGIC V100: DIRECT GRAB (ANTI-MACET) ---
+        function findNumberDirect() {
             resetUIState();
             document.getElementById('txtNum').innerText = "Mencari Stok...";
             document.getElementById('countryBadge').innerText = "...";
@@ -204,35 +183,41 @@
                     stopLoop(); return;
                 }
 
+                // Acak urutan biar gak semua orang narget nomor yg sama
                 candidates.sort(() => Math.random() - 0.5);
-                tryClaimNumber(candidates, 0);
-            });
-        }
+                
+                // Coba ambil nomor pertama yg available
+                const targetNum = candidates[0];
+                
+                // DIRECT UPDATE (Tanpa Transaction ribet)
+                // Kita pake update multi-path untuk lock owner juga
+                const updates = {};
+                updates['stock/' + targetNum + '/status'] = 'TAKEN';
+                updates['stock/' + targetNum + '/owner'] = mySessionID;
 
-        function tryClaimNumber(list, index) {
-            if (index >= list.length) {
-                alert("Server Sibuk. Coba lagi."); stopLoop(); return;
-            }
-
-            const targetNum = list[index];
-            const ref = db.ref('stock/' + targetNum + '/status');
-
-            ref.transaction((current) => {
-                if (current === 'AVAILABLE') return 'TAKEN';
-                return; 
-            }, (error, committed) => {
-                if (error || !committed) {
-                    tryClaimNumber(list, index + 1);
-                } else {
-                    currentNum = targetNum;
-                    document.getElementById('txtNum').innerText = currentNum;
-                    
-                    // Auto Detect Country
-                    currentCountryName = detectCountry(currentNum);
-                    document.getElementById('countryBadge').innerText = currentCountryName;
-
-                    listenOTP(currentNum);
-                }
+                db.ref().update(updates, (error) => {
+                    if (error) {
+                        // Kalau error permission atau jaringan, coba lagi
+                        setTimeout(findNumberDirect, 500); 
+                    } else {
+                        // Cek Double Lock (Verifikasi akhir)
+                        // Pastikan nomor ini beneran punya kita (gak ditiban orang lain yg lebih cepet 1ms)
+                        db.ref('stock/' + targetNum).once('value', s => {
+                            const val = s.val();
+                            if (val && val.owner === mySessionID) {
+                                // SUCCESS
+                                currentNum = targetNum;
+                                document.getElementById('txtNum').innerText = currentNum;
+                                currentCountryName = detectCountry(currentNum);
+                                document.getElementById('countryBadge').innerText = currentCountryName;
+                                listenOTP(currentNum);
+                            } else {
+                                // GAGAL (Keduluan), cari lagi
+                                setTimeout(findNumberDirect, 200);
+                            }
+                        });
+                    }
+                });
             });
         }
 
@@ -242,9 +227,8 @@
                 const code = snap.val();
                 if(code && isListening) {
                     showOTP(code);
+                    // Update status DONE biar hangus
                     db.ref('stock/' + num).update({ status: 'DONE' });
-                    
-                    // 🔥 KIRIM LOG KE HISTORY (BIAR SEMUA LIHAT)
                     pushToHistory(code);
                 }
             });
@@ -263,7 +247,6 @@
             document.getElementById('btnNext').style.display = 'block';
         }
 
-        // 4. HISTORY SYSTEM
         function pushToHistory(code) {
             db.ref('history').push({
                 name: userName,
@@ -273,35 +256,26 @@
             });
         }
 
-        // 5. MONITOR HISTORY FEED (REALTIME)
-        db.ref('history').limitToLast(20).on('child_added', (snap) => {
+        db.ref('history').limitToLast(10).on('child_added', (snap) => {
             const data = snap.val();
             const feed = document.getElementById('feedList');
-            
             const div = document.createElement('div');
             div.className = 'log-item';
-            div.innerHTML = `
-                <span class="log-name">${data.name}</span> 
-                <span class="log-country">(${data.country})</span> 
-                <span class="log-code">OTP: ${data.code}</span>
-            `;
-            
-            // Masukkan di paling atas
+            div.innerHTML = `<span class="log-name">${data.name}</span> <span class="log-country">(${data.country})</span> <span class="log-code">${data.code}</span>`;
             feed.insertBefore(div, feed.firstChild);
         });
 
-        // ACTIONS
         function nextBad() {
             if(currentNum) {
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
                 db.ref('stock/' + currentNum + '/otp').off();
             }
-            findNumberSafe();
+            findNumberDirect();
         }
 
         function nextSuccess() {
             if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
-            findNumberSafe();
+            findNumberDirect();
         }
 
         function stopLoop() {
