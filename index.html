@@ -3,73 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V97 (SAFE)</title>
+    <title>VIP PANEL V99 ULTIMATE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        body { background: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        .box { width: 100%; max-width: 420px; background: #111; padding: 25px; border-radius: 15px; border: 1px solid #333; text-align: center; box-shadow: 0 0 30px rgba(0,255,136,0.1); position: relative; overflow: hidden; }
         
-        h2 { margin: 0; color: #f43f5e; } 
-        
+        h2 { margin: 0; color: #00ff88; text-transform: uppercase; letter-spacing: 1px; } 
+        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
+
+        /* LOGIN OVERLAY */
+        #loginScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-input { padding: 12px; border-radius: 8px; border: 1px solid #00ff88; background: #111; color: #fff; text-align: center; font-weight: bold; width: 70%; margin-bottom: 10px; }
+
+        /* NOMOR DISPLAY */
         .display-num { 
-            font-size: 28px; font-family: monospace; background: #000; 
-            padding: 20px; border-radius: 10px; border: 2px dashed #f43f5e; 
-            margin: 15px 0; cursor: pointer; color: #fff; position: relative;
+            font-size: 26px; font-family: monospace; background: #080808; 
+            padding: 15px; border-radius: 10px; border: 1px dashed #444; 
+            margin: 10px 0; cursor: pointer; color: #fff; position: relative;
         }
-        .label-copy { font-size: 9px; color: #555; position: absolute; bottom: 5px; right: 10px; }
+        .country-tag { 
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
+            background: #00ff88; color: #000; font-size: 9px; font-weight: bold; 
+            padding: 2px 8px; border-radius: 4px;
+        }
 
-        .otp-code { font-size: 45px; font-weight: bold; color: #4ade80; letter-spacing: 6px; animation: pulse 1s infinite; cursor: pointer; margin-bottom: 10px; }
-        .waiting { font-size: 13px; color: #fbbf24; }
+        /* OTP AREA */
+        .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
+        .otp-code { font-size: 40px; font-weight: bold; color: #00ff88; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
+        .waiting { font-size: 12px; color: #fbbf24; }
 
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.4); }
-        .btn-bad { background: #ef4444; color: #fff; margin-bottom: 10px; }
-        .btn-next { background: #22c55e; color: #000; font-size: 16px; display: none; }
-        .btn-stop { background: transparent; border: 1px solid #555; color: #888; font-size: 10px; padding: 8px; margin-top: 20px; width: auto; }
+        /* BUTTONS */
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-start { background: #00ff88; color: #000; box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+        .btn-bad { background: #ef4444; color: #fff; }
+        .btn-next { background: #22c55e; color: #000; display: none; }
+        .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        #logSystem { font-size: 10px; color: #555; margin-top: 10px; text-align: left; }
+        /* LIVE HISTORY FEED */
+        .history-box { 
+            margin-top: 30px; width: 100%; max-width: 420px; 
+            background: #080808; border: 1px solid #222; border-radius: 10px; 
+            padding: 10px; text-align: left; height: 150px; overflow-y: auto;
+        }
+        .history-title { font-size: 10px; color: #555; margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; }
+        .log-item { font-size: 11px; margin-bottom: 5px; padding: 5px; border-radius: 4px; border-left: 2px solid #333; background: #111; animation: slideIn 0.3s; }
+        .log-name { color: #00ff88; font-weight: bold; }
+        .log-country { color: #aaa; }
+        .log-code { color: #fff; float: right; font-weight: bold; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <div style="margin-bottom:20px; border-bottom:1px solid #334155; padding-bottom:10px;">
-            <h2>⚡ PANEL V97 SAFE</h2>
-            <div style="font-size:11px; color:#94a3b8;">SYSTEM: CLAIM & VERIFY (ANTI TABRAK)</div>
+        <!-- LOGIN OVERLAY -->
+        <div id="loginScreen">
+            <h3 style="color:#00ff88; margin-bottom:5px;">SIAPA NAMA KAMU?</h3>
+            <input type="text" id="inputName" class="login-input" placeholder="Isi Nama Panggilan...">
+            <button class="btn-start" style="width:70%" onclick="loginUser()">MASUK PANEL</button>
+        </div>
+
+        <div class="header">
+            <h2>⚡ PANEL V99</h2>
+            <div class="sub" id="welcomeMsg">Welcome, User</div>
         </div>
         
+        <!-- MENU UTAMA -->
         <div id="menu">
             <div style="margin-bottom:20px; font-size:12px; color:#aaa;">
-                Klik tombol di bawah untuk mengambil nomor. 
-                <br>Sistem akan memverifikasi kepemilikan agar tidak bentrok.
+                Klik tombol untuk mengambil nomor secara acak dari database Admin.
             </div>
             <button class="btn-start" onclick="startLoop()">🚀 AMBIL NOMOR (AUTO)</button>
         </div>
 
+        <!-- LAYAR AKTIF -->
         <div id="active" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:11px; color:#aaa;">NOMOR AKTIF:</span>
-                <span id="regionBadge" style="font-size:10px; background:#334155; padding:2px 6px; border-radius:4px;">AUTO</span>
-            </div>
-            
             <div class="display-num" id="myNum" onclick="copyNum()">
+                <div id="countryBadge" class="country-tag">UNK</div>
                 <span id="txtNum">Mencari...</span>
-                <div class="label-copy">KLIK SALIN</div>
             </div>
             
-            <div id="statusWait" class="waiting">⏳ MENUNGGU SMS...</div>
-            <div id="myOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
+            <div class="otp-area">
+                <div id="statusWait" class="waiting">⏳ MENUNGGU SMS...</div>
+                <div id="myOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
+            </div>
 
             <button id="btnBad" class="btn-bad" onclick="nextBad()">❌ GAK MASUK? GANTI</button>
-            <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT BARU</button>
+            <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT NOMOR BARU</button>
             <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
-            
-            <div id="logSystem">System Ready.</div>
+        </div>
+    </div>
+
+    <!-- LIVE HISTORY FEED -->
+    <div class="history-box">
+        <div class="history-title">🔴 LIVE SUCCESS FEED</div>
+        <div id="feedList">
+            <!-- Log item masuk sini -->
         </div>
     </div>
 
@@ -78,44 +112,87 @@
         // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
         // ==========================================
         const firebaseConfig = {
-  apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
-  authDomain: "vipotpsystem.firebaseapp.com",
-  databaseURL: "https://vipotpsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "vipotpsystem",
-  storageBucket: "vipotpsystem.firebasestorage.app",
-  messagingSenderId: "1041472357696",
-  appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
-};
+            apiKey: "AIzaSyDxxxx...",
+            authDomain: "xxxx.firebaseapp.com",
+            databaseURL: "https://xxxx.firebasedatabase.app",
+            projectId: "xxxx",
+            storageBucket: "xxxx.appspot.com",
+            messagingSenderId: "xxxx",
+            appId: "xxxx"
+        };
         // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        // ID Unik untuk user ini (Session ID)
-        const mySessionID = "USER_" + Math.floor(Math.random() * 1000000);
-        
         let currentNum = null;
+        let userName = localStorage.getItem('vip_username') || "";
+        let currentCountryName = "Unknown";
         let isListening = false;
 
-        function log(msg) {
-            document.getElementById('logSystem').innerText = "> " + msg;
+        // --- DATABASE PREFIX NEGARA ---
+        const COUNTRY_MAP = {
+            '62': 'INDONESIA 🇮🇩',
+            '1': 'USA 🇺🇸',
+            '44': 'UNITED KINGDOM 🇬🇧',
+            '225': 'IVORY COAST 🇨🇮',
+            '212': 'MOROCCO 🇲🇦',
+            '60': 'MALAYSIA 🇲🇾',
+            '7': 'RUSSIA 🇷🇺',
+            '84': 'VIETNAM 🇻🇳',
+            '63': 'PHILIPPINES 🇵🇭',
+            '66': 'THAILAND 🇹🇭',
+            '234': 'NIGERIA 🇳🇬',
+            '33': 'FRANCE 🇫🇷',
+            '49': 'GERMANY 🇩🇪'
+        };
+
+        // 1. LOGIN SYSTEM
+        if(userName) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('welcomeMsg').innerText = "Operator: " + userName;
         }
 
+        function loginUser() {
+            const name = document.getElementById('inputName').value.trim();
+            if(name) {
+                userName = name;
+                localStorage.setItem('vip_username', name);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('welcomeMsg').innerText = "Operator: " + userName;
+            } else {
+                alert("Isi nama dulu bro!");
+            }
+        }
+
+        // 2. DETEKSI NEGARA DARI NOMOR
+        function detectCountry(num) {
+            // Cek 3 digit pertama, lalu 2 digit, lalu 1 digit
+            for (let len = 3; len >= 1; len--) {
+                const prefix = num.substring(0, len);
+                if (COUNTRY_MAP[prefix]) {
+                    return COUNTRY_MAP[prefix];
+                }
+            }
+            return "INTERNATIONAL 🌍";
+        }
+
+        // 3. START FLOW
         function startLoop() {
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
             findNumberSafe();
         }
 
-        // --- LOGIC V97: CLAIM & VERIFY ---
         function findNumberSafe() {
             resetUIState();
-            document.getElementById('txtNum').innerText = "Mencari...";
-            log("Mengambil data stok...");
+            document.getElementById('txtNum').innerText = "Mencari Stok...";
+            document.getElementById('countryBadge').innerText = "...";
 
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
+                
                 if(data) {
                     Object.keys(data).forEach(key => {
                         if(data[key].status === 'AVAILABLE') candidates.push(key);
@@ -123,78 +200,52 @@
                 }
 
                 if(candidates.length === 0) {
-                    alert(`DATABASE KOSONG / STOK HABIS!`);
+                    alert(`STOK HABIS! Minta Admin upload.`);
                     stopLoop(); return;
                 }
 
-                // Acak urutan
                 candidates.sort(() => Math.random() - 0.5);
-                
-                // Mulai proses claim
-                processClaim(candidates, 0);
+                tryClaimNumber(candidates, 0);
             });
         }
 
-        function processClaim(list, index) {
+        function tryClaimNumber(list, index) {
             if (index >= list.length) {
-                alert("Gagal dapat nomor (Server Penuh). Coba lagi nanti.");
-                stopLoop(); return;
+                alert("Server Sibuk. Coba lagi."); stopLoop(); return;
             }
 
             const targetNum = list[index];
-            log(`Mencoba claim ${targetNum}...`);
+            const ref = db.ref('stock/' + targetNum + '/status');
 
-            // 1. TULIS STATUS & OWNER
-            db.ref('stock/' + targetNum).update({
-                status: 'TAKEN',
-                owner: mySessionID // Tandai ini punya gue
-            }, (error) => {
-                if(error) {
-                    processClaim(list, index + 1); // Error jaringan, next
+            ref.transaction((current) => {
+                if (current === 'AVAILABLE') return 'TAKEN';
+                return; 
+            }, (error, committed) => {
+                if (error || !committed) {
+                    tryClaimNumber(list, index + 1);
                 } else {
-                    // 2. VERIFIKASI (Tunggu 500ms lalu cek lagi)
-                    // Ini kunci anti-tabraknya.
-                    setTimeout(() => {
-                        verifyOwnership(list, index, targetNum);
-                    }, 500);
-                }
-            });
-        }
-
-        function verifyOwnership(list, index, num) {
-            db.ref('stock/' + num).once('value', snap => {
-                const val = snap.val();
-                
-                // Cek: Apakah Owner-nya masih ID gue?
-                if (val && val.owner === mySessionID) {
-                    // SUKSES! Gak ada yang niban.
-                    log(`Berhasil! Nomor ${num} milik Anda.`);
-                    currentNum = num;
+                    currentNum = targetNum;
                     document.getElementById('txtNum').innerText = currentNum;
                     
-                    // Cek negara
-                    const country = val.country || 'UNK';
-                    document.getElementById('regionBadge').innerText = country;
+                    // Auto Detect Country
+                    currentCountryName = detectCountry(currentNum);
+                    document.getElementById('countryBadge').innerText = currentCountryName;
 
                     listenOTP(currentNum);
-                } else {
-                    // GAGAL! Ditiban orang lain yang lebih cepet sepersekian detik.
-                    log(`Collision! ${num} diambil orang lain. Mencari lagi...`);
-                    processClaim(list, index + 1);
                 }
             });
         }
 
         function listenOTP(num) {
             isListening = true;
-            log("Menunggu SMS...");
-            
             db.ref('stock/' + num + '/otp').on('value', snap => {
                 const code = snap.val();
                 if(code && isListening) {
-                    log(`OTP MASUK: ${code}`);
                     showOTP(code);
                     db.ref('stock/' + num).update({ status: 'DONE' });
+                    
+                    // 🔥 KIRIM LOG KE HISTORY (BIAR SEMUA LIHAT)
+                    pushToHistory(code);
                 }
             });
         }
@@ -212,6 +263,34 @@
             document.getElementById('btnNext').style.display = 'block';
         }
 
+        // 4. HISTORY SYSTEM
+        function pushToHistory(code) {
+            db.ref('history').push({
+                name: userName,
+                country: currentCountryName,
+                code: code,
+                timestamp: Date.now()
+            });
+        }
+
+        // 5. MONITOR HISTORY FEED (REALTIME)
+        db.ref('history').limitToLast(20).on('child_added', (snap) => {
+            const data = snap.val();
+            const feed = document.getElementById('feedList');
+            
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerHTML = `
+                <span class="log-name">${data.name}</span> 
+                <span class="log-country">(${data.country})</span> 
+                <span class="log-code">OTP: ${data.code}</span>
+            `;
+            
+            // Masukkan di paling atas
+            feed.insertBefore(div, feed.firstChild);
+        });
+
+        // ACTIONS
         function nextBad() {
             if(currentNum) {
                 db.ref('stock/' + currentNum).update({ status: 'BAD' });
@@ -225,18 +304,18 @@
             findNumberSafe();
         }
 
+        function stopLoop() {
+            if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+        }
+
         function resetUIState() {
             isListening = false;
             document.getElementById('statusWait').classList.remove('hidden');
             document.getElementById('myOTP').classList.add('hidden');
             document.getElementById('btnBad').style.display = 'block';
             document.getElementById('btnNext').style.display = 'none';
-        }
-
-        function stopLoop() {
-            if(currentNum) db.ref('stock/' + currentNum + '/otp').off();
-            document.getElementById('active').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
         }
 
         function copyNum() {
