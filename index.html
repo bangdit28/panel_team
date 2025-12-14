@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V107 DYNAMIC</title>
+    <title>VIP PANEL V108</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
         .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; }
         
-        h2 { margin: 0; color: #f43f5e; } 
-        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
+        /* NEWS TICKER */
+        .news-container { width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; }
+        .news-text { display: inline-block; padding: 8px; font-size: 12px; font-weight: bold; color: #ffd700; font-family: monospace; animation: marquee 10s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        h2 { margin: 0; color: #f43f5e; } .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
 
         /* NOMOR & OTP */
         .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
@@ -20,29 +24,47 @@
         .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
 
-        /* INPUTS */
+        /* BUTTONS */
         select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
         .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
+
+        /* HISTORY FEED (FITUR BALIK LAGI) */
+        .history-box { margin-top: 30px; width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 250px; overflow-y: auto; }
+        .log-item { font-size: 11px; margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid #333; background: #111; animation: slideIn 0.3s; }
+        .log-user { color: #f43f5e; font-weight: bold; }
+        .log-time { color: #555; font-size: 9px; float: right; }
+        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; margin-top: 2px; }
+        .log-code-hl { color: #4ade80; font-weight: bold; }
+
         .hidden { display: none; }
+        @keyframes pulse { 50% { opacity: 0.6; } }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="box">
+        <div id="newsContainer" class="news-container"><div id="newsText" class="news-text">...</div></div>
+
+        <!-- LOGIN -->
+        <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
+            <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
+            <button class="btn-start" style="width:70%; margin-top:10px;" onclick="loginUser()">MASUK</button>
+        </div>
+
         <div class="header">
-            <h2>⚡ PANEL V107</h2>
-            <div class="sub">DYNAMIC COUNTRY LIST</div>
+            <h2>⚡ PANEL V108</h2>
+            <div class="sub" id="welcomeMsg">Full Feature Suite</div>
         </div>
         
         <div id="menu">
-            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
-            <select id="countryPick">
-                <option>Loading List...</option>
-            </select>
+            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA STOK</label>
+            <select id="countryPick"><option>Loading...</option></select>
             <button class="btn-start" onclick="startLoop()">🚀 MULAI FARMING</button>
         </div>
 
@@ -63,10 +85,16 @@
         </div>
     </div>
 
+    <!-- FEED HISTORY -->
+    <div class="history-box">
+        <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
+            <span style="font-size:11px; color:#f43f5e; font-weight:bold;">🔴 LIVE HISTORY (<span id="dateDisplay">...</span>)</span>
+        </div>
+        <div id="feedList"></div>
+    </div>
+
     <script>
-        // ==========================================
         // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
-        // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -76,157 +104,155 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
-        // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
         let currentNum = null;
         let selectedRegion = "";
+        let userName = localStorage.getItem('vip_username') || "";
+        let currentCountryName = "Unknown";
         let isListening = false;
         let lastProcessedOTP = ""; 
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
+        
+        const today = new Date();
+        document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID');
+        const todayString = today.toDateString();
 
-        // --- FETCH NEGARA DARI FIREBASE (DINAMIS) ---
+        // 1. LOAD NEGARA DINAMIS
         db.ref('settings/countries').on('value', snap => {
             const data = snap.val();
             const select = document.getElementById('countryPick');
-            select.innerHTML = ""; // Bersihkan
-
+            select.innerHTML = "";
             if(data) {
                 Object.keys(data).forEach(key => {
                     const opt = document.createElement('option');
-                    opt.value = key; // Kode (Misal: ID)
-                    opt.innerText = data[key]; // Nama (Misal: INDONESIA)
+                    opt.value = key; opt.innerText = data[key];
                     select.appendChild(opt);
                 });
-            } else {
-                select.innerHTML = "<option>Belum ada negara</option>";
-            }
+            } else select.innerHTML = "<option>Kosong</option>";
         });
 
-        // --- LOGIC UTAMA (LOOPING) ---
-        function startLoop() {
-            selectedRegion = document.getElementById('countryPick').value;
-            // Ambil Nama Negara untuk Badge
-            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
-            document.getElementById('countryBadge').innerText = regionName;
+        // 2. NEWS TICKER
+        db.ref('system/notification').on('value', snap => {
+            const msg = snap.val();
+            const c = document.getElementById('newsContainer');
+            if(msg) { document.getElementById('newsText').innerText = "📢 " + msg; c.style.display = 'block'; }
+            else c.style.display = 'none';
+        });
 
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('active').classList.remove('hidden');
-            findNumberSafe();
+        if(userName) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('welcomeMsg').innerText = "Op: " + userName;
         }
 
-        function findNumberSafe() {
-            resetUIState();
-            document.getElementById('txtNum').innerText = "Mencari Stok...";
+        function loginUser() {
+            const name = document.getElementById('inputName').value.trim();
+            if(name) {
+                userName = name; localStorage.setItem('vip_username', name);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('welcomeMsg').innerText = "Op: " + userName;
+            } else alert("Isi nama!");
+        }
 
+        function startLoop() {
+            selectedRegion = document.getElementById('countryPick').value;
+            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
+            document.getElementById('countryBadge').innerText = regionName;
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('active').classList.remove('hidden');
+            findNumber();
+        }
+
+        function findNumber() {
+            resetUI();
+            document.getElementById('txtNum').innerText = "Mencari...";
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
-                let candidates = [];
+                let cands = [];
                 if(data) {
-                    Object.keys(data).forEach(key => {
-                        // Filter berdasarkan Negara yg dipilih
-                        if(data[key].country === selectedRegion && data[key].status === 'AVAILABLE') {
-                            candidates.push(key);
-                        }
+                    Object.keys(data).forEach(k => {
+                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) cands.push(k);
                     });
                 }
-
-                if(candidates.length === 0) {
-                    alert(`STOK ${selectedRegion} HABIS!\nHubungi Admin.`);
-                    stopLoop(); return;
-                }
-
-                candidates.sort(() => Math.random() - 0.5);
-                tryGrab(candidates, 0);
+                if(cands.length === 0) { alert("Stok Habis!"); stopLoop(); return; }
+                cands.sort(() => Math.random() - 0.5);
+                tryGrab(cands, 0);
             });
         }
 
         function tryGrab(list, index) {
-            if (index >= list.length) { alert("Gagal ambil. Coba lagi."); stopLoop(); return; }
-            const targetNum = list[index];
-            
-            db.ref('stock/' + targetNum).update({
-                status: 'TAKEN',
-                owner: mySessionID
-            }, (error) => {
-                if (error) {
-                    tryGrab(list, index + 1);
-                } else {
+            if(index >= list.length) { alert("Gagal ambil (Collision)."); stopLoop(); return; }
+            const num = list[index];
+            db.ref('stock/'+num).update({ status: 'TAKEN', owner: mySessionID }, (e) => {
+                if(e) tryGrab(list, index+1);
+                else {
                     setTimeout(() => {
-                        db.ref('stock/' + targetNum).once('value', s => {
-                            const val = s.val();
-                            if (val && val.owner === mySessionID) {
-                                currentNum = targetNum;
-                                document.getElementById('txtNum').innerText = currentNum;
-                                copyText(currentNum);
-                                listenOTP(currentNum);
-                            } else {
-                                tryGrab(list, index + 1);
-                            }
+                        db.ref('stock/'+num).once('value', s => {
+                            if(s.val() && s.val().owner === mySessionID) {
+                                currentNum = num;
+                                document.getElementById('txtNum').innerText = num;
+                                copyText(num);
+                                listen(num);
+                            } else tryGrab(list, index+1);
                         });
                     }, 300);
                 }
             });
         }
 
-        function listenOTP(num) {
-            isListening = true;
-            lastProcessedOTP = ""; 
-            db.ref('stock/' + num).on('value', snap => {
-                const data = snap.val();
-                if(data && data.otp && isListening && data.otp !== lastProcessedOTP) {
-                    lastProcessedOTP = data.otp;
-                    showOTP(data.otp);
-                    db.ref('stock/' + num).update({ status: 'DONE' });
+        function listen(num) {
+            isListening = true; lastProcessedOTP = "";
+            db.ref('stock/'+num).on('value', snap => {
+                const d = snap.val();
+                if(d && d.otp && isListening && d.otp !== lastProcessedOTP) {
+                    lastProcessedOTP = d.otp;
+                    showOTP(d.otp);
+                    db.ref('stock/'+num).update({ status: 'DONE' });
+                    if(!d.otp_pushed) {
+                        pushHistory(d.otp, d.full_msg || (d.otp + " adalah kode FB"));
+                        db.ref('stock/'+num).update({ otp_pushed: true });
+                    }
                 }
             });
         }
 
-        function showOTP(code) {
+        function showOTP(c) {
             document.getElementById('statusWait').classList.add('hidden');
-            const otpEl = document.getElementById('myOTP');
-            otpEl.innerText = code;
-            otpEl.classList.remove('hidden');
-            
+            const el = document.getElementById('myOTP');
+            el.innerText = c; el.classList.remove('hidden');
             new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-            copyText(code);
-
+            copyText(c);
             document.getElementById('btnBad').style.display = 'none';
             document.getElementById('btnNext').style.display = 'block';
         }
 
-        function nextBad() {
-            if(currentNum) {
-                db.ref('stock/' + currentNum).update({ status: 'BAD' });
-                db.ref('stock/' + currentNum).off();
-            }
-            findNumberSafe();
+        function pushHistory(c, m) {
+            db.ref('history').push({ name: userName, country: selectedRegion, code: c, msg: m, time: Date.now() });
         }
 
-        function nextSuccess() {
-            if(currentNum) db.ref('stock/' + currentNum).off();
-            findNumberSafe();
-        }
+        db.ref('history').limitToLast(30).on('child_added', snap => {
+            const d = snap.val();
+            if(new Date(d.time).toDateString() !== todayString) return;
+            const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+            let cm = d.msg.replace(d.code, `<span class="log-code-hl">XXXXX</span>`);
+            if(!cm.includes('XXXXX')) cm += ' XXXXX';
+            
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerHTML = `<div><span class="log-user">${d.name}</span> <span style="color:#aaa">(${d.country})</span> <span class="log-time">${tm}</span></div><span class="log-msg">${cm}</span>`;
+            const feed = document.getElementById('feedList');
+            feed.insertBefore(div, feed.firstChild);
+        });
 
-        function resetUIState() {
-            isListening = false;
-            document.getElementById('statusWait').classList.remove('hidden');
-            document.getElementById('myOTP').classList.add('hidden');
-            document.getElementById('btnBad').style.display = 'block';
-            document.getElementById('btnNext').style.display = 'none';
-        }
-
-        function stopLoop() {
-            if(currentNum) db.ref('stock/' + currentNum).off();
-            document.getElementById('active').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
-        }
-
+        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum).off(); } findNumber(); }
+        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum).off(); findNumber(); }
+        function stopLoop() { if(currentNum) db.ref('stock/'+currentNum).off(); document.getElementById('active').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
+        function resetUI() { isListening=false; document.getElementById('statusWait').classList.remove('hidden'); document.getElementById('myOTP').classList.add('hidden'); document.getElementById('btnBad').style.display='block'; document.getElementById('btnNext').style.display='none'; }
         function copyNum() { copyText(document.getElementById('txtNum').innerText); }
         function copyOTP() { copyText(document.getElementById('myOTP').innerText); }
-        function copyText(val) { navigator.clipboard.writeText(val).then(()=>{},()=>{}); }
+        function copyText(v) { navigator.clipboard.writeText(v).catch(()=>{}); }
     </script>
 </body>
 </html>
