@@ -3,54 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN STOCK MANAGER V92</title>
+    <title>ADMIN MONITOR V98</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #000; color: #00ff88; font-family: monospace; padding: 20px; text-align: center; }
-        .box { max-width: 600px; margin: 0 auto; border: 2px solid #00ff88; padding: 20px; border-radius: 10px; }
+        body { background: #000; color: #fff; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .box { width: 100%; max-width: 600px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         
-        textarea { width: 100%; height: 200px; background: #111; border: 1px solid #333; color: #fff; padding: 10px; box-sizing: border-box; }
-        select, button { width: 100%; padding: 12px; margin-top: 10px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 14px; }
+        h2 { margin-top: 0; color: #00ff88; text-align: center; }
+        
+        /* DASHBOARD GRID */
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #222; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #444; }
+        .stat-num { font-size: 24px; font-weight: bold; display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 10px; color: #aaa; }
+        
+        .c-green { color: #00e676; }
+        .c-blue { color: #2979ff; }
+        .c-red { color: #ff1744; }
+
+        /* FORM UPLOAD */
+        textarea { width: 100%; height: 150px; background: #000; border: 1px solid #333; color: #ccc; padding: 10px; box-sizing: border-box; }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
         
         .btn-up { background: #00ff88; color: #000; }
         .btn-del { background: #d32f2f; color: #fff; margin-top: 30px; }
         
-        h2 { margin-top: 0; }
-        .stats { margin-top: 10px; color: yellow; border: 1px dashed #333; padding: 10px; }
+        .loading { color: yellow; font-size: 12px; text-align: center; }
     </style>
 </head>
 <body>
 
+    <!-- MONITORING SECTION -->
     <div class="box">
-        <h2>🏭 GUDANG NOMOR V92</h2>
+        <h2>📊 LIVE MONITORING</h2>
+        <div id="loadingMsg" class="loading">Menghubungkan ke Database...</div>
         
-        <div class="stats" id="dbStats">
-            Loading Data...
+        <div class="grid-stats">
+            <div class="stat-card" style="border-color: #00e676;">
+                <span id="countAvail" class="stat-num c-green">0</span>
+                <span class="stat-label">AVAILABLE (STOK)</span>
+            </div>
+            <div class="stat-card" style="border-color: #2979ff;">
+                <span id="countActive" class="stat-num c-blue">0</span>
+                <span class="stat-label">ACTIVE (DIPAKE)</span>
+            </div>
+            <div class="stat-card" style="border-color: #ff1744;">
+                <span id="countTrash" class="stat-num c-red">0</span>
+                <span class="stat-label">DONE / BAD (SAMPAH)</span>
+            </div>
         </div>
+        
+        <div style="font-size:10px; color:#555; text-align:center;">
+            *Angka berubah otomatis saat Team mengambil/menyelesaikan nomor.
+        </div>
+    </div>
 
-        <hr style="border-color:#333; margin: 20px 0;">
-
-        <label>PILIH NEGARA STOK:</label>
-        <select id="countrySelect" style="background:#222; color:#fff; border:1px solid #444;">
+    <!-- UPLOAD SECTION -->
+    <div class="box">
+        <h2>📥 TAMBAH STOK</h2>
+        
+        <label>NEGARA:</label>
+        <select id="countrySelect" style="background:#222; color:#fff; margin-bottom:10px;">
             <option value="ID">🇮🇩 INDONESIA</option>
             <option value="US">🇺🇸 USA</option>
             <option value="UK">🇬🇧 INGGRIS</option>
             <option value="MY">🇲🇾 MALAYSIA</option>
             <option value="CI">🇨🇮 IVORY COAST</option>
-            <option value="OTHER">🌍 MIXED / LAINNYA</option>
+            <option value="OTHER">🌍 LAINNYA</option>
         </select>
 
-        <p style="text-align:left; font-size:11px; color:#aaa; margin-bottom:5px;">PASTE NOMOR DARI IVASMS (Bisa ribuan baris):</p>
-        <textarea id="numList" placeholder="212600192&#10;212600193&#10;..."></textarea>
+        <textarea id="numList" placeholder="Paste nomor dari IvaSMS disini..."></textarea>
 
-        <button class="btn-up" onclick="uploadStock()">🚀 UPLOAD STOK BARU</button>
+        <button class="btn-up" onclick="uploadStock()">🚀 UPLOAD KE DATABASE</button>
         
-        <button class="btn-del" onclick="clearAll()">🗑️ HAPUS SEMUA DATABASE (RESET)</button>
+        <button class="btn-del" onclick="clearAll()">🗑️ HAPUS SEMUA DATA (RESET TOTAL)</button>
+        <button class="btn-del" style="background: #ff9800;" onclick="clearTrash()">🧹 BERSIHKAN SAMPAH (HAPUS DONE/BAD)</button>
     </div>
 
     <script>
-        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
+        // ==========================================
+        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
+        // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -60,17 +94,40 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
+        // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Monitor Jumlah Stok
-        db.ref('stock').on('value', snap => {
-            const val = snap.val();
-            const count = val ? Object.keys(val).length : 0;
-            document.getElementById('dbStats').innerText = `TOTAL STOK SAAT INI: ${count} NOMOR`;
+        // --- REAL-TIME LISTENER ---
+        // Ini yang bikin angkanya update sendiri tanpa refresh
+        db.ref('stock').on('value', (snapshot) => {
+            document.getElementById('loadingMsg').style.display = 'none';
+            
+            const data = snapshot.val();
+            let avail = 0;
+            let active = 0;
+            let trash = 0;
+
+            if (data) {
+                Object.values(data).forEach(item => {
+                    if (item.status === 'AVAILABLE') avail++;
+                    else if (item.status === 'TAKEN') active++;
+                    else if (item.status === 'DONE' || item.status === 'BAD') trash++;
+                });
+            }
+
+            // Animasi angka
+            updateDisplay('countAvail', avail);
+            updateDisplay('countActive', active);
+            updateDisplay('countTrash', trash);
         });
 
+        function updateDisplay(id, val) {
+            document.getElementById(id).innerText = val;
+        }
+
+        // --- UPLOAD LOGIC ---
         function uploadStock() {
             const raw = document.getElementById('numList').value;
             const country = document.getElementById('countrySelect').value;
@@ -79,18 +136,16 @@
 
             const lines = raw.split(/\n/);
             let count = 0;
-            
-            // Batch upload biar ga berat
             let updates = {};
 
             lines.forEach(line => {
-                let cleanNum = line.replace(/\D/g, ''); // Ambil angka doang
+                let cleanNum = line.replace(/\D/g, ''); 
                 if(cleanNum.length > 6) {
                     updates[cleanNum] = {
                         number: cleanNum,
                         country: country,
                         otp: "",
-                        status: "AVAILABLE",
+                        status: "AVAILABLE", // Default status
                         timestamp: Date.now()
                     };
                     count++;
@@ -101,17 +156,36 @@
                 db.ref('stock').update(updates, (error) => {
                     if(error) alert("Error: " + error.message);
                     else {
-                        alert(`BERHASIL! ${count} Nomor ${country} Masuk Database.`);
+                        alert(`SUKSES! ${count} Stok Masuk. Counter akan update.`);
                         document.getElementById('numList').value = "";
                     }
                 });
             }
         }
 
+        // --- CLEANING TOOLS ---
         function clearAll() {
-            if(confirm("YAKIN HAPUS SEMUA? Team akan kehilangan akses nomor saat ini!")) {
+            if(confirm("BAHAYA: Ini akan menghapus SELURUH DATABASE (termasuk yang sedang dipake team).\nYakin?")) {
                 db.ref('stock').remove();
-                alert("DATABASE BERSIH! Silakan upload stok baru.");
+            }
+        }
+
+        function clearTrash() {
+            if(confirm("Hapus nomor yang statusnya DONE atau BAD saja? (Stok aman)")) {
+                db.ref('stock').once('value', snap => {
+                    const data = snap.val();
+                    if(!data) return;
+                    
+                    let updates = {};
+                    Object.keys(data).forEach(key => {
+                        if(data[key].status === 'DONE' || data[key].status === 'BAD') {
+                            updates[key] = null; // null artinya hapus
+                        }
+                    });
+                    
+                    db.ref('stock').update(updates);
+                    alert("Sampah dibersihkan!");
+                });
             }
         }
     </script>
