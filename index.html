@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP PANEL V102 (ANTI-MACET)</title>
+    <title>VIP PANEL V103 (AUTO COPY)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -52,7 +52,7 @@
         .log-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
         .log-user { color: #f43f5e; font-weight: bold; }
         .log-msg { color: #ccc; font-style: italic; font-family: monospace; }
-        .log-code-hl { color: #4ade80; font-weight: bold; }
+        .log-code-hl { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
@@ -70,8 +70,8 @@
         </div>
 
         <div class="header">
-            <h2>⚡ PANEL V102</h2>
-            <div class="sub" id="welcomeMsg">Metode Preman (Anti Macet)</div>
+            <h2>⚡ PANEL V103</h2>
+            <div class="sub" id="welcomeMsg">Auto Copy & Privacy Mode</div>
         </div>
         
         <div id="menu">
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <!-- FEED HISTORY PESAN PENUH -->
+    <!-- FEED HISTORY (SENSOR KODE) -->
     <div class="history-box">
         <div class="history-title">🔴 LIVE SMS FEED</div>
         <div id="feedList"></div>
@@ -123,6 +123,7 @@
         let userName = localStorage.getItem('vip_username') || "";
         let currentCountryName = "Unknown";
         let isListening = false;
+        let lastProcessedOTP = ""; // Variabel Anti-Double
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
 
         const COUNTRY_MAP = {
@@ -160,8 +161,6 @@
             findNumberBrute();
         }
 
-        // --- LOGIC V102: PREMAN MODE (OPTIMISTIC LOCKING) ---
-        // Gak pake Transaction yang ribet, langsung update aja.
         function findNumberBrute() {
             resetUIState();
             document.getElementById('txtNum').innerText = "Mencari Stok...";
@@ -169,7 +168,6 @@
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
-                
                 if(data) {
                     Object.keys(data).forEach(key => {
                         if(data[key].status === 'AVAILABLE') candidates.push(key);
@@ -181,69 +179,67 @@
                     stopLoop(); return;
                 }
 
-                // Acak urutan
                 candidates.sort(() => Math.random() - 0.5);
-                
                 tryGrab(candidates, 0);
             });
         }
 
         function tryGrab(list, index) {
             if (index >= list.length) {
-                alert("Gagal ambil. Stok mungkin direbut semua. Coba lagi.");
-                stopLoop(); return;
+                alert("Gagal ambil (Rebutan). Coba lagi."); stopLoop(); return;
             }
-
             const targetNum = list[index];
             
-            // 1. TEMBAK LANGSUNG (TANPA NANYA)
             db.ref('stock/' + targetNum).update({
                 status: 'TAKEN',
                 owner: mySessionID
             }, (error) => {
                 if (error) {
-                    // Error jaringan, lanjut next
                     tryGrab(list, index + 1);
                 } else {
-                    // 2. CEK SETELAH NEMBAK (Double Check)
-                    // Pastikan kita yang menang, bukan ditiban orang di detik yang sama
                     setTimeout(() => {
                         db.ref('stock/' + targetNum).once('value', s => {
                             const val = s.val();
                             if (val && val.owner === mySessionID) {
-                                // KITA MENANG!
+                                // SUCCESS
                                 currentNum = targetNum;
                                 document.getElementById('txtNum').innerText = currentNum;
                                 currentCountryName = detectCountry(currentNum);
                                 document.getElementById('countryBadge').innerText = currentCountryName;
+                                
+                                // AUTO COPY NOMOR
+                                copyText(currentNum); 
+                                
                                 listenOTP(currentNum);
                             } else {
-                                // KALAH CEPET (Ditiban), cari lagi
-                                console.log("Kalah cepet, cari lagi...");
                                 tryGrab(list, index + 1);
                             }
                         });
-                    }, 300); // Delay dikit buat nunggu sync database
+                    }, 300);
                 }
             });
         }
 
         function listenOTP(num) {
             isListening = true;
-            // Dengerin data 'otp' dan 'full_msg'
+            // Reset OTP local cache
+            lastProcessedOTP = ""; 
+
             db.ref('stock/' + num).on('value', snap => {
                 const data = snap.val();
-                // Kalau ada OTP dan statusnya RECEIVED (dikirim admin)
-                if(data && data.otp && isListening) {
+                
+                // Pastikan ada OTP, status Received, dan OTP ini belum diproses sebelumnya
+                if(data && data.otp && isListening && data.otp !== lastProcessedOTP) {
+                    lastProcessedOTP = data.otp; // Kunci biar ga double
+                    
                     showOTP(data.otp);
                     
-                    // Update status jadi DONE (Biar gak bisa diambil lagi)
+                    // Mark as DONE
                     db.ref('stock/' + num).update({ status: 'DONE' });
                     
-                    // PUSH TO HISTORY
-                    const msgContent = data.full_msg || (data.otp + " adalah kode konfirmasi");
-                    // Cek biar ga double push history (karena on value trigger berkali2)
+                    // Push history (Cek flag biar ga double push di database)
                     if(data.otp_pushed !== true) {
+                        const msgContent = data.full_msg || (data.otp + " adalah kode konfirmasi");
                         pushToHistory(data.otp, msgContent);
                         db.ref('stock/' + num).update({ otp_pushed: true });
                     }
@@ -258,7 +254,9 @@
             otpEl.classList.remove('hidden');
             
             new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-            navigator.clipboard.writeText(code);
+            
+            // AUTO COPY OTP
+            copyText(code);
 
             document.getElementById('btnBad').style.display = 'none';
             document.getElementById('btnNext').style.display = 'block';
@@ -274,12 +272,18 @@
             });
         }
 
+        // HISTORY VIEWER (SENSOR OTP)
         db.ref('history').limitToLast(10).on('child_added', (snap) => {
             const data = snap.val();
             const feed = document.getElementById('feedList');
             const div = document.createElement('div');
             
-            const highlightedMsg = data.message.replace(data.code, `<span class="log-code-hl">${data.code}</span>`);
+            // LOGIC SENSOR: Ganti angka OTP asli dengan XXXXX
+            // Kita replace 'data.code' di dalam 'data.message' dengan 'XXXXX'
+            let censoredMsg = data.message.replace(data.code, '<span class="log-code-hl">XXXXX</span>');
+            
+            // Jaga-jaga kalau replacement gagal (misal admin ga kirim full msg)
+            if(!censoredMsg.includes('XXXXX')) censoredMsg += ' <span class="log-code-hl">XXXXX</span>';
 
             div.className = 'log-item';
             div.innerHTML = `
@@ -287,7 +291,7 @@
                     <span class="log-user">${data.name}</span>
                     <span>${data.country}</span>
                 </div>
-                <div class="log-msg">${highlightedMsg}</div>
+                <div class="log-msg">${censoredMsg}</div>
             `;
             feed.insertBefore(div, feed.firstChild);
         });
@@ -305,6 +309,12 @@
             findNumberBrute();
         }
 
+        function stopLoop() {
+            if(currentNum) db.ref('stock/' + currentNum).off();
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+        }
+
         function resetUIState() {
             isListening = false;
             document.getElementById('statusWait').classList.remove('hidden');
@@ -313,14 +323,15 @@
             document.getElementById('btnNext').style.display = 'none';
         }
 
-        function stopLoop() {
-            if(currentNum) db.ref('stock/' + currentNum).off();
-            document.getElementById('active').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
+        function copyNum() { copyText(document.getElementById('txtNum').innerText); }
+        function copyOTP() { copyText(document.getElementById('myOTP').innerText); }
+        
+        function copyText(val) {
+            navigator.clipboard.writeText(val).then(() => {
+                // Efek visual kecil kalau sukses copy
+                // console.log("Auto copied: " + val);
+            }).catch(err => {});
         }
-
-        function copyNum() { navigator.clipboard.writeText(document.getElementById('txtNum').innerText); }
-        function copyOTP() { navigator.clipboard.writeText(document.getElementById('myOTP').innerText); }
     </script>
 </body>
 </html>
