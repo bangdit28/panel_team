@@ -3,55 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PANEL OTP VIP</title>
+    <title>VIP OTP PANEL PRO</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .box { width: 90%; max-width: 400px; background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        h2 { color: #2979ff; margin: 0 0 20px 0; }
+        .box { width: 100%; max-width: 400px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; }
         
-        .number-area { font-size: 24px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #555; margin-bottom: 20px; cursor: pointer; }
-        .otp-area { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; }
-        .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; }
+        .display-num { font-size: 28px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #555; margin: 15px 0; cursor: pointer; color: #fff; }
+        .otp-box { font-size: 40px; font-weight: bold; color: #4ade80; margin-top: 10px; letter-spacing: 5px; animation: pulse 1s infinite; }
         
-        button { width: 100%; padding: 15px; background: #2979ff; color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        button:hover { background: #1c64f2; }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border:none; font-weight:bold; }
+        select { background: #334155; color: #fff; }
+        .btn-buy { background: #2979ff; color: #fff; cursor: pointer; }
+        .btn-cancel { background: #ef4444; color: #fff; cursor: pointer; }
         
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
         .hidden { display: none; }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ VIP OTP RECEIVER</h2>
+        <h2>⚡ VIP SENDER PRO</h2>
         
-        <!-- BAGIAN 1: TOMBOL BELI -->
-        <div id="section-buy">
-            <p>Klik untuk ambil nomor dari Admin</p>
-            <button onclick="getOrder()">🛒 AMBIL NOMOR LIVE</button>
+        <!-- MENU PILIH -->
+        <div id="menu">
+            <label>PILIH NEGARA</label>
+            <select id="countryPick">
+                <option value="ID">🇮🇩 INDONESIA</option>
+                <option value="US">🇺🇸 USA</option>
+                <option value="UK">🇬🇧 INGGRIS</option>
+                <option value="MY">🇲🇾 MALAYSIA</option>
+                <option value="OTHER">🌍 MIXED</option>
+            </select>
+            <button class="btn-buy" onclick="findNumber()">🛒 AMBIL NOMOR</button>
         </div>
 
-        <!-- BAGIAN 2: MONITORING -->
-        <div id="section-active" class="hidden">
-            <div style="font-size:12px; color:#aaa; margin-bottom:5px;">NOMOR AKTIF (KLIK SALIN)</div>
-            <div class="number-area" onclick="copyNum()">
-                <span id="txtNomor">Loading...</span>
+        <!-- MENU AKTIF -->
+        <div id="active" class="hidden">
+            <div style="font-size:11px; color:#aaa;">NOMOR ANDA</div>
+            <div class="display-num" id="myNum" onclick="copyNum()">...</div>
+            
+            <div style="border-top:1px solid #333; padding-top:10px;">
+                <div id="status" style="font-size:12px; color:yellow;">Menunggu SMS...</div>
+                <div id="myOTP" class="otp-box hidden">---</div>
             </div>
 
-            <div class="otp-area">
-                <div id="statusOTP" style="color:#aaa; font-size:12px;">Menunggu SMS masuk...</div>
-                <div id="txtOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
-            </div>
-            
-            <br>
-            <button style="background:#d32f2f" onclick="location.reload()">❌ RESET / GANTI</button>
+            <button class="btn-cancel" onclick="stopSession()">❌ SELESAI / GANTI</button>
         </div>
     </div>
 
     <script>
-        // --- PASTE CONFIG FIREBASE LO DISINI ---
+        // 🔥 PASTE CONFIG FIREBASE SAMA 🔥
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -61,53 +65,83 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
-        // ---------------------------------------
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        let currentNum = null;
 
-        function getOrder() {
-            // Ambil Data Nomor dari Firebase (Yang dikirim PC Admin)
-            db.ref('session').once('value', (snap) => {
+        function findNumber() {
+            const region = document.getElementById('countryPick').value;
+            const btn = document.querySelector('.btn-buy');
+            btn.innerHTML = "🔍 MENCARI STOK...";
+
+            // Query cari nomor yg AVAILABLE di negara tsb
+            // Ini query sederhana (client side filtering biar gampang)
+            db.ref('stock').once('value', snap => {
                 const data = snap.val();
-                if(data && data.number) {
-                    // Tampilkan UI Aktif
-                    document.getElementById('section-buy').classList.add('hidden');
-                    document.getElementById('section-active').classList.remove('hidden');
-                    document.getElementById('txtNomor').innerText = data.number;
+                let found = null;
+
+                if(data) {
+                    // Loop cari yg cocok
+                    const keys = Object.keys(data);
+                    for(let key of keys) {
+                        if(data[key].country === region && data[key].status === 'AVAILABLE') {
+                            found = data[key];
+                            break;
+                        }
+                    }
+                }
+
+                if(found) {
+                    // Booking nomor biar ga diambil orang lain
+                    currentNum = found.number;
+                    db.ref('stock/' + currentNum).update({ status: 'TAKEN' });
                     
-                    // Mulai Dengerin OTP
-                    listenOTP();
+                    showActive(found.number);
+                    listenOTP(found.number);
                 } else {
-                    alert("Admin belum buka nomor di PC!");
+                    alert("STOK HABIS UNTUK NEGARA INI! Minta admin upload.");
+                    btn.innerHTML = "🛒 AMBIL NOMOR";
                 }
             });
         }
 
-        function listenOTP() {
-            db.ref('session/otp').on('value', (snap) => {
+        function showActive(num) {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('active').classList.remove('hidden');
+            document.getElementById('myNum').innerText = num;
+        }
+
+        function listenOTP(num) {
+            // Dengerin perubahan khusus di nomor ini
+            db.ref('stock/' + num + '/otp').on('value', snap => {
                 const code = snap.val();
-                // Tampilkan kalau ada kode baru (bukan kosong/waiting)
-                if(code && code.length >= 5) {
-                    document.getElementById('statusOTP').innerText = "✅ OTP DITERIMA!";
-                    document.getElementById('txtOTP').innerText = code;
-                    document.getElementById('txtOTP').classList.remove('hidden');
-                    
-                    // Bunyi
+                if(code) {
+                    document.getElementById('status').innerText = "✅ OTP SUKSES!";
+                    const otpEl = document.getElementById('myOTP');
+                    otpEl.innerText = code;
+                    otpEl.classList.remove('hidden');
                     new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
+                    navigator.clipboard.writeText(code);
                 }
             });
+        }
+
+        function stopSession() {
+            if(confirm("Sudah selesai dengan nomor ini?")) {
+                // Tandai nomor sbg DONE (biar ga muncul lagi) atau AVAILABLE (kalau mau dipake ulang)
+                // Disini kita set DONE biar gak dipake double.
+                if(currentNum) {
+                    db.ref('stock/' + currentNum).update({ status: 'DONE' });
+                    db.ref('stock/' + currentNum + '/otp').off(); // Matikan listener
+                }
+                location.reload();
+            }
         }
 
         function copyNum() {
-            const t = document.getElementById('txtNomor').innerText;
-            navigator.clipboard.writeText(t);
-            alert("Nomor Disalin!");
-        }
-        function copyOTP() {
-            const t = document.getElementById('txtOTP').innerText;
-            navigator.clipboard.writeText(t);
-            alert("Kode Disalin!");
+            navigator.clipboard.writeText(document.getElementById('myNum').innerText);
+            alert("Nomor dicopy!");
         }
     </script>
 </body>
