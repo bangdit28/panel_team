@@ -15,7 +15,8 @@
         .news-text { display: inline-block; padding: 8px; font-size: 12px; font-weight: bold; color: #ffd700; font-family: monospace; animation: marquee 10s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        h2 { margin: 0; color: #f43f5e; } .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
+        h2 { margin: 0; color: #f43f5e; } 
+        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
 
         /* NOMOR & OTP */
         .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
@@ -32,13 +33,18 @@
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* HISTORY FEED (FITUR BALIK LAGI) */
+        /* HISTORY FEED (FIX DISPLAY) */
         .history-box { margin-top: 30px; width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 250px; overflow-y: auto; }
+        .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; }
+        .history-date { font-size: 10px; color: #666; font-family: monospace; }
+        
         .log-item { font-size: 11px; margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid #333; background: #111; animation: slideIn 0.3s; }
+        .log-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
         .log-user { color: #f43f5e; font-weight: bold; }
-        .log-time { color: #555; font-size: 9px; float: right; }
-        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; margin-top: 2px; }
-        .log-code-hl { color: #4ade80; font-weight: bold; }
+        .log-country { color: #aaa; font-weight: bold; } /* Nama negara jelas */
+        .log-time { color: #555; font-size: 9px; }
+        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; margin-top: 2px; line-height: 1.4; }
+        .log-code-hl { color: #4ade80; font-weight: bold; background: rgba(74, 222, 128, 0.1); padding: 0 2px; border-radius: 2px; }
 
         .hidden { display: none; }
         @keyframes pulse { 50% { opacity: 0.6; } }
@@ -59,7 +65,7 @@
 
         <div class="header">
             <h2>PANEL BARUDAK TASIK</h2>
-            <div class="sub" id="welcomeMsg">Full Feature Suite</div>
+            <div class="sub" id="welcomeMsg">Welcome</div>
         </div>
         
         <div id="menu">
@@ -87,14 +93,17 @@
 
     <!-- FEED HISTORY -->
     <div class="history-box">
-        <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
-            <span style="font-size:11px; color:#f43f5e; font-weight:bold;">🔴 LIVE HISTORY (<span id="dateDisplay">...</span>)</span>
+        <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px; display:flex; justify-content:space-between;">
+            <span class="history-title">🔴 LIVE HISTORY</span>
+            <span class="history-date" id="dateDisplay">...</span>
         </div>
         <div id="feedList"></div>
     </div>
 
     <script>
-        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
+        // ==========================================
+        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
+        // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -104,14 +113,15 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
+        // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
         let currentNum = null;
-        let selectedRegion = "";
+        let selectedRegionCode = ""; 
+        let selectedRegionName = ""; // INI VARIABLE BARU BUAT NAMA LENGKAP
         let userName = localStorage.getItem('vip_username') || "";
-        let currentCountryName = "Unknown";
         let isListening = false;
         let lastProcessedOTP = ""; 
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
@@ -120,7 +130,7 @@
         document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID');
         const todayString = today.toDateString();
 
-        // 1. LOAD NEGARA DINAMIS
+        // 1. LOAD NEGARA
         db.ref('settings/countries').on('value', snap => {
             const data = snap.val();
             const select = document.getElementById('countryPick');
@@ -128,13 +138,14 @@
             if(data) {
                 Object.keys(data).forEach(key => {
                     const opt = document.createElement('option');
-                    opt.value = key; opt.innerText = data[key];
+                    opt.value = key; // Kode (CI)
+                    opt.innerText = data[key]; // Nama Lengkap (IVORY COAST 🇨🇮)
                     select.appendChild(opt);
                 });
             } else select.innerHTML = "<option>Kosong</option>";
         });
 
-        // 2. NEWS TICKER
+        // 2. NEWS
         db.ref('system/notification').on('value', snap => {
             const msg = snap.val();
             const c = document.getElementById('newsContainer');
@@ -157,9 +168,12 @@
         }
 
         function startLoop() {
-            selectedRegion = document.getElementById('countryPick').value;
-            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
-            document.getElementById('countryBadge').innerText = regionName;
+            // SIMPAN KODE DAN NAMA LENGKAP NEGARA
+            const select = document.getElementById('countryPick');
+            selectedRegionCode = select.value; // ID / CI
+            selectedRegionName = select.options[select.selectedIndex].text; // INDONESIA 🇮🇩
+
+            document.getElementById('countryBadge').innerText = selectedRegionCode;
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
             findNumber();
@@ -173,7 +187,7 @@
                 let cands = [];
                 if(data) {
                     Object.keys(data).forEach(k => {
-                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) cands.push(k);
+                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegionCode) cands.push(k);
                     });
                 }
                 if(cands.length === 0) { alert("Stok Habis!"); stopLoop(); return; }
@@ -210,7 +224,9 @@
                     lastProcessedOTP = d.otp;
                     showOTP(d.otp);
                     db.ref('stock/'+num).update({ status: 'DONE' });
+                    
                     if(!d.otp_pushed) {
+                        // KIRIM NAMA NEGARA LENGKAP KE HISTORY
                         pushHistory(d.otp, d.full_msg || (d.otp + " adalah kode FB"));
                         db.ref('stock/'+num).update({ otp_pushed: true });
                     }
@@ -229,19 +245,40 @@
         }
 
         function pushHistory(c, m) {
-            db.ref('history').push({ name: userName, country: selectedRegion, code: c, msg: m, time: Date.now() });
+            db.ref('history').push({ 
+                name: userName, 
+                country: selectedRegionName, // PAKE NAMA LENGKAP + EMOJI
+                code: c, 
+                msg: m, 
+                time: Date.now() 
+            });
         }
 
         db.ref('history').limitToLast(30).on('child_added', snap => {
             const d = snap.val();
             if(new Date(d.time).toDateString() !== todayString) return;
             const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-            let cm = d.msg.replace(d.code, `<span class="log-code-hl">XXXXX</span>`);
-            if(!cm.includes('XXXXX')) cm += ' XXXXX';
+            
+            // FIX SENSOR: Replace ALL occurrences (Termasuk yang di belakang #)
+            let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
+            
+            // Jaga-jaga kalau format beda, paksa sensor manual
+            if(!cm.includes('XXXXX')) cm += ' <span class="log-code-hl">XXXXX</span>';
             
             const div = document.createElement('div');
             div.className = 'log-item';
-            div.innerHTML = `<div><span class="log-user">${d.name}</span> <span style="color:#aaa">(${d.country})</span> <span class="log-time">${tm}</span></div><span class="log-msg">${cm}</span>`;
+            
+            // Tampilan Negara pakai Nama Lengkap
+            div.innerHTML = `
+                <div class="log-top">
+                    <div>
+                        <span class="log-user">${d.name}</span> 
+                        <span class="log-country">(${d.country})</span>
+                    </div>
+                    <span class="log-time">${tm}</span>
+                </div>
+                <span class="log-msg">${cm}</span>
+            `;
             const feed = document.getElementById('feedList');
             feed.insertBefore(div, feed.firstChild);
         });
