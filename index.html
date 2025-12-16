@@ -2,118 +2,153 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BOT OTP TASIK</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        /* === RESET CSS (BIAR GAK OFFSIDE) === */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 15px; margin: 0; width: 100vw; min-height: 100vh; overflow-x: hidden;
+        }
         
-        /* LOGIN OVERLAY (FULL SCREEN) */
-        #loginOverlay {
+        /* CONTAINER UTAMA (PAS DI TENGAH) */
+        .box { 
+            width: 100%; max-width: 400px; background: #1e293b; 
+            padding: 20px; border-radius: 12px; border: 1px solid #334155; 
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+            position: relative; margin: 0 auto 20px auto;
+        }
+
+        /* LOGIN OVERLAY (FULLSCREEN FIX) */
+        #loginScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0f172a; z-index: 99999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px;
         }
-        .login-box { text-align: center; width: 80%; max-width: 300px; }
-        
-        /* MAIN CONTAINER */
-        .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; margin-bottom: 20px; }
+        .login-box { width: 100%; max-width: 300px; text-align: center; }
 
-        h2 { margin: 0; color: #f43f5e; letter-spacing: 1px; } 
-        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
+        /* HEADER */
+        h2 { margin: 0; color: #f43f5e; letter-spacing: 1px; font-size: 20px; } 
+        .sub { font-size: 10px; color: #666; margin-bottom: 15px; }
 
         /* NOTIFIKASI */
-        .news-container { width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; }
-        .news-text { display: inline-block; padding: 8px; font-size: 12px; font-weight: bold; color: #ffd700; font-family: monospace; animation: marquee 10s linear infinite; }
+        .news-container { 
+            width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; 
+            border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; 
+        }
+        .news-text { 
+            display: inline-block; padding: 8px; font-size: 11px; 
+            font-weight: bold; color: #ffd700; font-family: monospace; 
+            animation: marquee 10s linear infinite; 
+        }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        /* INPUT & BTN */
-        input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #f43f5e; color: #fff; border-radius: 6px; text-align: center; font-weight: bold; box-sizing: border-box; margin-bottom: 10px; }
-        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
+        /* INPUT & SELECT */
+        input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #f43f5e; color: #fff; border-radius: 6px; text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 13px; }
         
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
+        /* BUTTONS */
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
-        .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
+        .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; }
 
-        /* DISPLAY AREA */
-        .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
-        .country-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
+        /* NOMOR & OTP */
+        .display-num { 
+            font-size: 24px; font-family: monospace; background: #000; 
+            padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; 
+            margin: 10px 0; cursor: pointer; color: #fff; position: relative; word-break: break-all;
+        }
+        .country-tag { 
+            position: absolute; top: -9px; left: 50%; transform: translateX(-50%); 
+            background: #f43f5e; color: #fff; font-size: 8px; font-weight: bold; 
+            padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+        }
         
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
-        .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
-        .waiting { font-size: 12px; color: #fbbf24; }
+        .otp-code { font-size: 36px; font-weight: bold; color: #4ade80; letter-spacing: 3px; animation: pulse 1s infinite; cursor: pointer; }
+        .waiting { font-size: 11px; color: #fbbf24; }
 
-        /* HISTORY BOX (GLOBAL) */
-        .history-box { width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 250px; overflow-y: auto; margin-top: 0; }
-        .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        /* GLOBAL HISTORY BOX (FIXED WIDTH) */
+        .history-box { 
+            width: 100%; background: #080808; border: 1px solid #222; 
+            border-radius: 10px; padding: 10px; text-align: left; 
+            height: 250px; overflow-y: auto; margin-top: 10px;
+        }
+        .history-title { font-size: 10px; color: #f43f5e; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
         
-        .log-item { margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid #333; background: #111; animation: slideIn 0.3s; }
-        .log-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 11px; }
+        .log-item { margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 2px solid #333; background: #111; animation: slideIn 0.3s; }
+        .log-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
         .log-user { color: #f43f5e; font-weight: bold; }
-        .log-country { color: #aaa; font-weight: bold; font-size: 10px; margin-left: 5px; }
-        .log-time { color: #555; font-size: 10px; font-family: monospace; }
-        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; font-size: 11px; line-height: 1.3; }
-        .log-code-hl { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
+        .log-country { color: #aaa; font-size: 9px; margin-left: 5px; }
+        .log-time { color: #555; font-size: 9px; font-family: monospace; }
+        /* Fix text overflow */
+        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; font-size: 10px; line-height: 1.3; word-break: break-word; }
+        .log-code-hl { color: #4ade80; font-weight: bold; }
 
         /* PERSONAL HISTORY */
         .iva-history-container { width: 100%; margin-top: 20px; border-top: 1px dashed #334155; padding-top: 10px; }
-        .iva-title { font-size: 11px; color: #4ade80; font-weight: bold; margin-bottom: 10px; }
+        .iva-title { font-size: 10px; color: #4ade80; font-weight: bold; margin-bottom: 10px; text-align: left; }
         .iva-row { display: flex; background: #111; color: #ddd; border: 1px solid #333; border-radius: 6px; margin-bottom: 5px; align-items: center; font-size: 10px; }
         .iva-col-left { flex: 1.2; padding: 8px; border-right: 1px solid #333; }
-        .iva-country { font-weight: bold; font-size: 10px; color: #fff; }
-        .iva-number { font-size: 10px; color: #666; font-family: monospace; }
-        .iva-col-mid { flex: 0.7; padding: 5px; border-right: 1px solid #333; text-align: center; font-weight: bold; color: #38bdf8; }
-        .iva-col-right { flex: 2; padding: 8px; color: #aaa; font-size: 10px; line-height: 1.3; }
-        .iva-code-hl { font-weight: bold; font-size: 12px; color: #4ade80; }
+        .iva-country { font-weight: bold; font-size: 9px; color: #fff; }
+        .iva-number { font-size: 9px; color: #666; font-family: monospace; }
+        .iva-col-mid { flex: 0.7; padding: 5px; border-right: 1px solid #333; text-align: center; font-weight: bold; color: #38bdf8; font-size: 9px; }
+        .iva-col-right { flex: 2; padding: 8px; color: #aaa; font-size: 9px; line-height: 1.3; word-break: break-word; }
+        .iva-code-hl { font-weight: bold; color: #4ade80; }
         
-        /* Pagination */
         .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
-        .page-btn { background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; width: auto; margin: 0; }
+        .page-btn { background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; }
         .page-btn.active { background: #f43f5e; border-color: #f43f5e; }
 
         .hidden { display: none !important; }
-        .spacer { height: 20px; }
+        .spacer { height: 15px; }
+        
+        #toast-container { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 350px; }
+        .toast { background: rgba(0,0,0,0.95); border-left: 3px solid #f59e0b; color: #fff; padding: 10px; margin-bottom: 8px; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+
         @keyframes pulse { 50% { opacity: 0.6; } }
         @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 400px; }
-        .toast { background: rgba(0,0,0,0.95); border-left: 4px solid #f59e0b; color: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
     <div id="toast-container"></div>
 
-    <!-- LOGIN SCREEN (DEFAULT VISIBLE) -->
+    <!-- LOGIN -->
     <div id="loginOverlay">
         <div class="login-box">
-            <h2 style="margin-bottom:20px;">LOGIN</h2>
-            <input type="text" id="inputName" placeholder="Nama Kamu...">
+            <h2 style="margin-bottom:15px;">LOGIN TEAM</h2>
+            <input type="text" id="inputName" placeholder="Nama Panggilan...">
             <button class="btn-start" onclick="processLogin()">MASUK PANEL</button>
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN -->
     <div id="mainApp" class="hidden">
         <div class="box">
             <div id="newsContainer" class="news-container"><div id="newsText" class="news-text">...</div></div>
 
             <div class="header">
-                <h2>OTP BOT BARUDAK TASIK</h2>
-                <div class="sub" id="welcomeMsg">...</div>
+                <h2>BOT OTP BARUDAK TASIK</h2>
+                <div class="sub" id="welcomeMsg">welcome</div>
             </div>
             
-            <!-- MENU AWAL -->
+            <!-- MENU -->
             <div id="menu">
-                <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
+                <label style="font-size:10px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
                 <select id="countryPick"><option>Loading...</option></select>
                 <button class="btn-start" onclick="startLoop()">MULAI</button>
 
                 <div class="spacer"></div>
 
+                <!-- GLOBAL HISTORY -->
                 <div class="history-box">
                     <div class="history-title">
                         <span>🌏 GLOBAL FEED</span>
@@ -123,7 +158,7 @@
                 </div>
             </div>
 
-            <!-- LAYAR AKTIF -->
+            <!-- AKTIF -->
             <div id="active" class="hidden">
                 <div class="display-num" id="myNum" onclick="copyNum()">
                     <div id="countryBadge" class="country-tag">UNK</div>
@@ -136,7 +171,7 @@
                 </div>
 
                 <button id="btnBad" class="btn-bad" onclick="nextBad()">🔄 GANTI</button>
-                <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT NOMOR BARU</button>
+                <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT BARU</button>
                 <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
 
                 <!-- PERSONAL HISTORY -->
@@ -151,7 +186,7 @@
 
     <script>
         // ==========================================
-        // 🔥 PASTE CONFIG FIREBASE LO DISINI 🔥
+        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
         // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
@@ -178,7 +213,7 @@
         const todayString = new Date().toDateString();
 
         let myHistoryData = [];
-        const itemsPerPage = 5; // Tampil 5 history per halaman biar ga panjang
+        const itemsPerPage = 5;
         let currentPage = 1;
         let bgListeners = [];
 
@@ -186,21 +221,16 @@
         const today = new Date();
         document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID');
 
-        // --- 1. SYSTEM LOGIN & RESTORE (FIXED) ---
+        // CHECK LOGIN
         function checkSession() {
             if(userName) {
-                // User sudah login sebelumnya
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainApp').classList.remove('hidden');
                 document.getElementById('welcomeMsg').innerText = "Op: " + userName;
                 
-                // Cek apakah ada nomor nyangkut
                 const savedNum = localStorage.getItem('active_num');
-                if(savedNum) {
-                    restoreActiveSession(savedNum);
-                }
+                if(savedNum) restoreActiveSession(savedNum);
             } else {
-                // Belum login
                 document.getElementById('loginOverlay').style.display = 'flex';
                 document.getElementById('mainApp').classList.add('hidden');
             }
@@ -209,12 +239,9 @@
         function processLogin() {
             const name = document.getElementById('inputName').value.trim();
             if(name) {
-                userName = name;
-                localStorage.setItem('vip_username', name);
+                userName = name; localStorage.setItem('vip_username', name);
                 checkSession();
-            } else {
-                alert("Wajib isi nama!");
-            }
+            } else alert("Isi nama!");
         }
 
         function restoreActiveSession(num) {
@@ -226,14 +253,12 @@
             document.getElementById('active').classList.remove('hidden');
             document.getElementById('txtNum').innerText = currentNum;
             document.getElementById('countryBadge').innerText = selectedRegionName;
-            
             listenOTP(currentNum);
         }
 
-        // Jalankan Cek Sesi saat Load
         checkSession();
 
-        // --- 2. DATA LOADERS ---
+        // LOADERS
         db.ref('settings/countries').on('value', snap => {
             const data = snap.val();
             const select = document.getElementById('countryPick');
@@ -254,7 +279,6 @@
             else c.style.display = 'none';
         });
 
-        // --- 3. CORE LOGIC ---
         function startLoop() {
             const select = document.getElementById('countryPick');
             if(select.value === 'Kosong') return alert("Admin belum set negara!");
@@ -262,10 +286,8 @@
             selectedRegionCode = select.value;
             selectedRegionName = select.options[select.selectedIndex].text;
             document.getElementById('countryBadge').innerText = selectedRegionName;
-
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            
             findNumber();
         }
 
@@ -311,7 +333,7 @@
             });
         }
 
-        function listenOTP(num) {
+        function listen(num) {
             isListening = true; lastProcessedOTP = "";
             db.ref('stock/'+num).on('value', snap => {
                 const d = snap.val();
@@ -328,19 +350,9 @@
             });
         }
 
-        function showOTP(c) {
-            document.getElementById('statusWait').classList.add('hidden');
-            const el = document.getElementById('myOTP');
-            el.innerText = c; el.classList.remove('hidden');
-            new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-            copyText(c);
-            document.getElementById('btnBad').style.display = 'none';
-            document.getElementById('btnNext').style.display = 'block';
-        }
-
         function moveToBackground(num) {
             const bgRef = db.ref('stock/' + num);
-            const listener = bgRef.on('value', snap => {
+            bgRef.on('value', snap => {
                 const d = snap.val();
                 if(d && d.otp && !d.otp_pushed) {
                     const msgContent = d.full_msg || (d.otp + " adalah kode FB (DELAY)");
@@ -351,7 +363,6 @@
                     bgRef.off();
                 }
             });
-            bgListeners.push({ num: num, ref: bgRef });
             setTimeout(() => bgRef.off(), 600000); 
         }
 
@@ -364,11 +375,20 @@
             setTimeout(() => div.remove(), 8000);
         }
 
+        function showOTP(c) {
+            document.getElementById('statusWait').classList.add('hidden');
+            const el = document.getElementById('myOTP');
+            el.innerText = c; el.classList.remove('hidden');
+            new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
+            copyText(c);
+            document.getElementById('btnBad').style.display = 'none';
+            document.getElementById('btnNext').style.display = 'block';
+        }
+
         function pushHistory(c, m, num) {
             db.ref('history').push({ name: userName, country: selectedRegionName, code: c, msg: m, number: num, time: Date.now() });
         }
 
-        // HISTORY HANDLER
         db.ref('history').limitToLast(30).on('child_added', snap => {
             const d = snap.val();
             if(new Date(d.time).toDateString() !== todayString) return;
@@ -376,7 +396,6 @@
             let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
             if(!cm.includes('XXXXX')) cm += ' <span class="log-code-hl">XXXXX</span>';
 
-            // GLOBAL FEED
             const divG = document.createElement('div');
             divG.className = 'log-item';
             divG.innerHTML = `
@@ -386,10 +405,8 @@
                 </div>
                 <span class="log-msg">${cm}</span>
             `;
-            const gFeed = document.getElementById('feedListGlobal');
-            gFeed.insertBefore(divG, gFeed.firstChild);
+            document.getElementById('feedListGlobal').prepend(divG);
 
-            // PERSONAL FEED
             if(d.name === userName) {
                 myHistoryData.unshift({ country: d.country, number: d.number, msg: d.msg, code: d.code, time: tm });
                 renderPersonalHistory();
@@ -431,10 +448,10 @@
             }
         }
 
-        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum+'/otp').off(); moveToBackground(currentNum); } findNumber(); }
-        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); findNumber(); }
+        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum).off(); moveToBackground(currentNum); } findNumber(); }
+        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum).off(); findNumber(); }
         function stopLoop() { 
-            if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); 
+            if(currentNum) db.ref('stock/'+currentNum).off(); 
             localStorage.removeItem('active_num');
             document.getElementById('active').classList.add('hidden'); 
             document.getElementById('menu').classList.remove('hidden'); 
