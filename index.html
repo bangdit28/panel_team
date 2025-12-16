@@ -3,53 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOT OTP TASIK</title>
+    <title>OTP BOT TASIK</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        
+        /* CONTAINER UTAMA */
         .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; margin-bottom: 20px; }
         
-        /* TOAST NOTIFICATION (POPUP OTP TELAT) */
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 400px; }
-        .toast { 
-            background: rgba(0, 0, 0, 0.9); border-left: 4px solid #f59e0b; 
-            color: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; 
-            display: flex; justify-content: space-between; align-items: center;
-            animation: slideDown 0.3s ease-out;
-        }
-        .toast-code { font-weight: bold; color: #4ade80; font-size: 14px; margin-left: 5px; cursor: pointer; }
-        
-        /* NEWS TICKER */
+        /* HEADER & SUB */
+        h2 { margin: 0; color: #f43f5e; letter-spacing: 1px; } 
+        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
+
+        /* NOTIFIKASI ATAS */
         .news-container { width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; }
         .news-text { display: inline-block; padding: 8px; font-size: 12px; font-weight: bold; color: #ffd700; font-family: monospace; animation: marquee 10s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        h2 { margin: 0; color: #f43f5e; } 
-        .sub { font-size: 10px; color: #666; margin-bottom: 20px; }
-
-        /* NOMOR & OTP */
+        /* DISPLAY NOMOR & OTP */
         .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
         .country-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
 
-        /* BUTTONS */
+        /* TOMBOL */
         select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; }
         button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-start { background: #f43f5e; color: #fff; }
+        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* HISTORY FEED */
-        .history-box { width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 150px; overflow-y: auto; margin-bottom: 20px; }
-        .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        .log-item-global { font-size: 10px; color: #888; border-bottom: 1px solid #222; padding: 4px 0; }
+        /* --- GLOBAL HISTORY FEED (FIX DESIGN) --- */
+        .history-box { 
+            width: 100%; max-width: 420px; 
+            background: #080808; border: 1px solid #222; border-radius: 10px; 
+            padding: 10px; text-align: left; height: 250px; overflow-y: auto;
+            margin-top: 0; /* Reset margin */
+        }
+        .history-title { 
+            font-size: 11px; color: #f43f5e; font-weight: bold; 
+            border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; 
+            display: flex; justify-content: space-between; 
+        }
         
-        /* PERSONAL HISTORY */
+        /* ITEM LOG GLOBAL */
+        .log-item { 
+            margin-bottom: 8px; padding: 8px; border-radius: 6px; 
+            border-left: 3px solid #333; background: #111; 
+            animation: slideIn 0.3s; 
+        }
+        
+        /* Baris 1: Nama (Negara) ... Jam */
+        .log-top { 
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 4px; font-size: 11px;
+        }
+        .log-user-group { display: flex; align-items: center; gap: 5px; }
+        .log-user { color: #f43f5e; font-weight: bold; }
+        .log-country { color: #aaa; font-weight: bold; font-size: 10px; }
+        .log-time { color: #555; font-size: 10px; font-family: monospace; }
+        
+        /* Baris 2: Pesan */
+        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; font-size: 11px; line-height: 1.3; }
+        .log-code-hl { color: #4ade80; font-weight: bold; letter-spacing: 1px; } /* HIJAU TERANG */
+
+        /* PERSONAL HISTORY (SAMA TAPI DI PAGE AKTIF) */
         .iva-history-container { width: 100%; margin-top: 20px; border-top: 1px dashed #334155; padding-top: 10px; }
         .iva-title { font-size: 11px; color: #4ade80; font-weight: bold; margin-bottom: 10px; }
         .iva-row { display: flex; background: #111; color: #ddd; border: 1px solid #333; border-radius: 6px; margin-bottom: 5px; align-items: center; font-size: 10px; }
@@ -58,15 +79,20 @@
         .iva-number { font-size: 10px; color: #666; font-family: monospace; }
         .iva-col-mid { flex: 0.7; padding: 5px; border-right: 1px solid #333; text-align: center; font-weight: bold; color: #38bdf8; }
         .iva-col-right { flex: 2; padding: 8px; color: #aaa; font-size: 10px; line-height: 1.3; }
-        .iva-code-hl { font-weight: bold; font-size: 12px; color: #4ade80; }
         .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
         .page-btn { background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; width: auto; margin: 0; }
         .page-btn.active { background: #f43f5e; border-color: #f43f5e; }
 
         .hidden { display: none; }
+        /* UTILS */
+        .spacer { height: 20px; } /* Pemisah */
+        
         @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 50% { opacity: 0.6; } }
         @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 400px; }
+        .toast { background: rgba(0,0,0,0.95); border-left: 4px solid #f59e0b; color: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; display: flex; justify-content: space-between; align-items: center; animation: slideDown 0.3s ease-out; }
     </style>
 </head>
 <body>
@@ -76,6 +102,7 @@
     <div class="box">
         <div id="newsContainer" class="news-container"><div id="newsText" class="news-text">...</div></div>
 
+        <!-- LOGIN -->
         <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
             <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
@@ -83,15 +110,20 @@
         </div>
 
         <div class="header">
-            <h2>BOT OTP BARUDAK TASIK</h2>
-            <div class="sub" id="welcomeMsg">welcome</div>
+            <h2>OTP BOT BARUDAK TASIK</h2>
+            <div class="sub" id="welcomeMsg">Welcome</div>
         </div>
         
+        <!-- MENU AWAL (ADA GLOBAL HISTORY) -->
         <div id="menu">
-            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA STOK</label>
+            <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
             <select id="countryPick"><option>Loading...</option></select>
             <button class="btn-start" onclick="startLoop()">MULAI</button>
 
+            <!-- Spacer biar ga nempel -->
+            <div class="spacer"></div>
+
+            <!-- GLOBAL HISTORY -->
             <div class="history-box">
                 <div class="history-title">
                     <span>🌏 GLOBAL FEED</span>
@@ -101,6 +133,7 @@
             </div>
         </div>
 
+        <!-- LAYAR AKTIF (ADA PERSONAL HISTORY) -->
         <div id="active" class="hidden">
             <div class="display-num" id="myNum" onclick="copyNum()">
                 <div id="countryBadge" class="country-tag">UNK</div>
@@ -137,6 +170,7 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
+        };
         // ==========================================
 
         firebase.initializeApp(firebaseConfig);
@@ -151,20 +185,15 @@
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
         const todayString = new Date().toDateString();
 
-        // --- PAGINATION VARS ---
         let myHistoryData = [];
         const itemsPerPage = 10;
         let currentPage = 1;
-
-        // --- BACKGROUND LISTENER (ARRAY) ---
-        // Menyimpan nomor yg sudah di-skip tapi masih dipantau
         let bgListeners = [];
 
-        // INIT
+        // INIT DATE
         const today = new Date();
         document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID');
 
-        // RESTORE SESSION
         if(userName) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('welcomeMsg').innerText = "Op: " + userName;
@@ -266,8 +295,7 @@
             });
         }
 
-        // --- LISTENER UTAMA ---
-        function listenOTP(num) {
+        function listen(num) {
             isListening = true; lastProcessedOTP = "";
             db.ref('stock/'+num).on('value', snap => {
                 const d = snap.val();
@@ -284,56 +312,29 @@
             });
         }
 
-        // --- BACKGROUND LISTENER (DELAY CATCHER) ---
         function moveToBackground(num) {
-            // Matikan listener utama di variabel global
-            // Tapi kita buat listener baru yang terisolasi
             const bgRef = db.ref('stock/' + num);
-            
             const listener = bgRef.on('value', snap => {
                 const d = snap.val();
-                // Kalau ada OTP masuk DAN belum dipush history
                 if(d && d.otp && !d.otp_pushed) {
-                    // 1. Push History
                     const msgContent = d.full_msg || (d.otp + " adalah kode FB (DELAY)");
                     pushHistory(d.otp, msgContent, num);
-                    
-                    // 2. Tandai DONE & Pushed
                     bgRef.update({ status: 'DONE', otp_pushed: true });
-                    
-                    // 3. Notifikasi Toast
                     showToast(num, d.otp);
-                    
-                    // 4. Bunyi Beda (Double Beep)
                     new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play();
-                    
-                    // 5. Matikan listener ini
                     bgRef.off();
                 }
             });
-            
-            // Simpan referensi biar bisa dimatiin nanti kalau kebanyakan
             bgListeners.push({ num: num, ref: bgRef });
-            
-            // Otomatis mati setelah 10 menit (biar ga berat)
-            setTimeout(() => {
-                bgRef.off();
-            }, 600000); 
+            setTimeout(() => bgRef.off(), 600000); 
         }
 
         function showToast(num, code) {
             const container = document.getElementById('toast-container');
             const div = document.createElement('div');
             div.className = 'toast';
-            div.innerHTML = `
-                <div>
-                    <div>🔔 OTP TELAT MASUK!</div>
-                    <div style="font-size:10px; color:#aaa;">${num}</div>
-                </div>
-                <div class="toast-code" onclick="copyText('${code}')">${code}</div>
-            `;
+            div.innerHTML = `<div><div>🔔 OTP TELAT MASUK!</div><div style="font-size:10px; color:#aaa;">${num}</div></div><div class="toast-code" onclick="copyText('${code}')">${code}</div>`;
             container.appendChild(div);
-            // Auto hide 5 detik
             setTimeout(() => div.remove(), 8000);
         }
 
@@ -348,27 +349,35 @@
         }
 
         function pushHistory(c, m, num) {
-            db.ref('history').push({ 
-                name: userName, country: selectedRegionName, code: c, msg: m, number: num, time: Date.now() 
-            });
+            db.ref('history').push({ name: userName, country: selectedRegionName, code: c, msg: m, number: num, time: Date.now() });
         }
 
-        // HISTORY HANDLER
-        db.ref('history').limitToLast(50).on('child_added', snap => {
+        // --- GLOBAL HISTORY (FIX LAYOUT) ---
+        db.ref('history').limitToLast(30).on('child_added', snap => {
             const d = snap.val();
             if(new Date(d.time).toDateString() !== todayString) return;
             const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+            
+            // SENSOR OTP (Ganti jadi XXXXX warna hijau)
             let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
             if(!cm.includes('XXXXX')) cm += ' <span class="log-code-hl">XXXXX</span>';
 
-            // GLOBAL
-            const divG = document.createElement('div');
-            divG.className = 'log-item-global';
-            divG.innerHTML = `<span style="color:#f43f5e;font-weight:bold;">${d.name}</span> [${d.country}] ${tm}: ${cm}`;
-            const gFeed = document.getElementById('feedListGlobal');
-            gFeed.insertBefore(divG, gFeed.firstChild);
+            const feed = document.getElementById('feedListGlobal');
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerHTML = `
+                <div class="log-top">
+                    <div class="log-user-group">
+                        <span class="log-user">${d.name}</span>
+                        <span class="log-country">(${d.country})</span>
+                    </div>
+                    <span class="log-time">${tm}</span>
+                </div>
+                <span class="log-msg">${cm}</span>
+            `;
+            feed.insertBefore(div, feed.firstChild);
 
-            // PERSONAL
+            // PERSONAL HISTORY
             if(d.name === userName) {
                 myHistoryData.unshift({ country: d.country, number: d.number, msg: d.msg, code: d.code, time: tm });
                 renderPersonalHistory();
@@ -410,24 +419,10 @@
             }
         }
 
-        function nextBad() { 
-            if(currentNum) { 
-                db.ref('stock/'+currentNum).update({status:'BAD'}); // Tetap tandai BAD biar gak diambil orang lain
-                db.ref('stock/'+currentNum+'/otp').off(); // Matikan listener utama
-                
-                // PINDAHKAN KE BACKGROUND LISTENER (DELAY CATCHER)
-                moveToBackground(currentNum);
-            } 
-            findNumber(); 
-        }
-
-        function nextSuccess() { 
-            if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); 
-            findNumber(); 
-        }
-
+        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum).off(); moveToBackground(currentNum); } findNumber(); }
+        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum).off(); findNumber(); }
         function stopLoop() { 
-            if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); 
+            if(currentNum) db.ref('stock/'+currentNum).off(); 
             localStorage.removeItem('active_num');
             document.getElementById('active').classList.add('hidden'); 
             document.getElementById('menu').classList.remove('hidden'); 
