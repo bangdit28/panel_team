@@ -10,6 +10,17 @@
         body { background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
         .box { width: 100%; max-width: 420px; background: #1e293b; padding: 25px; border-radius: 15px; border: 1px solid #334155; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; margin-bottom: 20px; }
         
+        /* TOAST NOTIFICATION (POPUP OTP TELAT) */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 400px; }
+        .toast { 
+            background: rgba(0, 0, 0, 0.9); border-left: 4px solid #f59e0b; 
+            color: #fff; padding: 12px; margin-bottom: 10px; border-radius: 4px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 12px; 
+            display: flex; justify-content: space-between; align-items: center;
+            animation: slideDown 0.3s ease-out;
+        }
+        .toast-code { font-weight: bold; color: #4ade80; font-size: 14px; margin-left: 5px; cursor: pointer; }
+        
         /* NEWS TICKER */
         .news-container { width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; }
         .news-text { display: inline-block; padding: 8px; font-size: 12px; font-weight: bold; color: #ffd700; font-family: monospace; animation: marquee 10s linear infinite; }
@@ -21,7 +32,6 @@
         /* NOMOR & OTP */
         .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; margin: 10px 0; cursor: pointer; color: #fff; position: relative; }
         .country-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f43f5e; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
-        
         .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
         .otp-code { font-size: 40px; font-weight: bold; color: #4ade80; letter-spacing: 5px; animation: pulse 1s infinite; cursor: pointer; }
         .waiting { font-size: 12px; color: #fbbf24; }
@@ -34,49 +44,38 @@
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 15px; margin-top: 20px; font-size: 10px; }
 
-        /* --- GLOBAL HISTORY --- */
-        .history-box { width: 100%; max-width: 450px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 150px; overflow-y: auto; margin-bottom: 20px; }
+        /* HISTORY FEED */
+        .history-box { width: 100%; max-width: 420px; background: #080808; border: 1px solid #222; border-radius: 10px; padding: 10px; text-align: left; height: 150px; overflow-y: auto; margin-bottom: 20px; }
         .history-title { font-size: 11px; color: #f43f5e; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 5px; display: flex; justify-content: space-between; }
         .log-item-global { font-size: 10px; color: #888; border-bottom: 1px solid #222; padding: 4px 0; }
         
-        /* --- PERSONAL HISTORY (DARK THEME) --- */
+        /* PERSONAL HISTORY */
         .iva-history-container { width: 100%; margin-top: 20px; border-top: 1px dashed #334155; padding-top: 10px; }
         .iva-title { font-size: 11px; color: #4ade80; font-weight: bold; margin-bottom: 10px; }
-        
-        .iva-row { 
-            display: flex; background: #111; color: #ddd; 
-            border: 1px solid #333; border-radius: 6px;
-            margin-bottom: 5px; align-items: center; font-size: 10px;
-        }
-        
+        .iva-row { display: flex; background: #111; color: #ddd; border: 1px solid #333; border-radius: 6px; margin-bottom: 5px; align-items: center; font-size: 10px; }
         .iva-col-left { flex: 1.2; padding: 8px; border-right: 1px solid #333; }
         .iva-country { font-weight: bold; font-size: 10px; color: #fff; }
         .iva-number { font-size: 10px; color: #666; font-family: monospace; }
-
         .iva-col-mid { flex: 0.7; padding: 5px; border-right: 1px solid #333; text-align: center; font-weight: bold; color: #38bdf8; }
-
         .iva-col-right { flex: 2; padding: 8px; color: #aaa; font-size: 10px; line-height: 1.3; }
         .iva-code-hl { font-weight: bold; font-size: 12px; color: #4ade80; }
-
-        /* PAGINATION */
         .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
-        .page-btn { 
-            background: #222; color: #fff; border: 1px solid #444; 
-            padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; width: auto; margin: 0;
-        }
+        .page-btn { background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; width: auto; margin: 0; }
         .page-btn.active { background: #f43f5e; border-color: #f43f5e; }
 
         .hidden { display: none; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes pulse { 50% { opacity: 0.6; } }
         @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <div class="box">
         <div id="newsContainer" class="news-container"><div id="newsText" class="news-text">...</div></div>
 
-        <!-- LOGIN -->
         <div id="loginScreen" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index:10; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <h3 style="color:#f43f5e; margin-bottom:10px;">NAMA TEAM:</h3>
             <input type="text" id="inputName" style="padding:10px; border-radius:5px; border:1px solid #f43f5e; background:#222; color:#fff; text-align:center;" placeholder="Isi nama...">
@@ -85,16 +84,14 @@
 
         <div class="header">
             <h2>BOT OTP BARUDAK TASIK</h2>
-            <div class="sub" id="welcomeMsg">Welcome</div>
+            <div class="sub" id="welcomeMsg">welcome</div>
         </div>
         
-        <!-- MENU AWAL -->
         <div id="menu">
             <label style="font-size:11px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA STOK</label>
             <select id="countryPick"><option>Loading...</option></select>
             <button class="btn-start" onclick="startLoop()">MULAI</button>
 
-            <!-- GLOBAL HISTORY -->
             <div class="history-box">
                 <div class="history-title">
                     <span>🌏 GLOBAL FEED</span>
@@ -104,7 +101,6 @@
             </div>
         </div>
 
-        <!-- LAYAR AKTIF -->
         <div id="active" class="hidden">
             <div class="display-num" id="myNum" onclick="copyNum()">
                 <div id="countryBadge" class="country-tag">UNK</div>
@@ -116,16 +112,13 @@
                 <div id="myOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
             </div>
 
-            <button id="btnBad" class="btn-bad" onclick="nextBad()">❌ GAK MASUK? GANTI</button>
+            <button id="btnBad" class="btn-bad" onclick="nextBad()">🔄 GANTI</button>
             <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT NOMOR BARU</button>
             <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
 
-            <!-- PERSONAL HISTORY (PAGINATION) -->
             <div class="iva-history-container">
-                <div class="iva-title">👤 RIWAYAT PRIBADI (AUTO SAVE)</div>
+                <div class="iva-title">👤 RIWAYAT SAYA</div>
                 <div id="personalFeed"></div>
-                
-                <!-- TOMBOL HALAMAN 1 2 3 -->
                 <div id="paginationControl" class="pagination"></div>
             </div>
         </div>
@@ -158,10 +151,14 @@
         const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
         const todayString = new Date().toDateString();
 
-        // --- VAR PAGINATION ---
-        let myHistoryData = []; // Menyimpan data history lokal
-        const itemsPerPage = 10; // Max item per halaman
+        // --- PAGINATION VARS ---
+        let myHistoryData = [];
+        const itemsPerPage = 10;
         let currentPage = 1;
+
+        // --- BACKGROUND LISTENER (ARRAY) ---
+        // Menyimpan nomor yg sudah di-skip tapi masih dipantau
+        let bgListeners = [];
 
         // INIT
         const today = new Date();
@@ -188,7 +185,6 @@
             }
         };
 
-        // LOAD DATA
         db.ref('settings/countries').on('value', snap => {
             const data = snap.val();
             const select = document.getElementById('countryPick');
@@ -209,87 +205,6 @@
             else c.style.display = 'none';
         });
 
-        // --- HISTORY HANDLER ---
-        db.ref('history').limitToLast(100).on('child_added', snap => {
-            const d = snap.val();
-            // Filter Harian
-            if(new Date(d.time).toDateString() !== todayString) return;
-
-            const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-            let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
-            if(!cm.includes('XXXXX')) cm += ' XXXXX';
-
-            // 1. GLOBAL HISTORY
-            const divG = document.createElement('div');
-            divG.className = 'log-item-global';
-            divG.innerHTML = `<span style="color:#f43f5e;font-weight:bold;">${d.name}</span> [${d.country}] ${tm}: ${cm}`;
-            const gFeed = document.getElementById('feedListGlobal');
-            gFeed.insertBefore(divG, gFeed.firstChild);
-
-            // 2. PERSONAL HISTORY (ARRAY + RENDER)
-            if(d.name === userName) {
-                // Tambahkan ke array lokal (di paling depan)
-                myHistoryData.unshift({
-                    country: d.country,
-                    number: d.number || "Hidden",
-                    msg: d.msg,
-                    code: d.code
-                });
-                renderPersonalHistory(); // Render ulang halaman
-            }
-        });
-
-        // --- PAGINATION RENDERER ---
-        function renderPersonalHistory() {
-            const feed = document.getElementById('personalFeed');
-            feed.innerHTML = ""; // Bersihkan dulu
-
-            // Hitung start & end
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = myHistoryData.slice(start, end);
-
-            pageData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'iva-row';
-                
-                // Highlight Code Asli (Bukan XXXXX)
-                const realMsg = item.msg.replace(item.code, `<span class="iva-code-hl">${item.code}</span>`);
-
-                div.innerHTML = `
-                    <div class="iva-col-left">
-                        <div class="iva-country">${item.country}</div>
-                        <div class="iva-number">${item.number}</div>
-                    </div>
-                    <div class="iva-col-mid">Facebook</div>
-                    <div class="iva-col-right">${realMsg}</div>
-                `;
-                feed.appendChild(div);
-            });
-
-            renderPaginationControls();
-        }
-
-        function renderPaginationControls() {
-            const container = document.getElementById('paginationControl');
-            container.innerHTML = "";
-            const totalPages = Math.ceil(myHistoryData.length / itemsPerPage);
-
-            if (totalPages <= 1) return;
-
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('button');
-                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-                btn.innerText = i;
-                btn.onclick = () => {
-                    currentPage = i;
-                    renderPersonalHistory();
-                };
-                container.appendChild(btn);
-            }
-        }
-
-        // --- CORE FUNCTIONS ---
         function loginUser() {
             const name = document.getElementById('inputName').value.trim();
             if(name) {
@@ -343,7 +258,7 @@
                                 localStorage.setItem('active_region_code', selectedRegionCode);
                                 localStorage.setItem('active_region_name', selectedRegionName);
                                 copyText(num);
-                                listen(num);
+                                listenOTP(currentNum);
                             } else tryGrab(list, index+1);
                         });
                     }, 300);
@@ -351,7 +266,8 @@
             });
         }
 
-        function listen(num) {
+        // --- LISTENER UTAMA ---
+        function listenOTP(num) {
             isListening = true; lastProcessedOTP = "";
             db.ref('stock/'+num).on('value', snap => {
                 const d = snap.val();
@@ -360,11 +276,65 @@
                     showOTP(d.otp);
                     db.ref('stock/'+num).update({ status: 'DONE' });
                     if(!d.otp_pushed) {
-                        pushHistory(d.otp, d.full_msg || (d.otp + " adalah kode FB"), num);
+                        const msgContent = d.full_msg || (d.otp + " adalah kode FB");
+                        pushHistory(d.otp, msgContent, num);
                         db.ref('stock/'+num).update({ otp_pushed: true });
                     }
                 }
             });
+        }
+
+        // --- BACKGROUND LISTENER (DELAY CATCHER) ---
+        function moveToBackground(num) {
+            // Matikan listener utama di variabel global
+            // Tapi kita buat listener baru yang terisolasi
+            const bgRef = db.ref('stock/' + num);
+            
+            const listener = bgRef.on('value', snap => {
+                const d = snap.val();
+                // Kalau ada OTP masuk DAN belum dipush history
+                if(d && d.otp && !d.otp_pushed) {
+                    // 1. Push History
+                    const msgContent = d.full_msg || (d.otp + " adalah kode FB (DELAY)");
+                    pushHistory(d.otp, msgContent, num);
+                    
+                    // 2. Tandai DONE & Pushed
+                    bgRef.update({ status: 'DONE', otp_pushed: true });
+                    
+                    // 3. Notifikasi Toast
+                    showToast(num, d.otp);
+                    
+                    // 4. Bunyi Beda (Double Beep)
+                    new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play();
+                    
+                    // 5. Matikan listener ini
+                    bgRef.off();
+                }
+            });
+            
+            // Simpan referensi biar bisa dimatiin nanti kalau kebanyakan
+            bgListeners.push({ num: num, ref: bgRef });
+            
+            // Otomatis mati setelah 10 menit (biar ga berat)
+            setTimeout(() => {
+                bgRef.off();
+            }, 600000); 
+        }
+
+        function showToast(num, code) {
+            const container = document.getElementById('toast-container');
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerHTML = `
+                <div>
+                    <div>🔔 OTP TELAT MASUK!</div>
+                    <div style="font-size:10px; color:#aaa;">${num}</div>
+                </div>
+                <div class="toast-code" onclick="copyText('${code}')">${code}</div>
+            `;
+            container.appendChild(div);
+            // Auto hide 5 detik
+            setTimeout(() => div.remove(), 8000);
         }
 
         function showOTP(c) {
@@ -383,10 +353,81 @@
             });
         }
 
-        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum).off(); } findNumber(); }
-        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum).off(); findNumber(); }
+        // HISTORY HANDLER
+        db.ref('history').limitToLast(50).on('child_added', snap => {
+            const d = snap.val();
+            if(new Date(d.time).toDateString() !== todayString) return;
+            const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+            let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
+            if(!cm.includes('XXXXX')) cm += ' <span class="log-code-hl">XXXXX</span>';
+
+            // GLOBAL
+            const divG = document.createElement('div');
+            divG.className = 'log-item-global';
+            divG.innerHTML = `<span style="color:#f43f5e;font-weight:bold;">${d.name}</span> [${d.country}] ${tm}: ${cm}`;
+            const gFeed = document.getElementById('feedListGlobal');
+            gFeed.insertBefore(divG, gFeed.firstChild);
+
+            // PERSONAL
+            if(d.name === userName) {
+                myHistoryData.unshift({ country: d.country, number: d.number, msg: d.msg, code: d.code, time: tm });
+                renderPersonalHistory();
+            }
+        });
+
+        function renderPersonalHistory() {
+            const feed = document.getElementById('personalFeed');
+            feed.innerHTML = ""; 
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = myHistoryData.slice(start, end);
+
+            pageData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'iva-row';
+                const realMsg = item.msg.replace(item.code, `<span class="iva-code-hl">${item.code}</span>`);
+                div.innerHTML = `
+                    <div class="iva-col-left"><div class="iva-country">${item.country}</div><div class="iva-number">${item.number}</div></div>
+                    <div class="iva-col-mid">Facebook</div>
+                    <div class="iva-col-right">${realMsg}</div>
+                `;
+                feed.appendChild(div);
+            });
+            renderPaginationControls();
+        }
+
+        function renderPaginationControls() {
+            const container = document.getElementById('paginationControl');
+            container.innerHTML = "";
+            const totalPages = Math.ceil(myHistoryData.length / itemsPerPage);
+            if (totalPages <= 1) return;
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => { currentPage = i; renderPersonalHistory(); };
+                container.appendChild(btn);
+            }
+        }
+
+        function nextBad() { 
+            if(currentNum) { 
+                db.ref('stock/'+currentNum).update({status:'BAD'}); // Tetap tandai BAD biar gak diambil orang lain
+                db.ref('stock/'+currentNum+'/otp').off(); // Matikan listener utama
+                
+                // PINDAHKAN KE BACKGROUND LISTENER (DELAY CATCHER)
+                moveToBackground(currentNum);
+            } 
+            findNumber(); 
+        }
+
+        function nextSuccess() { 
+            if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); 
+            findNumber(); 
+        }
+
         function stopLoop() { 
-            if(currentNum) db.ref('stock/'+currentNum).off(); 
+            if(currentNum) db.ref('stock/'+currentNum+'/otp').off(); 
             localStorage.removeItem('active_num');
             document.getElementById('active').classList.add('hidden'); 
             document.getElementById('menu').classList.remove('hidden'); 
