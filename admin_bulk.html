@@ -3,45 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN V117 COMMANDER</title>
+    <title>MASTER ADMIN V118</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .box { width: 100%; max-width: 700px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
+        .box { width: 100%; max-width: 800px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         h2 { margin-top: 0; color: #00ff88; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
-        /* LIST RANGE */
-        .range-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; border-left: 4px solid #2979ff; 
-        }
-        .range-info { font-size: 12px; }
-        .range-name { color: #fff; font-weight: bold; font-size: 14px; }
-        .range-country { color: #aaa; font-size: 11px; margin-left: 5px; background: #222; padding: 2px 5px; border-radius: 3px; }
-        
-        .range-stats { color: #00ff88; font-weight: bold; }
-        .btn-del { background: #d32f2f; color: #fff; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 11px; }
-        .btn-del:hover { background: #ff5252; }
+        /* NAVIGATION TABS */
+        .tabs-header { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .tab-btn { background: #222; border: 1px solid #444; color: #aaa; padding: 10px; cursor: pointer; flex: 1; font-weight: bold; font-size: 11px; }
+        .tab-btn.active { background: #00ff88; color: #000; border-color: #00ff88; }
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .loading { text-align:center; padding:20px; color:#aaa; }
+        /* TAB 1: DASHBOARD STATS */
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #1a1a1a; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #444; }
+        .stat-num { font-size: 28px; font-weight: bold; display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 10px; color: #aaa; }
+        .c-green { color: #00e676; } .c-blue { color: #2979ff; } .c-red { color: #ff1744; }
+        
+        /* NOTIF BOX */
+        .notif-box { background: rgba(255, 215, 0, 0.05); border: 1px dashed #ffd700; padding: 15px; border-radius: 8px; }
+        .notif-input { width: 100%; padding: 10px; background: #000; color: #ffd700; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; font-weight: bold; }
+
+        /* TAB 2 & 3: LISTS */
+        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; }
+        .list-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #1a1a1a; padding: 8px 12px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; 
+        }
+        .item-info { font-size: 12px; }
+        .item-actions { display: flex; gap: 5px; }
+        
+        /* BUTTONS & INPUTS */
+        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; }
+        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
+        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; }
+        .bg-yellow { background: #ffd700; color:#000; }
+        
+        button:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ V117 RANGE COMMANDER</h2>
-        <div style="font-size:11px; color:#aaa; margin-bottom:15px; text-align:center;">
-            Monitor stok berdasarkan Range IvaSMS. Hapus range yang macet/error di sini.
+        <h2>⚡ V118 MASTER ADMIN</h2>
+
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('dash')">📊 DASHBOARD</button>
+            <button class="tab-btn" onclick="switchTab('range')">📂 MONITOR RANGE</button>
+            <button class="tab-btn" onclick="switchTab('country')">🌍 ATUR NEGARA</button>
+            <button class="tab-btn" onclick="switchTab('upload')">📥 UPLOAD & RESET</button>
         </div>
 
-        <div id="rangeListContainer">
-            <div class="loading">Memuat Data Stok...</div>
+        <!-- TAB 1: DASHBOARD (STATS + NOTIF) -->
+        <div id="dash" class="tab-content active">
+            <div class="grid-stats">
+                <div class="stat-card" style="border-color: #00e676;">
+                    <span id="countAvail" class="stat-num c-green">...</span>
+                    <span class="stat-label">AVAILABLE (STOK)</span>
+                </div>
+                <div class="stat-card" style="border-color: #2979ff;">
+                    <span id="countActive" class="stat-num c-blue">...</span>
+                    <span class="stat-label">ACTIVE (DIPAKE)</span>
+                </div>
+                <div class="stat-card" style="border-color: #ff1744;">
+                    <span id="countTrash" class="stat-num c-red">...</span>
+                    <span class="stat-label">DONE / BAD</span>
+                </div>
+            </div>
+
+            <div class="notif-box">
+                <label style="color:#ffd700; font-size:11px;">📢 KIRIM RUNNING TEXT KE TEAM:</label>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <input type="text" id="notifMsg" class="notif-input" placeholder="Tulis pesan disini...">
+                    <button onclick="sendNotif()" class="action-btn bg-yellow" style="width:auto;">KIRIM</button>
+                    <button onclick="clearNotif()" class="action-btn bg-red" style="width:auto;">HAPUS</button>
+                </div>
+                <div id="currentNotif" style="font-size:10px; color:#777; margin-top:5px;"></div>
+            </div>
         </div>
+
+        <!-- TAB 2: RANGE MONITOR (HAPUS PER RANGE) -->
+        <div id="range" class="tab-content">
+            <div style="font-size:11px; color:#aaa; margin-bottom:10px; text-align:center;">
+                Hapus range yang macet. (Data stok akan berkurang sesuai jumlah di range tsb).
+            </div>
+            <div class="list-container" id="rangeListContainer">Loading Data...</div>
+        </div>
+
+        <!-- TAB 3: COUNTRY MANAGER (EDIT NEGARA) -->
+        <div id="country" class="tab-content">
+            <div style="background:#222; padding:10px; border-radius:5px; margin-bottom:10px;">
+                <label style="font-size:10px; color:#aaa;">TAMBAH / EDIT NEGARA MANUAL:</label>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <input type="text" id="cCode" placeholder="Kode (Misal: US)" style="width:30%;">
+                    <input type="text" id="cName" placeholder="Nama (UNITED STATES 🇺🇸)">
+                    <button onclick="saveCountry()" class="action-btn bg-blue" style="width:auto;">SIMPAN</button>
+                </div>
+            </div>
+            <div class="list-container" id="countryListDisplay">Loading...</div>
+        </div>
+
+        <!-- TAB 4: UPLOAD & RESET -->
+        <div id="upload" class="tab-content">
+            <label style="font-size:11px; color:#aaa;">UPLOAD NOMOR MANUAL:</label>
+            <select id="countrySelect" style="margin-top:5px; margin-bottom:5px;"><option>Loading...</option></select>
+            <textarea id="numList" placeholder="Paste nomor disini (pisahkan enter)..." style="height:100px;"></textarea>
+            
+            <button onclick="uploadStock()" class="action-btn bg-green" style="width:100%; padding:12px; font-size:14px; margin-top:10px;">🚀 UPLOAD KE DATABASE</button>
+            
+            <hr style="border-color:#333; margin:20px 0;">
+            
+            <div style="display:flex; gap:10px;">
+                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:10px;">🧹 BERSIHKAN SAMPAH</button>
+                <button onclick="clearAll()" class="action-btn bg-red" style="flex:1; padding:10px;">🗑️ RESET TOTAL</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // 🔥 PASTE CONFIG FIREBASE DISINI 🔥
+        // ==========================================
+        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
+        // ==========================================
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -51,98 +140,172 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
+        // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- MONITOR RANGE ---
+        // --- NAVIGATION ---
+        window.switchTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // --- CORE: REALTIME MONITORING (STATS & RANGE) ---
         db.ref('stock').on('value', snap => {
             const data = snap.val();
-            const container = document.getElementById('rangeListContainer');
-            container.innerHTML = "";
-
-            if (!data) {
-                container.innerHTML = "<div class='loading'>Stok Kosong / Database Bersih.</div>";
-                return;
-            }
-
-            // Grouping Logic
+            let avail=0, active=0, trash=0;
             let rangeStats = {};
 
-            Object.keys(data).forEach(key => {
-                const item = data[key];
-                // Fallback kalau range_name kosong
-                const rName = item.range_name || "UNKNOWN/MANUAL"; 
-                
-                if (!rangeStats[rName]) {
-                    rangeStats[rName] = { 
-                        total: 0, 
-                        available: 0, 
-                        countryCode: item.country 
-                    };
-                }
-                
-                rangeStats[rName].total++;
-                if (item.status === 'AVAILABLE') rangeStats[rName].available++;
-            });
+            const rangeContainer = document.getElementById('rangeListContainer');
+            rangeContainer.innerHTML = "";
 
-            // Render UI
-            Object.keys(rangeStats).forEach(rName => {
-                const stat = rangeStats[rName];
-                const div = document.createElement('div');
-                div.className = 'range-item';
-                
-                // Indikator Warna (Merah kalau habis)
-                const statusColor = stat.available > 0 ? '#00ff88' : '#555';
-                div.style.borderLeftColor = statusColor;
+            if (data) {
+                Object.values(data).forEach(item => {
+                    // Global Stats
+                    if (item.status === 'AVAILABLE') avail++;
+                    else if (item.status === 'TAKEN') active++;
+                    else trash++;
 
-                div.innerHTML = `
-                    <div class="range-info">
-                        <span class="range-name">${rName}</span>
-                        <span class="range-country">Code: ${stat.countryCode}</span>
-                        <div style="margin-top:5px; color:#888;">
-                            Sisa: <b style="color:${statusColor}">${stat.available}</b> / Total: ${stat.total}
+                    // Range Stats
+                    const rName = item.range_name || "MANUAL UPLOAD";
+                    if (!rangeStats[rName]) rangeStats[rName] = { total: 0, avail: 0, country: item.country };
+                    rangeStats[rName].total++;
+                    if (item.status === 'AVAILABLE') rangeStats[rName].avail++;
+                });
+
+                // Render Range List
+                Object.keys(rangeStats).forEach(rName => {
+                    const stat = rangeStats[rName];
+                    const color = stat.avail > 0 ? '#00ff88' : '#555';
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.style.borderLeftColor = color;
+                    div.innerHTML = `
+                        <div class="item-info">
+                            <div style="font-weight:bold; color:#fff;">${rName} <span style="color:#777;">(${stat.country})</span></div>
+                            <div style="color:#aaa;">Sisa: <b style="color:${color}">${stat.avail}</b> / Total: ${stat.total}</div>
                         </div>
-                    </div>
-                    <button class="btn-del" onclick="deleteRange('${rName}')">HAPUS RANGE</button>
-                `;
-                container.appendChild(div);
-            });
+                        <button class="action-btn bg-red" onclick="deleteRange('${rName}')">HAPUS</button>
+                    `;
+                    rangeContainer.appendChild(div);
+                });
+            } else {
+                rangeContainer.innerHTML = "<div style='text-align:center;color:#555;padding:20px;'>Database Kosong</div>";
+            }
+
+            // Update Dashboard UI
+            document.getElementById('countAvail').innerText = avail;
+            document.getElementById('countActive').innerText = active;
+            document.getElementById('countTrash').innerText = trash;
         });
 
-        // --- FUNGSI HAPUS (FIXED) ---
+        // --- CORE: COUNTRY MANAGER ---
+        db.ref('settings/countries').on('value', snap => {
+            const data = snap.val();
+            const listDiv = document.getElementById('countryListDisplay');
+            const selectDiv = document.getElementById('countrySelect');
+            listDiv.innerHTML = ""; selectDiv.innerHTML = "";
+
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    // List Item
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <div class="item-info"><span style="color:#00e5ff; font-weight:bold;">${key}</span> : ${data[key]}</div>
+                        <div class="item-actions">
+                            <button class="action-btn bg-blue" onclick="editCountry('${key}', '${data[key]}')">EDIT</button>
+                            <button class="action-btn bg-red" onclick="delCountry('${key}')">X</button>
+                        </div>
+                    `;
+                    listDiv.appendChild(item);
+
+                    // Dropdown Item
+                    const opt = document.createElement('option');
+                    opt.value = key; opt.innerText = data[key];
+                    selectDiv.appendChild(opt);
+                });
+            }
+        });
+
+        // --- ACTIONS ---
+        window.saveCountry = () => {
+            const c = document.getElementById('cCode').value.toUpperCase().trim();
+            const n = document.getElementById('cName').value.trim();
+            if(c && n) {
+                db.ref('settings/countries/' + c).set(n);
+                document.getElementById('cCode').value = "";
+                document.getElementById('cName').value = "";
+            } else alert("Isi Kode & Nama!");
+        }
+
+        window.editCountry = (c, n) => {
+            document.getElementById('cCode').value = c;
+            document.getElementById('cName').value = n;
+            switchTab('country'); // Pindah tab kalau lagi di tab lain
+        }
+
+        window.delCountry = (k) => { if(confirm("Hapus Negara?")) db.ref('settings/countries/' + k).remove(); }
+
         window.deleteRange = (rangeName) => {
-            if(confirm(`YAKIN HAPUS RANGE: "${rangeName}"?\nSemua nomor di range ini akan dihapus permanen.`)) {
-                
-                // Ambil snapshot dulu biar aman
+            if(confirm(`Hapus semua nomor di range "${rangeName}"?`)) {
                 db.ref('stock').once('value', snap => {
                     const data = snap.val();
                     let updates = {};
-                    let count = 0;
-
                     if(data) {
                         Object.keys(data).forEach(key => {
-                            // Cek apakah range_name cocok (atau undefined jika menghapus UNKNOWN)
-                            const currentRange = data[key].range_name || "UNKNOWN/MANUAL";
-                            
-                            if(currentRange === rangeName) {
-                                updates[key] = null; // Tandai hapus
-                                count++;
-                            }
+                            if(data[key].range_name === rangeName) updates[key] = null;
                         });
-                        
-                        // Eksekusi Hapus Massal
-                        if(count > 0) {
-                            db.ref('stock').update(updates)
-                                .then(() => alert(`Berhasil menghapus ${count} nomor dari range ${rangeName}`))
-                                .catch(e => alert("Gagal hapus: " + e.message));
-                        } else {
-                            alert("Data tidak ditemukan atau sudah terhapus.");
-                        }
+                        db.ref('stock').update(updates);
                     }
                 });
             }
         }
+
+        window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
+        window.clearNotif = () => { db.ref('system/notification').remove(); document.getElementById('notifMsg').value = ""; }
+        
+        // Monitor Notif sendiri
+        db.ref('system/notification').on('value', s => {
+            document.getElementById('currentNotif').innerText = s.val() ? `Aktif: "${s.val()}"` : "Tidak ada pesan.";
+        });
+
+        window.uploadStock = () => {
+            const raw = document.getElementById('numList').value;
+            const country = document.getElementById('countrySelect').value;
+            if(!raw) return alert("Kosong!");
+            
+            const lines = raw.split(/\n/);
+            let updates = {}; let count = 0;
+            lines.forEach(l => {
+                let n = l.replace(/\D/g, ''); 
+                if(n.length > 6) {
+                    updates[n] = { 
+                        number: n, country: country, otp: "", 
+                        status: "AVAILABLE", range_name: "MANUAL UPLOAD", timestamp: Date.now() 
+                    };
+                    count++;
+                }
+            });
+            if(count > 0) db.ref('stock').update(updates, (e) => { if(!e) { alert("Sukses!"); document.getElementById('numList').value=""; }});
+        }
+
+        window.clearTrash = () => {
+            if(confirm("Hapus nomor status DONE & BAD?")) {
+                db.ref('stock').once('value', s => {
+                    const d = s.val(); if(!d) return;
+                    let u = {};
+                    Object.keys(d).forEach(k => { if(d[k].status==='DONE'||d[k].status==='BAD') u[k]=null; });
+                    db.ref('stock').update(u);
+                });
+            }
+        }
+        
+        window.clearAll = () => { if(confirm("RESET TOTAL (SEMUA DATA HILANG)?")) db.ref('stock').remove(); }
+
     </script>
 </body>
 </html>
