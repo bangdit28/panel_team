@@ -3,216 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BOT OTP TASIK V135</title>
+    <title>BOT OTP BARUDAK TASIK</title>
+
+    <!-- FONTS KEREN -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Creepster&family=Lobster&family=Orbitron:wght@400;700&family=Poppins:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        /* RESET & BASE */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        /* CSS MODERN (SAMA SEPERTI V3 TAPI TANPA PWA STUFF) */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
         body { 
-            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
-            margin: 0; padding: 10px; padding-top: 45px; /* SPACE FOR NOTIF BAR */
-            min-height: 100vh;
-            display: flex; flex-direction: column; 
+            background: #0f172a; color: #fff; font-family: 'Poppins', sans-serif; 
+            margin: 0; padding: 0; padding-bottom: 70px;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* --- 🔥 NEW: NOTIFICATION BAR 🔥 --- */
         #notifBar {
             position: fixed; top: 0; left: 0; width: 100%;
-            background: #ffd700; color: #000;
-            z-index: 9999; font-weight: bold; font-size: 12px;
-            padding: 8px 0; display: none; /* Default hidden */
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            background: #ffd700; color: #000; z-index: 9999;
+            font-weight: bold; font-size: 11px; padding: 5px 0;
+            display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-        marquee { width: 100%; display: block; letter-spacing: 0.5px; text-transform: uppercase; }
-        /* ------------------------------------- */
+        marquee { width: 100%; display: block; text-transform: uppercase; }
 
-        /* CONTAINER UTAMA */
-        .box { 
-            width: 100%; background: #1e293b; 
-            padding: 15px; border-radius: 12px; border: 1px solid #334155; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            margin-bottom: 15px; position: relative;
-        }
+        .page-section { display: none; padding: 15px; padding-top: 40px; animation: fadeIn 0.3s; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
-        .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 4px 10px; border-radius: 4px; border: 1px solid #334155; font-weight: bold; }
-
-        /* INPUTS & BUTTONS */
-        select, input { width: 100%; padding: 12px; background: #334155; color: #fff; border: 1px solid #475569; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
-        input { background: #000; border-color: #f43f5e; text-align: center; }
+        .box { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        h2 { margin: 0; color: #f43f5e; font-size: 20px; font-weight: 800; letter-spacing: 1px; }
         
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
-        button:active { transform: scale(0.98); }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+        .user-badge { 
+            font-size: 12px; padding: 5px 12px; border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3);
+            text-transform: uppercase; font-weight: bold;
+        }
+
+        select, input { width: 100%; padding: 14px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 10px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+        input[type="color"] { height: 50px; padding: 0; cursor: pointer; }
+        
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: transform 0.1s; }
+        button:active { transform: scale(0.97); }
+        .btn-start { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4); }
         .btn-bad { background: #ef4444; color: #fff; }
-        .btn-next { background: #22c55e; color: #000; display: none; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
-        .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-next { background: #22c55e; color: #000; }
+        .btn-save { background: #3b82f6; color: #fff; }
 
-        /* ACTIVE NUMBER DISPLAY */
-        .display-num { 
-            font-size: 24px; font-family: monospace; background: #000; 
-            padding: 12px; border-radius: 8px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; text-align: center; cursor: pointer; color: #fff;
-        }
-
-        .otp-area { 
-            background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155;
-            padding: 15px; text-align: center; margin-bottom: 15px; 
-            min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;
-        }
-        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer;}
-        .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
-
-        /* --- GLOBAL FEED STYLE --- */
-        .history-box { 
-            width: 100%; background: #0f172a; border: 1px solid #334155; 
-            border-radius: 10px; overflow: hidden; margin-top: 5px; display: flex; flex-direction: column;
-        }
-        .h-header {
-            background: #172033; padding: 10px; border-bottom: 1px solid #334155;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .h-title { font-size: 11px; color: #f43f5e; font-weight: 800; }
-        .h-date { font-size: 10px; color: #94a3b8; font-weight: bold; font-family: monospace; }
+        .display-num { font-size: 28px; font-family: 'Roboto Mono', monospace; background: #000; padding: 20px; border-radius: 12px; border: 2px dashed #f43f5e; margin: 15px 0; text-align: center; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .otp-area { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 15px; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .otp-code { font-size: 48px; font-weight: 800; color: #4ade80; letter-spacing: 5px; animation: popIn 0.3s; text-shadow: 0 0 20px rgba(74, 222, 128, 0.5); }
         
-        .feed-list { padding: 10px; max-height: 350px; overflow-y: auto; }
-
-        .g-item {
-            background: #1e293b; border: 1px solid #334155; border-radius: 6px;
-            padding: 10px; margin-bottom: 8px; position: relative;
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
+            background: #1e293b; border-top: 1px solid #334155;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 999; padding-bottom: 5px;
         }
-        .g-user {
-            color: #f43f5e; 
-            font-weight: 800; font-size: 12px; margin-bottom: 4px;
-            display: flex; align-items: center; gap: 6px;
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #64748b; font-size: 10px; font-weight: bold; width: 25%; height: 100%; cursor: pointer;
+            transition: 0.2s;
         }
-        .g-msg {
-            color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4;
-            padding-right: 35px;
-        }
-        .x-green { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
-        .g-time {
-            position: absolute; bottom: 8px; right: 10px;
-            font-size: 10px; color: #64748b; font-weight: bold;
-        }
-
-        /* --- PERSONAL HISTORY TABLE STYLE --- */
-        .ph-table-header {
-            display: grid; grid-template-columns: 1.5fr 1fr 2fr; 
-            background: #0f172a; padding: 8px 5px; font-size: 9px;
-            color: #94a3b8; border-bottom: 1px solid #334155; font-weight: bold; text-transform: uppercase;
-        }
-        .p-item {
-            display: grid; grid-template-columns: 1.5fr 1fr 2fr; 
-            background: #1e293b; border-bottom: 1px solid #334155;
-            padding: 8px 5px; font-size: 10px; color: #ccc; align-items: center;
-        }
-        .col-sms { display: flex; flex-direction: column; }
-        .sms-country { font-weight: bold; color: #fff; font-size: 10px; display: flex; align-items: center; gap: 4px; }
-        .sms-num { font-family: monospace; color: #94a3b8; font-size: 10px; margin-top: 2px; }
-        .col-app { font-weight: bold; color: #fff; font-size: 10px; letter-spacing: 0.5px; }
-        .col-msg { font-family: 'Courier New', monospace; font-size: 9px; line-height: 1.3; color: #94a3b8; word-break: break-all; }
+        .nav-item svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+        .nav-item.active { color: #f43f5e; }
         
-        .p-pending { border-left: 3px solid #f59e0b; }
-        .p-success { border-left: 3px solid #4ade80; }
+        /* CHAT STYLE */
+        .chat-container { height: 70vh; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { background: #334155; padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 12px; line-height: 1.4; }
+        .chat-self { align-self: flex-end; background: #f43f5e; color: #fff; border-bottom-right-radius: 2px; }
+        .chat-other { align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-name { font-size: 9px; opacity: 0.7; margin-bottom: 2px; display: block; font-weight: bold; }
+        .chat-input-area { position: fixed; bottom: 70px; left: 0; width: 100%; padding: 10px; background: #0f172a; display: flex; gap: 10px; }
+
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        .hist-card { background: #1e293b; padding: 12px; border-radius: 10px; border-left: 4px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .hist-card.success { border-left-color: #4ade80; }
+        .hist-card.pending { border-left-color: #fbbf24; }
+        
+        .setting-group { margin-bottom: 20px; }
+        .setting-label { font-size: 12px; color: #94a3b8; margin-bottom: 8px; display: block; }
+
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 99999; display: flex; align-items: center; justify-content: center; }
+        .login-inner { width: 85%; max-width: 320px; text-align: center; background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; }
+
         .hidden { display: none !important; }
-
-        /* LOGIN */
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-inner { width: 85%; max-width: 320px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- 🔥 NOTIFICATION BAR (NEW) 🔥 -->
-    <div id="notifBar">
-        <marquee id="notifText">INFO ADMIN DISINI...</marquee>
-    </div>
+    <div id="notifBar"><marquee id="notifText">...</marquee></div>
 
     <!-- LOGIN -->
     <div id="loginOverlay">
         <div class="login-inner">
-            <h2 style="margin-bottom:15px; color:#f43f5e;">PANEL BARUDAK TASIK</h2>
-            <input type="text" id="inputName" placeholder="Nama Kamu...">
+            <h2 style="margin-bottom:20px; color:#f43f5e;">PANEL UTAMA</h2>
+            <input type="text" id="inputLoginName" placeholder="Nama Anda...">
             <button class="btn-start" onclick="doLogin()">MASUK</button>
         </div>
     </div>
 
-    <div id="mainApp" class="hidden">
-        
-        <!-- PAGE 1: MENU UTAMA -->
-        <div id="pageMenu">
-            <div class="box">
-                <div class="header">
-                    <h2>PANEL BARUDAK TASIK</h2>
-                    <div class="op-name" id="opNameMenu">...</div>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:10px; color:#aaa; margin-bottom:4px; display:block;">Pilih Negara:</label>
-                    <select id="countryPick"><option>Loading...</option></select>
-                    <button class="btn-start" onclick="startFarming()">AMBIL</button>
-                </div>
+    <!-- TAB 1: HOME -->
+    <div id="pageHome" class="page-section active">
+        <div class="box">
+            <div class="header-top">
+                <h2>BOT OTP BARUDAK TASIK</h2>
+                <div class="user-badge" id="dispNameHome">User</div>
             </div>
 
-            <div class="history-box">
-                <div class="h-header">
-                    <div class="h-title">🔴 LIVE GLOBAL (INSTANT)</div>
-                    <div class="h-date" id="headerDate">...</div>
-                </div>
-                <div id="globalFeedList" class="feed-list">
-                    <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Menunggu aktivitas...</div>
-                </div>
+            <div id="menuArea">
+                <label class="setting-label">Pilih Negara:</label>
+                <select id="countryPick"><option>Loading...</option></select>
+                <button class="btn-start" onclick="smartStartFarming()">🚀 AMBIL NOMOR</button>
             </div>
-        </div>
 
-        <!-- PAGE 2: FARMING -->
-        <div id="pageActive" class="hidden">
-            <div class="box">
-                <div class="header">
-                    <h2>ACTIVE SESSION</h2>
-                    <div class="op-name" id="opNameActive">...</div>
-                </div>
-
+            <div id="workArea" class="hidden">
                 <div class="display-num" onclick="copyText(document.getElementById('txtNum').innerText)">
                     <span id="txtNum">...</span>
                 </div>
-
                 <div class="otp-area">
-                    <div id="statusWait" class="waiting">📡 MENUNGGU SMS...</div>
+                    <div id="statusWait" style="color:#fbbf24; font-size:12px; animation:blink 1.5s infinite;">📡 MENUNGGU SMS...</div>
                     <div id="myOTP" class="otp-code hidden" onclick="copyText(this.innerText)">---</div>
                 </div>
-
-                <div style="display: flex; gap: 8px;">
-                    <button id="btnBad" class="btn-bad" onclick="actionBad()">🔄 GANTI</button>
-                    <button id="btnNext" class="btn-next" onclick="actionNext()">✅ LANJUT</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-bad" onclick="actionBad()">🔄 GANTI</button>
+                    <button class="btn-next" onclick="actionNext()">✅ LANJUT</button>
                 </div>
-                
-                <button class="btn-stop" onclick="clearSessionAndStop()">⏹️ KEMBALI KE MENU</button>
-            </div>
-
-            <div class="history-box">
-                <div class="ph-table-header">
-                    <div>Live SMS</div>
-                    <div>Application</div>
-                    <div>Message content</div>
-                </div>
-                <div id="personalFeedList" class="feed-list" style="padding:0;">
-                    <div style="text-align:center; padding:15px; color:#444; font-size:10px;">Belum ada history.</div>
-                </div>
+                <button class="btn-stop" style="margin-top:15px; border:1px solid #475569;" onclick="stopFarmingUI()">⏹️ STOP</button>
             </div>
         </div>
+    </div>
 
+    <!-- TAB 2: HISTORY -->
+    <div id="pageHistory" class="page-section">
+        <h2 style="margin-bottom:15px; padding-left:10px;">RIWAYAT</h2>
+        <div id="historyContainer" class="history-list">
+            <div style="text-align:center; padding:30px; color:#666; font-size:12px;">Kosong.</div>
+        </div>
+    </div>
+
+    <!-- TAB 3: CHAT -->
+    <div id="pageChat" class="page-section" style="padding-bottom: 80px;">
+        <h2 style="margin-bottom:10px; padding-left:10px;">CHAT GLOBAL</h2>
+        <div id="chatBox" class="chat-container"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chatMsg" placeholder="Kirim pesan..." style="margin:0;">
+            <button class="btn-start" style="width:60px; margin:0;" onclick="sendChat()">➤</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: PROFIL -->
+    <div id="pageProfile" class="page-section">
+        <div class="box">
+            <h2 style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">PROFIL SAYA</h2>
+            
+            <div class="setting-group">
+                <label class="setting-label">Ganti Nama</label>
+                <input type="text" id="inputNewName">
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Ganti Font</label>
+                <select id="inputFont">
+                    <option value="'Poppins', sans-serif">Poppins (Normal)</option>
+                    <option value="'Orbitron', sans-serif">Orbitron (Cyber)</option>
+                    <option value="'Bangers', cursive">Bangers (Komik)</option>
+                    <option value="'Lobster', cursive">Lobster (Latin)</option>
+                    <option value="'Roboto Mono', monospace">Hacker (Kode)</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">Warna Nama</label>
+                <input type="color" id="inputColor" value="#ffffff">
+            </div>
+
+            <button class="btn-save" onclick="saveProfileSettings()">💾 SIMPAN</button>
+        </div>
+    </div>
+
+    <!-- NAV BOTTOM -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('pageHome', this)">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>HOME</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('pageHistory', this)">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>HISTORY</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('pageChat', this)">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span>CHAT</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('pageProfile', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>PROFIL</span>
+        </div>
     </div>
 
     <script>
-        // 🔥 CONFIG TASIK 🔥
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
             authDomain: "vipotpsystem.firebaseapp.com",
@@ -222,150 +213,166 @@
             messagingSenderId: "1041472357696",
             appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 🔒 PERMANENT KEYS 🔒
-        const LS_KEY_NAME = 'TASIK_BOT_USERNAME_V135'; 
-        const LS_KEY_HIST = 'TASIK_BOT_HISTORY_V135';
-        const LS_KEY_SESSION = 'TASIK_BOT_SESSION_V135'; 
+        // 🔥 PATH UTAMA (STOCK BIASA) 🔥
+        const DB_STOCK_PATH = 'stock';
+        const DB_CHAT_PATH = 'chat_main'; // Jalur khusus chat biar gak ganggu stok
+        
+        const LS_KEY_NAME = 'MAIN_USER_WEB';
+        const LS_KEY_HIST = 'MAIN_HIST_WEB';
+        const LS_PREF_FONT = 'MAIN_FONT';
+        const LS_PREF_COLOR = 'MAIN_COLOR';
+
+        let mySessionID = localStorage.getItem('MAIN_SESS_ID');
+        if(!mySessionID) {
+            mySessionID = "U_" + Math.floor(Math.random() * 999999);
+            localStorage.setItem('MAIN_SESS_ID', mySessionID);
+        }
 
         let currentUser = localStorage.getItem(LS_KEY_NAME);
         let currentNum = null;
         let selectedRegion = "";
         let listenerRef = null;
-        let mySessionID = null;
         let myHistory = JSON.parse(localStorage.getItem(LS_KEY_HIST)) || [];
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
 
-        // 🔥 NOTIF LISTENER 🔥
-        db.ref('system/notification').on('value', snap => {
-            const msg = snap.val();
-            const bar = document.getElementById('notifBar');
-            const txt = document.getElementById('notifText');
-            if(msg) {
-                txt.innerText = msg;
-                bar.style.display = 'block';
-            } else {
-                bar.style.display = 'none';
-            }
-        });
-
-        // FLAGS
-        const flags = { "MYANMAR": "🇲🇲", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "GUINEAGAMMA": "🇬🇳", "MOROCCO": "🇲🇦", "SUDAN": "🇸🇩" };
-        function getFlag(name) { return flags[name?.toUpperCase()] || "🌍"; }
-
-        // --- INIT ---
+        // Init
         if(currentUser) initApp();
         else document.getElementById('loginOverlay').style.display = 'flex';
 
         function doLogin() {
-            const n = document.getElementById('inputName').value.trim();
-            if(!n) return alert("Wajib isi nama!");
-            currentUser = n;
-            localStorage.setItem(LS_KEY_NAME, n);
-            initApp();
+            const n = document.getElementById('inputLoginName').value.trim();
+            if(!n) return alert("Nama wajib diisi!");
+            currentUser = n; localStorage.setItem(LS_KEY_NAME, n); initApp();
         }
 
         function initApp() {
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('opNameMenu').innerText = currentUser;
-            document.getElementById('opNameActive').innerText = currentUser;
-            const today = new Date();
-            const dateStr = today.getDate().toString().padStart(2,'0') + "/" + (today.getMonth()+1).toString().padStart(2,'0') + "/" + today.getFullYear();
-            document.getElementById('headerDate').innerText = dateStr;
-            loadCountries(); initGlobalFeed(); renderPersonalHistory(); checkSavedSession();
-        }
-
-        function checkSavedSession() {
-            const savedSession = JSON.parse(localStorage.getItem(LS_KEY_SESSION));
-            if(savedSession && savedSession.status === 'active') {
-                currentNum = savedSession.number;
-                mySessionID = savedSession.sessionID;
-                selectedRegion = savedSession.region;
-                document.getElementById('pageMenu').classList.add('hidden');
-                document.getElementById('pageActive').classList.remove('hidden');
-                document.getElementById('txtNum').innerText = currentNum;
-                attachListener(currentNum);
-            } else {
-                mySessionID = "U_" + Math.floor(Math.random() * 999999);
-            }
-        }
-
-        function loadCountries() {
-            db.ref('settings/countries').on('value', snap => {
-                const d = snap.val();
-                const sel = document.getElementById('countryPick');
-                sel.innerHTML = "";
-                if(d) Object.keys(d).forEach(k => {
-                    const opt = document.createElement('option'); opt.value = k; opt.innerText = d[k]; sel.appendChild(opt);
-                });
+            
+            applyUserPreferences();
+            loadCountries();
+            initHistory();
+            initChat();
+            checkActiveSession(); 
+            
+            document.getElementById('inputNewName').value = currentUser;
+            
+            db.ref('system/notification').on('value', snap => {
+                const msg = snap.val();
+                if(msg) { document.getElementById('notifText').innerText = msg; document.getElementById('notifBar').style.display = 'block'; }
+                else { document.getElementById('notifBar').style.display = 'none'; }
             });
+        }
+
+        window.switchTab = (pid, el) => {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(pid).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // --- PROFILE ---
+        function saveProfileSettings() {
+            const n = document.getElementById('inputNewName').value.trim();
+            const f = document.getElementById('inputFont').value;
+            const c = document.getElementById('inputColor').value;
+            if(n) { currentUser = n; localStorage.setItem(LS_KEY_NAME, n); }
+            localStorage.setItem(LS_PREF_FONT, f);
+            localStorage.setItem(LS_PREF_COLOR, c);
+            applyUserPreferences();
+            alert("Profil tersimpan!");
+        }
+        function applyUserPreferences() {
+            const f = localStorage.getItem(LS_PREF_FONT) || "'Poppins', sans-serif";
+            const c = localStorage.getItem(LS_PREF_COLOR) || "#ffffff";
+            const badge = document.getElementById('dispNameHome');
+            badge.innerText = currentUser;
+            badge.style.fontFamily = f;
+            badge.style.color = c;
+            badge.style.borderColor = c;
         }
 
         // --- FARMING ---
-        function startFarming() {
-            selectedRegion = document.getElementById('countryPick').value;
-            document.getElementById('pageMenu').classList.add('hidden');
-            document.getElementById('pageActive').classList.remove('hidden');
-            findNumber();
+        function checkActiveSession() {
+            db.ref(DB_STOCK_PATH).orderByChild('owner').equalTo(mySessionID).once('value', snap => {
+                let found = null;
+                snap.forEach(c => { if(c.val().status === 'TAKEN') found = c.key; });
+                if(found) {
+                    currentNum = found;
+                    showActiveUI();
+                    attachListener(currentNum);
+                }
+            });
         }
 
-        function findNumber() {
+        function smartStartFarming() {
+            selectedRegion = document.getElementById('countryPick').value;
+            db.ref(DB_STOCK_PATH).orderByChild('owner').equalTo(mySessionID).once('value', snap => {
+                let found = null;
+                snap.forEach(c => { if(c.val().status === 'TAKEN') found = c.key; });
+                if(found) {
+                    alert("Melanjutkan sesi aktif...");
+                    currentNum = found;
+                    showActiveUI();
+                    attachListener(currentNum);
+                } else {
+                    showActiveUI();
+                    findNewNumber();
+                }
+            });
+        }
+
+        function findNewNumber() {
             resetUI();
             document.getElementById('txtNum').innerText = "Mencari...";
-            db.ref('stock').once('value', snap => {
+            if(listenerRef) listenerRef.off();
+            
+            db.ref(DB_STOCK_PATH).once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
-                if(data) Object.keys(data).forEach(k => { if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) candidates.push(k); });
+                if(data) Object.keys(data).forEach(k => { 
+                    if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion && k !== currentNum) candidates.push(k);
+                });
 
-                if(candidates.length === 0) { alert("Stok Habis!"); clearSessionAndStop(); return; }
+                if(candidates.length === 0) { alert("Stok Habis!"); stopFarmingUI(); return; }
                 candidates.sort(() => Math.random() - 0.5);
                 const target = candidates[0];
 
-                db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: currentUser }, (err) => {
+                db.ref(DB_STOCK_PATH+'/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: currentUser }, (err) => {
                     if(!err) {
-                        db.ref('stock/'+target).once('value', s => {
+                        db.ref(DB_STOCK_PATH+'/'+target).once('value', s => {
                             if(s.val().owner === mySessionID) {
                                 currentNum = target;
-                                saveSessionData(currentNum, selectedRegion);
                                 document.getElementById('txtNum').innerText = currentNum;
                                 copyText(currentNum);
                                 attachListener(currentNum);
-                            } else findNumber();
+                            } else findNewNumber();
                         });
-                    } else findNumber();
+                    } else findNewNumber();
                 });
             });
         }
 
-        function saveSessionData(num, region) { localStorage.setItem(LS_KEY_SESSION, JSON.stringify({ status: 'active', number: num, region: region, sessionID: mySessionID })); }
-        function clearSessionData() { localStorage.removeItem(LS_KEY_SESSION); }
-
         function attachListener(num) {
             if(listenerRef) listenerRef.off();
-            listenerRef = db.ref('stock/'+num);
-            let hasTriggeredFeed = false;
+            listenerRef = db.ref(DB_STOCK_PATH+'/'+num);
             listenerRef.on('value', snap => {
                 const d = snap.val();
-                if(!d) { clearSessionAndStop(); return; }
+                if(!d) { stopFarmingUI(); return; }
+                if(d.number !== currentNum) return;
+
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden');
                         elOTP.innerText = d.otp;
                         elOTP.classList.remove('hidden');
-                        document.getElementById('btnBad').style.display = 'none';
-                        document.getElementById('btnNext').style.display = 'block';
-                        audioBeep.currentTime = 0; audioBeep.play().catch(()=>{});
+                        audioBeep.play().catch(()=>{});
                         copyText(d.otp);
-                        upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
-                        if(!hasTriggeredFeed) {
-                            db.ref('stock/'+num).update({ last_update: firebase.database.ServerValue.TIMESTAMP });
-                            hasTriggeredFeed = true; 
-                        }
+                        upsertHistory(d.number, d.country, d.otp, 'SUCCESS');
                     }
                 }
             });
@@ -373,78 +380,91 @@
 
         function actionBad() {
             if(currentNum) {
-                upsertPersonalHistory(currentNum, selectedRegion, "PENDING", 'PENDING');
-                db.ref('stock/'+currentNum).update({status:'BAD'});
+                upsertHistory(currentNum, selectedRegion, "PENDING", 'PENDING');
+                db.ref(DB_STOCK_PATH+'/'+currentNum).update({status:'BAD'});
+                if(listenerRef) listenerRef.off();
             }
-            findNumber(); 
+            findNewNumber();
         }
-        function actionNext() { if(currentNum) db.ref('stock/'+currentNum).update({status:'DONE'}); findNumber(); }
-        function clearSessionAndStop() { if(listenerRef) listenerRef.off(); currentNum = null; clearSessionData(); document.getElementById('pageActive').classList.add('hidden'); document.getElementById('pageMenu').classList.remove('hidden'); }
-        function resetUI() { document.getElementById('statusWait').classList.remove('hidden'); document.getElementById('myOTP').classList.add('hidden'); document.getElementById('myOTP').innerText = "---"; document.getElementById('btnBad').style.display = 'block'; document.getElementById('btnNext').style.display = 'none'; }
+        function actionNext() {
+            if(currentNum) {
+                db.ref(DB_STOCK_PATH+'/'+currentNum).update({status:'DONE'});
+                if(listenerRef) listenerRef.off();
+            }
+            findNewNumber();
+        }
 
-        // --- GLOBAL & SYNC ---
-        function initGlobalFeed() {
-            const feed = document.getElementById('globalFeedList');
-            const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
-            const tsStart = startOfDay.getTime();
-            const query = db.ref('stock').orderByChild('last_update').limitToLast(40);
-            const render = (snap) => {
+        // --- HISTORY ---
+        function initHistory() {
+            renderHistoryList();
+            db.ref(DB_STOCK_PATH).orderByChild('last_update').limitToLast(20).on('child_changed', snap => {
                 const d = snap.val();
-                const key = snap.key;
-                if(d.op_name === currentUser && d.otp && d.otp.length > 2) upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
-                if(d.otp && d.otp.length > 2 && d.last_update >= tsStart) {
-                    if(document.getElementById('glog-'+key)) return;
-                    if(feed.innerText.includes('Menunggu')) feed.innerHTML = "";
-                    const uName = d.op_name || "User";
-                    const flag = getFlag(d.country || "");
-                    const dt = new Date(d.last_update);
-                    const timeStr = dt.getHours().toString().padStart(2,'0') + ":" + dt.getMinutes().toString().padStart(2,'0');
-                    const div = document.createElement('div');
-                    div.id = 'glog-'+key; div.className = 'g-item';
-                    div.innerHTML = `<div class="g-user">${uName} ( ${d.country || ""} ${flag} )</div><div class="g-msg">FB-<span class="x-green">XXXXX</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">XXXXX</span></div><div class="g-time">${timeStr}</div>`;
-                    feed.insertBefore(div, feed.firstChild);
-                }
-            };
-            query.on('child_added', render); query.on('child_changed', render);
-        }
-
-        function upsertPersonalHistory(num, country, otpVal, status) {
-            const index = myHistory.findIndex(item => item.num === num);
-            if(index > -1) {
-                if(status === 'SUCCESS' && myHistory[index].otp === 'PENDING') {
-                     myHistory[index].otp = otpVal; myHistory[index].status = 'SUCCESS';
-                     new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-                }
-            } else {
-                myHistory.unshift({ num: num, country: country, otp: otpVal, status: status });
-            }
-            localStorage.setItem(LS_KEY_HIST, JSON.stringify(myHistory));
-            renderPersonalHistory();
-        }
-
-        function renderPersonalHistory() {
-            const feed = document.getElementById('personalFeedList');
-            if(myHistory.length === 0) { feed.innerHTML = '<div style="text-align:center; padding:15px; color:#444; font-size:10px;">Belum ada history.</div>'; return; }
-            feed.innerHTML = "";
-            myHistory.forEach(item => {
-                const flag = getFlag(item.country);
-                let msgDisplay = item.otp === "PENDING" ? `<span style="color:#f59e0b; font-weight:bold;">MENUNGGU KODE... (PENDING)</span>` : `FB-<span class="x-green">${item.otp}</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">${item.otp}</span>`;
-                const div = document.createElement('div');
-                div.className = `p-item ${item.otp === "PENDING" ? "p-pending" : "p-success"}`;
-                div.innerHTML = `<div class="col-sms"><span class="sms-country">${flag} ${item.country || "UNK"}</span><span class="sms-num">${item.num}</span></div><div class="col-app">FACEBOOK</div><div class="col-msg">${msgDisplay}</div>`;
-                feed.appendChild(div);
+                const item = myHistory.find(i => i.num === d.number && i.status === 'PENDING');
+                if(item && d.otp && d.otp.length > 2) upsertHistory(d.number, d.country, d.otp, 'SUCCESS');
             });
         }
 
-        function copyText(val) {
-            if(!val || val.includes("...") || val.includes("---")) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(val).catch(err => { fallbackCopyText(val); }); } else { fallbackCopyText(val); }
+        function upsertHistory(num, country, otpVal, status) {
+            const idx = myHistory.findIndex(i => i.num === num);
+            if(idx > -1) {
+                if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') {
+                    myHistory[idx].otp = otpVal; myHistory[idx].status = 'SUCCESS';
+                    audioBeep.play().catch(()=>{});
+                }
+            } else {
+                myHistory.unshift({ num, country, otp: otpVal, status });
+            }
+            localStorage.setItem(LS_KEY_HIST, JSON.stringify(myHistory));
+            renderHistoryList();
         }
-        function fallbackCopyText(val) {
-            var textArea = document.createElement("textarea"); textArea.value = val; textArea.style.top = "0"; textArea.style.left = "0"; textArea.style.position = "fixed";
-            document.body.appendChild(textArea); textArea.focus(); textArea.select();
-            try { document.execCommand('copy'); } catch (err) {} document.body.removeChild(textArea);
+
+        function renderHistoryList() {
+            const c = document.getElementById('historyContainer');
+            if(myHistory.length === 0) return;
+            c.innerHTML = "";
+            myHistory.forEach(i => {
+                const flag = getFlag(i.country);
+                const cls = i.status === 'PENDING' ? 'pending' : 'success';
+                const msg = i.status === 'PENDING' ? 'Menunggu Kode...' : `OTP: ${i.otp}`;
+                c.innerHTML += `<div class="hist-card ${cls}"><div><div style="font-weight:bold;font-size:11px;">${flag} ${i.country}</div><div style="font-family:monospace;color:#aaa;font-size:12px;">${i.num}</div></div><div style="font-weight:bold;color:${i.status==='PENDING'?'#fbbf24':'#4ade80'}">${msg}</div></div>`;
+            });
         }
+
+        // --- CHAT SYSTEM (JALUR KHUSUS: chat_main) ---
+        function initChat() {
+            // Ambil 50 pesan terakhir
+            db.ref(DB_CHAT_PATH).limitToLast(50).on('child_added', snap => {
+                const d = snap.val();
+                appendChat(d.name, d.msg, d.id === mySessionID);
+            });
+        }
+        function sendChat() {
+            const i = document.getElementById('chatMsg');
+            const m = i.value.trim();
+            if(m) { 
+                db.ref(DB_CHAT_PATH).push({ 
+                    name:currentUser, 
+                    msg:m, 
+                    id:mySessionID, 
+                    time:Date.now() 
+                }); 
+                i.value=""; 
+            }
+        }
+        function appendChat(name, msg, self) {
+            const b = document.getElementById('chatBox');
+            b.innerHTML += `<div class="chat-bubble ${self?'chat-self':'chat-other'}"><span class="chat-name">${name}</span>${msg}</div>`;
+            b.scrollTop = b.scrollHeight;
+        }
+
+        // --- UTILS ---
+        function showActiveUI() { document.getElementById('menuArea').classList.add('hidden'); document.getElementById('workArea').classList.remove('hidden'); document.getElementById('txtNum').innerText = currentNum; }
+        function stopFarmingUI() { if(listenerRef) listenerRef.off(); document.getElementById('workArea').classList.add('hidden'); document.getElementById('menuArea').classList.remove('hidden'); }
+        function resetUI() { document.getElementById('statusWait').classList.remove('hidden'); document.getElementById('myOTP').classList.add('hidden'); }
+        function loadCountries() { db.ref('settings/countries').on('value', s => { const d = s.val(); const sel = document.getElementById('countryPick'); sel.innerHTML=""; if(d) Object.keys(d).forEach(k => { sel.innerHTML += `<option value="${k}">${d[k]}</option>`; }); }); }
+        function copyText(val) { if(navigator.clipboard) navigator.clipboard.writeText(val); }
+        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷" };
+        function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
     </script>
 </body>
 </html>
