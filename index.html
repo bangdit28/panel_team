@@ -7,187 +7,142 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        /* === RESET CSS (BIAR GAK OFFSIDE) === */
+        /* RESET CSS BIAR PAS LAYAR HP */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 15px; margin: 0; width: 100vw; min-height: 100vh; overflow-x: hidden;
-        }
-        
-        /* CONTAINER UTAMA (PAS DI TENGAH) */
-        .box { 
-            width: 100%; max-width: 400px; background: #1e293b; 
-            padding: 20px; border-radius: 12px; border: 1px solid #334155; 
-            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            position: relative; margin: 0 auto 20px auto;
+            margin: 0; padding: 10px; min-height: 100vh;
+            display: flex; flex-direction: column; 
         }
 
-        /* LOGIN OVERLAY (FULLSCREEN FIX) */
-        #loginScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0f172a; z-index: 99999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px;
+        /* CONTAINER UTAMA (FULL WIDTH) */
+        .box { 
+            width: 100%; background: #1e293b; 
+            padding: 20px; border-radius: 12px; border: 1px solid #334155; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            margin-bottom: 15px;
         }
-        .login-box { width: 100%; max-width: 300px; text-align: center; }
 
         /* HEADER */
-        h2 { margin: 0; color: #f43f5e; letter-spacing: 1px; font-size: 20px; } 
-        .sub { font-size: 10px; color: #666; margin-bottom: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        h2 { margin: 0; color: #f43f5e; font-size: 18px; }
+        .op-name { font-size: 11px; color: #aaa; }
 
-        /* NOTIFIKASI */
-        .news-container { 
-            width: 100%; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; 
-            border-radius: 6px; margin-bottom: 15px; overflow: hidden; white-space: nowrap; display: none; 
-        }
-        .news-text { 
-            display: inline-block; padding: 8px; font-size: 11px; 
-            font-weight: bold; color: #ffd700; font-family: monospace; 
-            animation: marquee 10s linear infinite; 
-        }
-        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        /* INPUT & SELECT (FULL RATA) */
+        select, input { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+        input { background: #000; border: 1px solid #f43f5e; text-align: center; }
 
-        /* INPUT & SELECT */
-        input { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #f43f5e; color: #fff; border-radius: 6px; text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
-        select { width: 100%; padding: 12px; background: #334155; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 13px; }
-        
-        /* BUTTONS */
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+        /* BUTTONS (FULL RATA) */
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
         .btn-next { background: #22c55e; color: #000; display: none; }
-        .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; }
+        .btn-stop { background: transparent; border: 1px solid #333; color: #666; width: auto; padding: 8px 20px; margin-top: 20px; font-size: 11px; display: block; margin-left: auto; margin-right: auto; }
 
-        /* NOMOR & OTP */
+        /* LAYAR AKTIF */
         .display-num { 
-            font-size: 24px; font-family: monospace; background: #000; 
-            padding: 15px; border-radius: 10px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; cursor: pointer; color: #fff; position: relative; word-break: break-all;
+            font-size: 26px; font-family: monospace; background: #000; 
+            padding: 15px; border-radius: 8px; border: 2px dashed #f43f5e; 
+            margin: 10px 0; text-align: center; cursor: pointer; position: relative;
         }
-        .country-tag { 
-            position: absolute; top: -9px; left: 50%; transform: translateX(-50%); 
-            background: #f43f5e; color: #fff; font-size: 8px; font-weight: bold; 
-            padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+        .country-badge {
+            position: absolute; top: -10px; right: 10px; 
+            background: #f43f5e; color: #fff; font-size: 10px; 
+            padding: 2px 8px; border-radius: 4px; font-weight: bold;
         }
-        
-        .otp-area { min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 15px; }
-        .otp-code { font-size: 36px; font-weight: bold; color: #4ade80; letter-spacing: 3px; animation: pulse 1s infinite; cursor: pointer; }
-        .waiting { font-size: 11px; color: #fbbf24; }
 
-        /* GLOBAL HISTORY BOX (FIXED WIDTH) */
+        .otp-area { 
+            background: rgba(255,255,255,0.03); border-radius: 8px; 
+            padding: 15px; text-align: center; margin-bottom: 15px; 
+            min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .otp-code { font-size: 42px; font-weight: bold; color: #4ade80; letter-spacing: 4px; cursor: pointer; animation: pop 0.2s; }
+        .waiting { font-size: 12px; color: #fbbf24; animation: blink 1.5s infinite; }
+
+        /* HISTORY (FULL WIDTH) */
         .history-box { 
             width: 100%; background: #080808; border: 1px solid #222; 
-            border-radius: 10px; padding: 10px; text-align: left; 
-            height: 250px; overflow-y: auto; margin-top: 10px;
+            border-radius: 10px; padding: 10px; height: 300px; overflow-y: auto; 
         }
-        .history-title { font-size: 10px; color: #f43f5e; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        
-        .log-item { margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 2px solid #333; background: #111; animation: slideIn 0.3s; }
-        .log-top { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; color: #888; }
-        .log-user { color: #f43f5e; font-weight: bold; }
-        .log-country { color: #aaa; font-size: 9px; margin-left: 5px; }
-        .log-time { color: #555; font-size: 9px; font-family: monospace; }
-        /* Fix text overflow */
-        .log-msg { color: #ccc; font-style: italic; font-family: monospace; display: block; font-size: 10px; line-height: 1.3; word-break: break-word; }
-        .log-code-hl { color: #4ade80; font-weight: bold; }
+        .history-header { font-size: 11px; color: #f43f5e; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* PERSONAL HISTORY */
-        .iva-history-container { width: 100%; margin-top: 20px; border-top: 1px dashed #334155; padding-top: 10px; }
-        .iva-title { font-size: 10px; color: #4ade80; font-weight: bold; margin-bottom: 10px; text-align: left; }
-        .iva-row { display: flex; background: #111; color: #ddd; border: 1px solid #333; border-radius: 6px; margin-bottom: 5px; align-items: center; font-size: 10px; }
-        .iva-col-left { flex: 1.2; padding: 8px; border-right: 1px solid #333; }
-        .iva-country { font-weight: bold; font-size: 9px; color: #fff; }
-        .iva-number { font-size: 9px; color: #666; font-family: monospace; }
-        .iva-col-mid { flex: 0.7; padding: 5px; border-right: 1px solid #333; text-align: center; font-weight: bold; color: #38bdf8; font-size: 9px; }
-        .iva-col-right { flex: 2; padding: 8px; color: #aaa; font-size: 9px; line-height: 1.3; word-break: break-word; }
-        .iva-code-hl { font-weight: bold; color: #4ade80; }
-        
-        .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
-        .page-btn { background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; }
-        .page-btn.active { background: #f43f5e; border-color: #f43f5e; }
+        /* ITEM HISTORY (STYLE IVASMS DARK) */
+        .iva-row { 
+            display: flex; background: #111; color: #ccc; 
+            border: 1px solid #333; border-radius: 6px; 
+            margin-bottom: 5px; align-items: center; font-size: 11px;
+        }
+        .iva-col-left { flex: 1.5; padding: 8px; border-right: 1px solid #333; font-size: 10px; color: #aaa; }
+        .iva-col-right { flex: 2.5; padding: 8px; color: #fff; font-size: 10px; line-height: 1.3; }
+        .hl-otp { color: #4ade80; font-weight: bold; font-size: 12px; }
 
         .hidden { display: none !important; }
-        .spacer { height: 15px; }
         
-        #toast-container { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 90%; max-width: 350px; }
-        .toast { background: rgba(0,0,0,0.95); border-left: 3px solid #f59e0b; color: #fff; padding: 10px; margin-bottom: 8px; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+        /* LOGIN OVERLAY */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-inner { width: 80%; max-width: 300px; text-align: center; }
 
-        @keyframes pulse { 50% { opacity: 0.6; } }
-        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
     <!-- LOGIN -->
     <div id="loginOverlay">
-        <div class="login-box">
-            <h2 style="margin-bottom:15px;">LOGIN TEAM</h2>
-            <input type="text" id="inputName" placeholder="Nama Panggilan...">
-            <button class="btn-start" onclick="processLogin()">MASUK PANEL</button>
+        <div class="login-inner">
+            <h2 style="margin-bottom:20px;">VIP LOGIN</h2>
+            <input type="text" id="inputName" placeholder="Nama Kamu...">
+            <button class="btn-start" onclick="doLogin()">MASUK</button>
         </div>
     </div>
 
-    <!-- MAIN -->
-    <div id="mainApp" class="hidden">
+    <!-- MAIN APP -->
+    <div id="mainApp" class="hidden" style="width: 100%;">
+        
         <div class="box">
-            <div id="newsContainer" class="news-container"><div id="newsText" class="news-text">...</div></div>
-
             <div class="header">
                 <h2>BOT OTP BARUDAK TASIK</h2>
-                <div class="sub" id="welcomeMsg">welcome</div>
+                <div class="op-name" id="opName">...</div>
             </div>
-            
-            <!-- MENU -->
+
+            <!-- MENU PILIH -->
             <div id="menu">
-                <label style="font-size:10px; color:#aaa; display:block; text-align:left; margin-bottom:5px;">PILIH NEGARA</label>
                 <select id="countryPick"><option>Loading...</option></select>
-                <button class="btn-start" onclick="startLoop()">MULAI</button>
-
-                <div class="spacer"></div>
-
-                <!-- GLOBAL HISTORY -->
-                <div class="history-box">
-                    <div class="history-title">
-                        <span>🌏 GLOBAL FEED</span>
-                        <span id="dateDisplay" style="font-size:9px; color:#666;">...</span>
-                    </div>
-                    <div id="feedListGlobal"></div>
-                </div>
+                <button class="btn-start" onclick="startFarming()">🚀 AMBIL NOMOR (AUTO)</button>
             </div>
 
-            <!-- AKTIF -->
+            <!-- AREA KERJA -->
             <div id="active" class="hidden">
-                <div class="display-num" id="myNum" onclick="copyNum()">
-                    <div id="countryBadge" class="country-tag">UNK</div>
-                    <span id="txtNum">Mencari...</span>
+                <div class="display-num" onclick="copyText('txtNum')">
+                    <span id="txtNum">...</span>
+                    <div class="country-badge" id="cBadge">UNK</div>
                 </div>
-                
+
                 <div class="otp-area">
                     <div id="statusWait" class="waiting">⏳ MENUNGGU SMS...</div>
-                    <div id="myOTP" class="otp-code hidden" onclick="copyOTP()">---</div>
+                    <div id="myOTP" class="otp-code hidden" onclick="copyText('myOTP')">---</div>
                 </div>
 
-                <button id="btnBad" class="btn-bad" onclick="nextBad()">🔄 GANTI</button>
-                <button id="btnNext" class="btn-next" onclick="nextSuccess()">➡️ LANJUT BARU</button>
-                <button class="btn-stop" onclick="stopLoop()">⏹️ STOP</button>
-
-                <!-- PERSONAL HISTORY -->
-                <div class="iva-history-container">
-                    <div class="iva-title">👤 RIWAYAT SAYA</div>
-                    <div id="personalFeed"></div>
-                    <div id="paginationControl" class="pagination"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btnBad" class="btn-bad" onclick="actionBad()">❌ GANTI</button>
+                    <button id="btnNext" class="btn-next" onclick="actionNext()">➡️ LANJUT</button>
                 </div>
+                
+                <button class="btn-stop" onclick="stopFarming()">⏹️ KEMBALI KE MENU</button>
             </div>
         </div>
+
+        <!-- HISTORY -->
+        <div class="history-box">
+            <div class="history-header">🔴 RIWAYAT LIVE (PRIBADI & GLOBAL)</div>
+            <div id="feedList"></div>
+        </div>
+
     </div>
 
     <script>
-        // ==========================================
-        // 🔥 PASTE CONFIG FIREBASE SAMA PERSIS 🔥
-        // ==========================================
+        // 🔥 CONFIG FIREBASE 🔥
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -197,269 +152,217 @@
   messagingSenderId: "1041472357696",
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
-        // ==========================================
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // VARS
+
+        let currentUser = localStorage.getItem('vip_user');
         let currentNum = null;
-        let selectedRegionCode = ""; 
-        let selectedRegionName = ""; 
-        let userName = localStorage.getItem('vip_username') || "";
-        let isListening = false;
-        let lastProcessedOTP = ""; 
-        const mySessionID = "USER_" + Math.floor(Math.random() * 999999);
-        const todayString = new Date().toDateString();
+        let selectedRegion = "";
+        let listenerRef = null;
+        const mySessionID = "U_" + Math.floor(Math.random() * 999999);
 
-        let myHistoryData = [];
-        const itemsPerPage = 5;
-        let currentPage = 1;
-        let bgListeners = [];
+        // --- 1. LOGIN & INIT ---
+        if(currentUser) initApp();
 
-        // INIT DATE
-        const today = new Date();
-        document.getElementById('dateDisplay').innerText = today.toLocaleDateString('id-ID');
-
-        // CHECK LOGIN
-        function checkSession() {
-            if(userName) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('mainApp').classList.remove('hidden');
-                document.getElementById('welcomeMsg').innerText = "Op: " + userName;
-                
-                const savedNum = localStorage.getItem('active_num');
-                if(savedNum) restoreActiveSession(savedNum);
-            } else {
-                document.getElementById('loginOverlay').style.display = 'flex';
-                document.getElementById('mainApp').classList.add('hidden');
-            }
+        function doLogin() {
+            const n = document.getElementById('inputName').value.trim();
+            if(!n) return alert("Isi nama!");
+            currentUser = n;
+            localStorage.setItem('vip_user', n);
+            initApp();
         }
 
-        function processLogin() {
-            const name = document.getElementById('inputName').value.trim();
-            if(name) {
-                userName = name; localStorage.setItem('vip_username', name);
-                checkSession();
-            } else alert("Isi nama!");
+        function initApp() {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('opName').innerText = "Op: " + currentUser;
+            loadCountries();
         }
 
-        function restoreActiveSession(num) {
-            currentNum = num;
-            selectedRegionCode = localStorage.getItem('active_region_code');
-            selectedRegionName = localStorage.getItem('active_region_name') || selectedRegionCode;
+        // --- 2. LOAD COUNTRIES ---
+        function loadCountries() {
+            db.ref('settings/countries').on('value', snap => {
+                const d = snap.val();
+                const sel = document.getElementById('countryPick');
+                sel.innerHTML = "";
+                if(d) {
+                    Object.keys(d).forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k; opt.innerText = d[k];
+                        sel.appendChild(opt);
+                    });
+                } else sel.innerHTML = "<option>Kosong</option>";
+            });
+        }
+
+        // --- 3. FARMING LOGIC (DIRECT & FAST) ---
+        function startFarming() {
+            selectedRegion = document.getElementById('countryPick').value;
+            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
             
+            document.getElementById('cBadge').innerText = selectedRegion;
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('active').classList.remove('hidden');
-            document.getElementById('txtNum').innerText = currentNum;
-            document.getElementById('countryBadge').innerText = selectedRegionName;
-            listenOTP(currentNum);
-        }
-
-        checkSession();
-
-        // LOADERS
-        db.ref('settings/countries').on('value', snap => {
-            const data = snap.val();
-            const select = document.getElementById('countryPick');
-            select.innerHTML = "";
-            if(data) {
-                Object.keys(data).forEach(key => {
-                    const opt = document.createElement('option');
-                    opt.value = key; opt.innerText = data[key];
-                    select.appendChild(opt);
-                });
-            } else select.innerHTML = "<option>Kosong</option>";
-        });
-
-        db.ref('system/notification').on('value', snap => {
-            const msg = snap.val();
-            const c = document.getElementById('newsContainer');
-            if(msg) { document.getElementById('newsText').innerText = "📢 " + msg; c.style.display = 'block'; }
-            else c.style.display = 'none';
-        });
-
-        function startLoop() {
-            const select = document.getElementById('countryPick');
-            if(select.value === 'Kosong') return alert("Admin belum set negara!");
             
-            selectedRegionCode = select.value;
-            selectedRegionName = select.options[select.selectedIndex].text;
-            document.getElementById('countryBadge').innerText = selectedRegionName;
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('active').classList.remove('hidden');
             findNumber();
         }
 
         function findNumber() {
             resetUI();
             document.getElementById('txtNum').innerText = "Mencari...";
-            localStorage.removeItem('active_num');
-
+            
+            // 1. Ambil Snapshot Stok
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
-                let cands = [];
+                let candidates = [];
                 if(data) {
                     Object.keys(data).forEach(k => {
-                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegionCode) cands.push(k);
+                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) candidates.push(k);
                     });
                 }
-                if(cands.length === 0) { alert("Stok Habis!"); stopLoop(); return; }
-                cands.sort(() => Math.random() - 0.5);
-                tryGrab(cands, 0);
-            });
-        }
 
-        function tryGrab(list, index) {
-            if(index >= list.length) { alert("Gagal ambil."); stopLoop(); return; }
-            const num = list[index];
-            db.ref('stock/'+num).update({ status: 'TAKEN', owner: mySessionID }, (e) => {
-                if(e) tryGrab(list, index+1);
-                else {
-                    setTimeout(() => {
-                        db.ref('stock/'+num).once('value', s => {
-                            if(s.val() && s.val().owner === mySessionID) {
-                                currentNum = num;
-                                document.getElementById('txtNum').innerText = num;
-                                localStorage.setItem('active_num', currentNum);
-                                localStorage.setItem('active_region_code', selectedRegionCode);
-                                localStorage.setItem('active_region_name', selectedRegionName);
-                                copyText(num);
-                                listenOTP(num);
-                            } else tryGrab(list, index+1);
-                        });
-                    }, 300);
+                if(candidates.length === 0) {
+                    alert("Stok Habis!");
+                    stopFarming(); return;
                 }
+
+                // 2. Acak & Ambil
+                candidates.sort(() => Math.random() - 0.5);
+                const target = candidates[0];
+
+                // 3. Direct Lock (Tanpa Transaction Ribet)
+                db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID }, (err) => {
+                    if(!err) {
+                        // Double check ownership (Anti Tabrak)
+                        db.ref('stock/'+target).once('value', s => {
+                            if(s.val().owner === mySessionID) {
+                                // SUKSES MILIK KITA
+                                currentNum = target;
+                                document.getElementById('txtNum').innerText = currentNum;
+                                copyText(currentNum);
+                                attachListener(currentNum);
+                            } else {
+                                // GAGAL (KEDULUAN), ULANGI
+                                findNumber();
+                            }
+                        });
+                    } else findNumber();
+                });
             });
         }
 
-        function listen(num) {
-            isListening = true; lastProcessedOTP = "";
-            db.ref('stock/'+num).on('value', snap => {
+        // --- 4. REALTIME LISTENER (FIX DELAY) ---
+        function attachListener(num) {
+            if(listenerRef) listenerRef.off(); // Matikan listener lama
+            
+            // Langsung dengerin path OTP
+            listenerRef = db.ref('stock/'+num);
+            
+            listenerRef.on('value', snap => {
                 const d = snap.val();
-                if(d && d.otp && isListening && d.otp !== lastProcessedOTP) {
-                    lastProcessedOTP = d.otp;
-                    showOTP(d.otp);
-                    db.ref('stock/'+num).update({ status: 'DONE' });
-                    if(!d.otp_pushed) {
-                        const msgContent = d.full_msg || (d.otp + " adalah kode FB");
-                        pushHistory(d.otp, msgContent, num);
-                        db.ref('stock/'+num).update({ otp_pushed: true });
+                
+                // JIKA OTP MUNCUL & BELUM PROSES
+                if(d && d.otp && d.otp.length > 3) {
+                    // Update UI Instant
+                    document.getElementById('statusWait').classList.add('hidden');
+                    const el = document.getElementById('myOTP');
+                    el.innerText = d.otp;
+                    el.classList.remove('hidden');
+                    
+                    // Buttons
+                    document.getElementById('btnBad').style.display = 'none';
+                    document.getElementById('btnNext').style.display = 'block';
+
+                    // Cek biar ga spam bunyi/copy
+                    if(document.getElementById('myOTP').getAttribute('data-last') !== d.otp) {
+                        document.getElementById('myOTP').setAttribute('data-last', d.otp);
+                        new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
+                        copyText(d.otp);
                     }
                 }
             });
         }
 
-        function moveToBackground(num) {
-            const bgRef = db.ref('stock/' + num);
-            bgRef.on('value', snap => {
-                const d = snap.val();
-                if(d && d.otp && !d.otp_pushed) {
-                    const msgContent = d.full_msg || (d.otp + " adalah kode FB (DELAY)");
-                    pushHistory(d.otp, msgContent, num);
-                    bgRef.update({ status: 'DONE', otp_pushed: true });
-                    showToast(num, d.otp);
-                    new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play();
-                    bgRef.off();
-                }
-            });
-            setTimeout(() => bgRef.off(), 600000); 
+        // --- ACTIONS ---
+        function actionBad() {
+            if(currentNum) {
+                // Tandai BAD & Pindahin ke Background (Delay Catcher)
+                db.ref('stock/'+currentNum).update({status:'BAD'}); 
+                if(listenerRef) listenerRef.off();
+            }
+            findNumber();
         }
 
-        function showToast(num, code) {
-            const container = document.getElementById('toast-container');
-            const div = document.createElement('div');
-            div.className = 'toast';
-            div.innerHTML = `<div><div>🔔 OTP TELAT MASUK!</div><div style="font-size:10px; color:#aaa;">${num}</div></div><div style="font-size:14px;color:#00e676;font-weight:bold" onclick="copyText('${code}')">${code}</div>`;
-            container.appendChild(div);
-            setTimeout(() => div.remove(), 8000);
+        function actionNext() {
+            if(currentNum) {
+                // Tandai DONE
+                db.ref('stock/'+currentNum).update({status:'DONE'});
+                if(listenerRef) listenerRef.off();
+            }
+            findNumber();
         }
 
-        function showOTP(c) {
-            document.getElementById('statusWait').classList.add('hidden');
-            const el = document.getElementById('myOTP');
-            el.innerText = c; el.classList.remove('hidden');
-            new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
-            copyText(c);
-            document.getElementById('btnBad').style.display = 'none';
-            document.getElementById('btnNext').style.display = 'block';
+        function stopFarming() {
+            if(currentNum && listenerRef) listenerRef.off();
+            document.getElementById('active').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
         }
 
-        function pushHistory(c, m, num) {
-            db.ref('history').push({ name: userName, country: selectedRegionName, code: c, msg: m, number: num, time: Date.now() });
+        function resetUI() {
+            document.getElementById('statusWait').classList.remove('hidden');
+            document.getElementById('myOTP').classList.add('hidden');
+            document.getElementById('myOTP').setAttribute('data-last', '');
+            document.getElementById('btnBad').style.display = 'block';
+            document.getElementById('btnNext').style.display = 'none';
         }
 
-        db.ref('history').limitToLast(30).on('child_added', snap => {
+        // --- HISTORY FEED (STYLE IVASMS) ---
+        const todayStr = new Date().toDateString();
+        
+        db.ref('stock').orderByChild('last_update').limitToLast(20).on('child_changed', snap => {
             const d = snap.val();
-            if(new Date(d.time).toDateString() !== todayString) return;
-            const tm = new Date(d.time).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-            let cm = d.msg.replaceAll(d.code, `<span class="log-code-hl">XXXXX</span>`);
-            if(!cm.includes('XXXXX')) cm += ' <span class="log-code-hl">XXXXX</span>';
-
-            const divG = document.createElement('div');
-            divG.className = 'log-item';
-            divG.innerHTML = `
-                <div class="log-top">
-                    <div><span class="log-user">${d.name}</span> <span class="log-country">(${d.country})</span></div>
-                    <span class="log-time">${tm}</span>
-                </div>
-                <span class="log-msg">${cm}</span>
-            `;
-            document.getElementById('feedListGlobal').prepend(divG);
-
-            if(d.name === userName) {
-                myHistoryData.unshift({ country: d.country, number: d.number, msg: d.msg, code: d.code, time: tm });
-                renderPersonalHistory();
+            // Filter: Harus ada OTP, tanggal hari ini, dan status DONE/BAD
+            if(d.otp && new Date(d.timestamp).toDateString() === todayString) {
+                addLog(d);
             }
         });
 
-        function renderPersonalHistory() {
-            const feed = document.getElementById('personalFeed');
-            feed.innerHTML = ""; 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = myHistoryData.slice(start, end);
+        function addLog(d) {
+            const feed = document.getElementById('feedList');
+            const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            
+            // Sensor OTP
+            let msg = d.full_msg || (d.otp + " adalah kode FB");
+            msg = msg.replaceAll(d.otp, `<span class="hl-otp">XXXXX</span>`);
 
-            pageData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'iva-row';
-                const realMsg = item.msg.replace(item.code, `<span class="iva-code-hl">${item.code}</span>`);
-                div.innerHTML = `
-                    <div class="iva-col-left"><div class="iva-country">${item.country}</div><div class="iva-number">${item.number}</div></div>
-                    <div class="iva-col-mid">Facebook</div>
-                    <div class="iva-col-right">${realMsg}</div>
-                `;
-                feed.appendChild(div);
-            });
-            renderPaginationControls();
+            const div = document.createElement('div');
+            div.className = 'iva-row';
+            div.innerHTML = `
+                <div class="iva-col-left">
+                    <div>${d.country}</div>
+                    <div style="font-family:monospace; color:#666;">${d.number}</div>
+                </div>
+                <div class="iva-col-right">
+                    <div style="display:flex; justify-content:space-between; color:#555; font-size:9px; margin-bottom:2px;">
+                        <span>FB VERIFY</span>
+                        <span>${time}</span>
+                    </div>
+                    ${msg}
+                </div>
+            `;
+            
+            // Taruh paling atas
+            feed.insertBefore(div, feed.firstChild);
+            
+            // Limit tampilan history biar ga berat
+            if(feed.children.length > 20) feed.removeChild(feed.lastChild);
         }
 
-        function renderPaginationControls() {
-            const container = document.getElementById('paginationControl');
-            container.innerHTML = "";
-            const totalPages = Math.ceil(myHistoryData.length / itemsPerPage);
-            if (totalPages <= 1) return;
-            for (let i = 1; i <= totalPages; i++) {
-                const btn = document.createElement('button');
-                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-                btn.innerText = i;
-                btn.onclick = () => { currentPage = i; renderPersonalHistory(); };
-                container.appendChild(btn);
-            }
+        function copyText(val) {
+            const t = document.createElement("textarea"); t.value = val; document.body.appendChild(t);
+            t.select(); document.execCommand('copy'); document.body.removeChild(t);
         }
-
-        function nextBad() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'BAD'}); db.ref('stock/'+currentNum).off(); moveToBackground(currentNum); } findNumber(); }
-        function nextSuccess() { if(currentNum) db.ref('stock/'+currentNum).off(); findNumber(); }
-        function stopLoop() { 
-            if(currentNum) db.ref('stock/'+currentNum).off(); 
-            localStorage.removeItem('active_num');
-            document.getElementById('active').classList.add('hidden'); 
-            document.getElementById('menu').classList.remove('hidden'); 
-        }
-        function resetUI() { isListening=false; document.getElementById('statusWait').classList.remove('hidden'); document.getElementById('myOTP').classList.add('hidden'); document.getElementById('btnBad').style.display='block'; document.getElementById('btnNext').style.display='none'; }
-        function copyNum() { copyText(document.getElementById('txtNum').innerText); }
-        function copyOTP() { copyText(document.getElementById('myOTP').innerText); }
-        function copyText(v) { navigator.clipboard.writeText(v).catch(()=>{}); }
     </script>
 </body>
 </html>
