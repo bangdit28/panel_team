@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>test</title>
+    <title>AHAHA</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,12 +12,12 @@
         /* BASE & RESET */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; 
+            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
             display: flex; flex-direction: column; 
         }
 
-        /* CONTAINER BOX */
+        /* CONTAINER */
         .box { 
             width: 100%; background: #1e293b; 
             padding: 15px; border-radius: 12px; border: 1px solid #334155; 
@@ -27,14 +27,13 @@
 
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; }
+        h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
         .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155; }
 
-        /* INPUTS */
+        /* CONTROLS */
         select, input { width: 100%; padding: 12px; background: #334155; color: #fff; border: 1px solid #475569; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
         input { background: #000; border-color: #f43f5e; text-align: center; }
         
-        /* BUTTONS */
         button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
         button:active { transform: scale(0.98); }
         .btn-start { background: #f43f5e; color: #fff; }
@@ -42,54 +41,55 @@
         .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; display: block; margin-left: auto; margin-right: auto; }
 
-        /* FARMING DISPLAY */
+        /* DISPLAY NUMBER (ACTIVE) */
         .display-num { 
-            font-size: 22px; font-family: monospace; background: #000; 
+            font-size: 24px; font-family: monospace; background: #000; 
             padding: 12px; border-radius: 8px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; text-align: center; cursor: pointer; position: relative; color: #fff;
+            margin: 10px 0; text-align: center; cursor: pointer; color: #fff;
         }
-        .country-badge {
-            position: absolute; top: -8px; right: 10px; 
-            background: #f43f5e; color: #fff; font-size: 9px; 
-            padding: 2px 6px; border-radius: 4px; font-weight: bold;
-        }
-
+        
         .otp-area { 
             background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155;
             padding: 15px; text-align: center; margin-bottom: 15px; 
             min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;
         }
-        .otp-code { 
-            font-size: 42px; font-weight: 800; color: #4ade80; 
-            letter-spacing: 4px; cursor: pointer; animation: popIn 0.3s; 
-        }
+        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer;}
         .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
-        /* HISTORY BOX STYLES */
+        /* --- GLOBAL FEED STYLE (NEW REQUEST) --- */
         .history-box { 
             width: 100%; background: #0f172a; border: 1px solid #334155; 
-            border-radius: 10px; padding: 10px; max-height: 300px; overflow-y: auto; 
+            border-radius: 10px; padding: 10px; max-height: 400px; overflow-y: auto; 
             margin-top: 5px;
         }
-        .h-title { font-size: 11px; color: #f43f5e; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 5px; display: flex; justify-content: space-between; }
-        
-        /* LOG ITEM */
-        .log-item { 
-            display: flex; background: #1e293b; color: #ccc; 
-            border: 1px solid #334155; border-radius: 6px; 
-            margin-bottom: 5px; padding: 8px; align-items: center; font-size: 10px;
+        .h-title { font-size: 11px; color: #f43f5e; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase; }
+
+        /* CUSTOM FEED ITEM */
+        .g-item {
+            background: #1e293b; border: 1px solid #334155; border-radius: 8px;
+            padding: 10px; margin-bottom: 8px; font-size: 11px;
         }
-        .log-left { flex: 1; border-right: 1px solid #334155; padding-right: 8px; margin-right: 8px; }
-        .log-right { flex: 2; line-height: 1.3; }
-        
-        .hl-otp-censored { color: #f43f5e; font-weight: bold; letter-spacing: 1px; }
-        .hl-otp-clear { color: #4ade80; font-weight: bold; font-size: 12px; }
-        
+        .g-user {
+            color: #f43f5e; font-weight: bold; margin-bottom: 4px; font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .g-msg {
+            color: #94a3b8; font-family: 'Courier New', monospace; line-height: 1.4;
+        }
+        .x-green { color: #4ade80; font-weight: bold; }
+
+        /* PERSONAL HISTORY STYLE */
+        .p-item {
+            display: flex; justify-content: space-between; background: #1e293b;
+            padding: 8px; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #4ade80;
+            font-size: 10px; color: #ccc;
+        }
+
         .hidden { display: none !important; }
 
         /* LOGIN */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
+        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
 
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.4; } }
@@ -100,48 +100,47 @@
     <!-- LOGIN -->
     <div id="loginOverlay">
         <div class="login-inner">
-            <h2 style="margin-bottom:15px;">VIP SYSTEM</h2>
-            <input type="text" id="inputName" placeholder="Nama Operator...">
-            <button class="btn-start" onclick="doLogin()">MASUK</button>
+            <h2 style="margin-bottom:15px;">VIP V128</h2>
+            <input type="text" id="inputName" placeholder="Nama Kamu (Cth: Bangdit)">
+            <button class="btn-start" onclick="doLogin()">MASUK SYSTEM</button>
         </div>
     </div>
 
     <div id="mainApp" class="hidden">
         
-        <!-- HALAMAN MENU (GLOBAL FEED DISINI) -->
+        <!-- HALAMAN MENU -->
         <div id="pageMenu">
             <div class="box">
                 <div class="header">
-                    <h2>test</h2>
+                    <h2>AHAHAH</h2>
                     <div class="op-name" id="opNameMenu">...</div>
                 </div>
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:10px; color:#aaa;">Pilih Negara:</label>
+                    <label style="font-size:10px; color:#aaa;">Pilih Server Negara:</label>
                     <select id="countryPick"><option>Loading...</option></select>
                     <button class="btn-start" onclick="startFarming()">🚀 AMBIL NOMOR</button>
                 </div>
             </div>
 
-            <!-- GLOBAL LIVE FEED (Hanya muncul di Menu) -->
+            <!-- GLOBAL LIVE FEED (FORMAT BARU) -->
             <div class="history-box">
-                <div class="h-title">🔴 GLOBAL LIVE FEED (SEMUA USER)</div>
+                <div class="h-title">🔴 LIVE GLOBAL FEED</div>
                 <div id="globalFeedList">
-                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Menunggu aktivitas...</div>
+                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Menunggu OTP masuk...</div>
                 </div>
             </div>
         </div>
 
-        <!-- HALAMAN FARMING (PERSONAL HISTORY DISINI) -->
+        <!-- HALAMAN FARMING (PERSONAL) -->
         <div id="pageActive" class="hidden">
             <div class="box">
                 <div class="header">
-                    <h2>ACTIVE NUMBER</h2>
+                    <h2>ACTIVE SESSION</h2>
                     <div class="op-name" id="opNameActive">...</div>
                 </div>
 
                 <div class="display-num" onclick="copyText(document.getElementById('txtNum').innerText)">
                     <span id="txtNum">...</span>
-                    <div class="country-badge" id="cBadge">UNK</div>
                 </div>
 
                 <div class="otp-area">
@@ -157,19 +156,17 @@
                 <button class="btn-stop" onclick="stopFarming()">⏹️ KEMBALI KE MENU</button>
             </div>
 
-            <!-- PERSONAL HISTORY (Hanya muncul di Farming) -->
+            <!-- PERSONAL HISTORY -->
             <div class="history-box">
-                <div class="h-title">👤 RIWAYAT SESI INI (PRIBADI)</div>
-                <div id="personalFeedList">
-                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Belum ada nomor sukses sesi ini.</div>
-                </div>
+                <div class="h-title">👤 HISTORY SAYA</div>
+                <div id="personalFeedList"></div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // 🔥 SETUP FIREBASE (GANTI CONFIG DI SINI) 🔥
+        // 🔥 SETUP FIREBASE (ISI CONFIG LO) 🔥
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -183,24 +180,34 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // VARIABLES
-        let currentUser = localStorage.getItem('vip_user_v127');
+        // VARS
+        let currentUser = localStorage.getItem('vip_user_v128');
         let currentNum = null;
         let selectedRegion = "";
         let listenerRef = null;
         const mySessionID = "U_" + Math.floor(Math.random() * 999999);
-        
-        // AUDIO (NOTIF TUUT)
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
+
+        // MAP BENDERA (BIAR KEREN)
+        const flags = {
+            "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭",
+            "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧",
+            "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷"
+        };
+        function getFlag(name) {
+            if(!name) return "🌍";
+            const up = name.toUpperCase();
+            return flags[up] || "🌍";
+        }
 
         // --- 1. INIT ---
         if(currentUser) initApp();
 
         function doLogin() {
             const n = document.getElementById('inputName').value.trim();
-            if(!n) return alert("Isi nama!");
+            if(!n) return alert("Isi nama operator!");
             currentUser = n;
-            localStorage.setItem('vip_user_v127', n);
+            localStorage.setItem('vip_user_v128', n);
             initApp();
         }
 
@@ -210,7 +217,7 @@
             document.getElementById('opNameMenu').innerText = currentUser;
             document.getElementById('opNameActive').innerText = currentUser;
             loadCountries();
-            initGlobalFeed(); // Start Global Listener
+            initGlobalFeed();
         }
 
         function loadCountries() {
@@ -226,17 +233,11 @@
             });
         }
 
-        // --- 2. FARMING FLOW ---
+        // --- 2. FARMING (PENTING: SAVE NAMA OPERATOR) ---
         function startFarming() {
             selectedRegion = document.getElementById('countryPick').value;
-            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
-            
-            document.getElementById('cBadge').innerText = regionName;
-            
-            // Switch Page
             document.getElementById('pageMenu').classList.add('hidden');
             document.getElementById('pageActive').classList.remove('hidden');
-            
             findNumber();
         }
 
@@ -252,14 +253,19 @@
                 });
 
                 if(candidates.length === 0) {
-                    alert("Stok Kosong!");
+                    alert("Stok Habis!");
                     stopFarming(); return;
                 }
 
                 candidates.sort(() => Math.random() - 0.5);
                 const target = candidates[0];
 
-                db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID }, (err) => {
+                // 🔥 UPDATE DB: SIMPAN STATUS 'TAKEN' + 'OP_NAME' 🔥
+                db.ref('stock/'+target).update({ 
+                    status: 'TAKEN', 
+                    owner: mySessionID,
+                    op_name: currentUser // <-- INI YANG BIKIN NAMA LO MUNCUL DI GLOBAL
+                }, (err) => {
                     if(!err) {
                         db.ref('stock/'+target).once('value', s => {
                             if(s.val().owner === mySessionID) {
@@ -274,7 +280,7 @@
             });
         }
 
-        // --- 3. LISTENER (OTOMATIS) ---
+        // --- 3. LISTENER ---
         function attachListener(num) {
             if(listenerRef) listenerRef.off();
             listenerRef = db.ref('stock/'+num);
@@ -283,27 +289,19 @@
                 const d = snap.val();
                 if(!d) { stopFarming(); return; }
 
-                // JIKA OTP MASUK
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
-                    
-                    // Cek biar gak loop/spam bunyi
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden');
                         elOTP.innerText = d.otp;
                         elOTP.classList.remove('hidden');
-                        
                         document.getElementById('btnBad').style.display = 'none';
                         document.getElementById('btnNext').style.display = 'block';
 
-                        // 🔥 BUNYI TUUUT 🔥
+                        // AUDIO ON
                         audioBeep.currentTime = 0;
                         audioBeep.play().catch(()=>{});
-                        
-                        // Auto Copy
                         copyText(d.otp);
-
-                        // TAMBAH KE PERSONAL HISTORY
                         addPersonalLog(d);
                     }
                 }
@@ -314,19 +312,16 @@
             if(currentNum) db.ref('stock/'+currentNum).update({status:'BAD'});
             findNumber();
         }
-
         function actionNext() {
             if(currentNum) db.ref('stock/'+currentNum).update({status:'DONE'});
             findNumber();
         }
-
         function stopFarming() {
             if(listenerRef) listenerRef.off();
             currentNum = null;
             document.getElementById('pageActive').classList.add('hidden');
             document.getElementById('pageMenu').classList.remove('hidden');
         }
-
         function resetUI() {
             document.getElementById('statusWait').classList.remove('hidden');
             document.getElementById('myOTP').classList.add('hidden');
@@ -335,81 +330,62 @@
             document.getElementById('btnNext').style.display = 'none';
         }
 
-        // --- 4. HISTORY SYSTEMS ---
-
-        // A. PERSONAL HISTORY (Di Halaman Farming)
-        // Disimpan di array memory sementara
-        function addPersonalLog(d) {
-            const feed = document.getElementById('personalFeedList');
-            
-            // Bersihkan teks "belum ada"
-            if(feed.innerText.includes('Belum ada')) feed.innerHTML = "";
-
-            const div = document.createElement('div');
-            div.className = 'log-item';
-            div.style.borderLeft = "3px solid #4ade80"; // Hijau tanda sukses
-            
-            const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-            
-            div.innerHTML = `
-                <div class="log-left">
-                    <div style="font-weight:bold; color:#fff;">${d.country}</div>
-                    <div style="font-family:monospace; color:#aaa;">${d.number}</div>
-                </div>
-                <div class="log-right">
-                    <div style="font-size:9px; color:#666;">${time} - SUKSES</div>
-                    <div class="hl-otp-clear">OTP: ${d.otp}</div>
-                </div>
-            `;
-            
-            feed.insertBefore(div, feed.firstChild);
-        }
-
-        // B. GLOBAL FEED (Di Halaman Menu)
+        // --- 4. GLOBAL FEED (NEW FORMAT) ---
         function initGlobalFeed() {
             const feed = document.getElementById('globalFeedList');
             const todayDate = new Date().toDateString();
 
-            // Listen to LAST updates
+            // Pake child_added biar ringan
             db.ref('stock').orderByChild('last_update').limitToLast(10).on('child_added', snap => {
                 const d = snap.val();
                 const key = snap.key;
 
-                // FILTER: Harus ada OTP, status DONE, dan Tanggal Hari Ini
+                // SYARAT: ADA OTP, STATUS DONE, HARI INI
                 if(d.otp && d.status === 'DONE') {
                     const dTime = new Date(d.last_update || Date.now());
-                    
                     if(dTime.toDateString() === todayDate) {
-                        // CEK DUPLIKASI (Anti Masuk 2x)
                         if(document.getElementById('glog-'+key)) return;
-
                         if(feed.innerText.includes('Menunggu')) feed.innerHTML = "";
 
                         const div = document.createElement('div');
-                        div.id = 'glog-' + key; // ID Unik biar gak double
-                        div.className = 'log-item';
-                        
-                        const timeStr = dTime.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-                        
-                        // SENSOR OTP (XXXXX) tapi NOMOR FULL
+                        div.id = 'glog-' + key;
+                        div.className = 'g-item';
+
+                        // DATA USER & NEGARA
+                        const uName = d.op_name || "User"; // Ambil nama yang disimpan tadi
+                        const uCountry = d.country || "UNK";
+                        const flag = getFlag(uCountry);
+
+                        // FORMAT PESAN FB
+                        // FB-XXXXX is your Facebook confirmation code @m.facebook.com #XXXXX
+                        const msg = `FB-<span class="x-green">XXXXX</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">XXXXX</span>`;
+
                         div.innerHTML = `
-                            <div class="log-left">
-                                <div style="font-weight:bold;">${d.country}</div>
-                                <div style="font-family:monospace; color:#aaa;">${d.number}</div>
+                            <div class="g-user">
+                                ${uName} ( ${uCountry} ${flag} )
                             </div>
-                            <div class="log-right">
-                                <div style="font-size:9px; color:#666;">User: ${d.owner ? d.owner.substring(0,4) : 'Someone'} • ${timeStr}</div>
-                                <div class="hl-otp-censored">OTP: XXXXX</div>
+                            <div class="g-msg">
+                                ${msg}
                             </div>
                         `;
 
                         feed.insertBefore(div, feed.firstChild);
-                        
-                        // Batasi max 15 biar gak berat
-                        if(feed.children.length > 15) feed.removeChild(feed.lastChild);
+                        if(feed.children.length > 20) feed.removeChild(feed.lastChild);
                     }
                 }
             });
+        }
+
+        // --- 5. PERSONAL HISTORY ---
+        function addPersonalLog(d) {
+            const feed = document.getElementById('personalFeedList');
+            const div = document.createElement('div');
+            div.className = 'p-item';
+            div.innerHTML = `
+                <div>${d.country} - ${d.number}</div>
+                <div style="color:#4ade80; font-weight:bold;">${d.otp}</div>
+            `;
+            feed.insertBefore(div, feed.firstChild);
         }
 
         function copyText(val) {
@@ -417,7 +393,6 @@
             const t = document.createElement("textarea"); t.value = val; document.body.appendChild(t);
             t.select(); document.execCommand('copy'); document.body.removeChild(t);
         }
-
     </script>
 </body>
 </html>
