@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PANEL TASIK V143</title>
+    <title>PANEL TASIK V144 (PERMANENT)</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -67,7 +67,7 @@
         .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; }
         .btn-save { background: #3b82f6; color: #fff; }
 
-        /* UPLOAD AVATAR */
+        /* PROFILE */
         .profile-pic-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; }
         .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f43f5e; background: #0f172a; }
         .upload-icon { position: absolute; bottom: 0; right: 0; background: #f43f5e; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #1e293b; }
@@ -79,12 +79,12 @@
         .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer; }
         .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
-        /* FEED LIST (GLOBAL) */
+        /* LISTS */
         .feed-list { padding: 0; }
         .g-item { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px; }
         .x-green { color: #4ade80; font-weight: bold; }
         
-        /* PERSONAL TABLE (TAB 1) */
+        /* PERSONAL TABLE */
         .ph-table { width: 100%; border-collapse: collapse; }
         .ph-row { border-bottom: 1px solid #334155; }
         .ph-cell { padding: 10px; font-size: 10px; color: #ccc; }
@@ -109,7 +109,7 @@
 </head>
 <body>
 
-    <!-- HEADER FIXED -->
+    <!-- HEADER -->
     <div class="top-header">
         <div class="app-title">PANEL TASIK</div>
         <div class="user-info-header">
@@ -118,7 +118,7 @@
         </div>
     </div>
 
-    <!-- 1. HALAMAN HOME (MENU -> FARMING -> HISTORY PRIBADI) -->
+    <!-- 1. HOME (MENU + FARMING + PERSONAL HISTORY) -->
     <div id="viewHome" class="page active">
         <!-- Area Menu -->
         <div id="areaMenu" class="box">
@@ -146,7 +146,7 @@
             </div>
         </div>
 
-        <!-- 🔥 HISTORY PRIBADI (ADA DI HOME) 🔥 -->
+        <!-- HISTORY PRIBADI (DI HOME) -->
         <div class="box" style="margin-top:15px;">
             <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">
                 👤 HISTORY PRIBADI SAYA
@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    <!-- 2. HALAMAN HISTORY (GLOBAL FEED) -->
+    <!-- 2. HISTORY (GLOBAL FEED) -->
     <div id="viewHistory" class="page">
         <div class="box">
             <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">
@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    <!-- 3. HALAMAN CHAT -->
+    <!-- 3. CHAT -->
     <div id="viewChat" class="page">
         <div id="chatContainer"></div>
         <div class="chat-input-area">
@@ -176,16 +176,13 @@
         </div>
     </div>
 
-    <!-- 4. HALAMAN PROFIL (UPLOAD FOTO) -->
+    <!-- 4. PROFIL -->
     <div id="viewProfil" class="page">
         <div class="box">
-            <div class="profile-header">
-                <!-- Avatar Upload -->
-                <div class="profile-pic-wrapper">
-                    <img src="" id="profilePreview" class="profile-pic" onerror="this.src='https://via.placeholder.com/100?text=USER'">
-                    <label for="fileInput" class="upload-icon">📷</label>
-                    <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
-                </div>
+            <div class="profile-pic-wrapper">
+                <img src="" id="profilePreview" class="profile-pic" onerror="this.src='https://via.placeholder.com/100?text=USER'">
+                <label for="fileInput" class="upload-icon">📷</label>
+                <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
             </div>
 
             <label style="font-size:11px; color:#aaa;">NAMA:</label>
@@ -208,20 +205,12 @@
         </div>
     </div>
 
-    <!-- NAVIGATION -->
+    <!-- NAV -->
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="navTo('viewHome', this)">
-            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span>
-        </div>
-        <div class="nav-item" onclick="navTo('viewHistory', this)">
-            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>History</span>
-        </div>
-        <div class="nav-item" onclick="navTo('viewChat', this)">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span>Chat</span>
-        </div>
-        <div class="nav-item" onclick="navTo('viewProfil', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span>
-        </div>
+        <div class="nav-item active" onclick="navTo('viewHome', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
+        <div class="nav-item" onclick="navTo('viewHistory', this)"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>History</span></div>
+        <div class="nav-item" onclick="navTo('viewChat', this)"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span>Chat</span></div>
+        <div class="nav-item" onclick="navTo('viewProfil', this)"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
     </nav>
 
     <!-- LOGIN -->
@@ -234,7 +223,6 @@
     </div>
 
     <script>
-        // 🔥 CONFIG TASIK 🔥
         const firebaseConfig = {
             apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
             authDomain: "vipotpsystem.firebaseapp.com",
@@ -247,9 +235,10 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const KEY_PROFILE = 'TASIK_PROFILE_V142'; 
-        const KEY_HISTORY = 'TASIK_HISTORY_V142';
-        const KEY_SESSION = 'TASIK_SESSION_V142';
+        // 🔥 PERMANENT KEYS (JANGAN DIUBAH LAGI BIAR GAK RESET) 🔥
+        const KEY_PROFILE = 'TASIK_DATA_PROFILE_MASTER'; 
+        const KEY_HISTORY = 'TASIK_DATA_HISTORY_MASTER';
+        const KEY_SESSION = 'TASIK_DATA_SESSION_MASTER';
 
         let userProfile = JSON.parse(localStorage.getItem(KEY_PROFILE)) || null;
         let myHistory = JSON.parse(localStorage.getItem(KEY_HISTORY)) || [];
@@ -276,8 +265,9 @@
         function initApp() {
             applyProfileToUI();
             loadCountries();
+            // INIT ALL
             initGlobalFeed(); 
-            renderPersonalHistory(); 
+            renderPersonalHistory(); // PENTING: Render history dari memory pas load
             checkSavedSession();
             initChatSystem();
         }
@@ -328,9 +318,7 @@
         // --- FARMING ---
         function loadCountries() {
             db.ref('settings/countries').on('value', snap => {
-                const d = snap.val();
-                const sel = document.getElementById('countryPick');
-                sel.innerHTML = "";
+                const d = snap.val(); const sel = document.getElementById('countryPick'); sel.innerHTML = "";
                 if(d) Object.keys(d).forEach(k => { const opt = document.createElement('option'); opt.value = k; opt.innerText = d[k]; sel.appendChild(opt); });
             });
         }
@@ -402,7 +390,7 @@
             h += '</table>'; c.innerHTML = h;
         }
 
-        // --- GLOBAL & CHAT ---
+        // --- GLOBAL FEED ---
         function initGlobalFeed() {
             const feed = document.getElementById('globalFeedList');
             const q = db.ref('stock').orderByChild('last_update').limitToLast(50);
