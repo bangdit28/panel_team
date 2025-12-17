@@ -3,106 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NYOBAAN</title>
-    <!-- FIREBASE V8 -->
+    <title>test</title>
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        /* RESET & BASE */
+        /* BASE & RESET */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: #0f172a; color: #fff; font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
             display: flex; flex-direction: column; 
         }
 
-        /* FULL WIDTH CONTAINER */
+        /* CONTAINER BOX */
         .box { 
             width: 100%; background: #1e293b; 
-            padding: 20px; border-radius: 12px; border: 1px solid #334155; 
+            padding: 15px; border-radius: 12px; border: 1px solid #334155; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            margin-bottom: 15px; position: relative; overflow: hidden;
+            margin-bottom: 15px; position: relative;
         }
 
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        h2 { margin: 0; color: #f43f5e; font-size: 18px; letter-spacing: 1px; }
-        .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 4px 8px; border-radius: 4px; border: 1px solid #333; }
+        h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; }
+        .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 3px 8px; border-radius: 4px; border: 1px solid #334155; }
 
         /* INPUTS */
-        select, input { width: 100%; padding: 14px; background: #334155; color: #fff; border: 1px solid #475569; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; appearance: none; }
+        select, input { width: 100%; padding: 12px; background: #334155; color: #fff; border: 1px solid #475569; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
         input { background: #000; border-color: #f43f5e; text-align: center; }
         
         /* BUTTONS */
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: transform 0.1s; margin-top: 5px; text-transform: uppercase; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
         button:active { transform: scale(0.98); }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+        .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
-        .btn-next { background: #22c55e; color: #000; display: none; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
-        .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 20px; font-size: 11px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-next { background: #22c55e; color: #000; display: none; }
+        .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; display: block; margin-left: auto; margin-right: auto; }
 
-        /* DISPLAY NOMOR */
+        /* FARMING DISPLAY */
         .display-num { 
-            font-size: 24px; font-family: 'Courier New', monospace; background: #000; 
-            padding: 15px; border-radius: 8px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; text-align: center; cursor: pointer; position: relative;
-            color: #fff; transition: 0.2s;
+            font-size: 22px; font-family: monospace; background: #000; 
+            padding: 12px; border-radius: 8px; border: 2px dashed #f43f5e; 
+            margin: 10px 0; text-align: center; cursor: pointer; position: relative; color: #fff;
         }
-        .display-num:active { background: #111; border-color: #fff; }
         .country-badge {
-            position: absolute; top: -10px; right: 10px; 
-            background: #f43f5e; color: #fff; font-size: 10px; 
-            padding: 3px 8px; border-radius: 4px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            position: absolute; top: -8px; right: 10px; 
+            background: #f43f5e; color: #fff; font-size: 9px; 
+            padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
 
-        /* OTP AREA */
         .otp-area { 
             background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155;
             padding: 15px; text-align: center; margin-bottom: 15px; 
-            min-height: 90px; display: flex; align-items: center; justify-content: center; flex-direction: column;
+            min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;
         }
         .otp-code { 
-            font-size: 48px; font-weight: 800; color: #4ade80; 
-            letter-spacing: 5px; cursor: pointer; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            text-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+            font-size: 42px; font-weight: 800; color: #4ade80; 
+            letter-spacing: 4px; cursor: pointer; animation: popIn 0.3s; 
         }
-        .waiting { font-size: 12px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
+        .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
-        /* HISTORY */
+        /* HISTORY BOX STYLES */
         .history-box { 
             width: 100%; background: #0f172a; border: 1px solid #334155; 
-            border-radius: 12px; padding: 12px; height: 320px; overflow-y: auto; display: flex; flex-direction: column;
+            border-radius: 10px; padding: 10px; max-height: 300px; overflow-y: auto; 
+            margin-top: 5px;
         }
-        .history-header { font-size: 11px; color: #f43f5e; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; justify-content: space-between; }
-
-        /* ROW STYLE (IVASMS) */
-        .iva-row { 
+        .h-title { font-size: 11px; color: #f43f5e; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 5px; display: flex; justify-content: space-between; }
+        
+        /* LOG ITEM */
+        .log-item { 
             display: flex; background: #1e293b; color: #ccc; 
             border: 1px solid #334155; border-radius: 6px; 
-            margin-bottom: 6px; align-items: stretch; font-size: 11px; overflow: hidden;
+            margin-bottom: 5px; padding: 8px; align-items: center; font-size: 10px;
         }
-        .iva-col-left { 
-            flex: 1.2; padding: 8px; background: #172033; 
-            border-right: 1px solid #334155; font-size: 10px; color: #94a3b8; 
-            display: flex; flex-direction: column; justify-content: center;
-        }
-        .iva-col-right { flex: 2.8; padding: 8px; color: #fff; font-size: 10px; line-height: 1.4; display: flex; flex-direction: column; justify-content: center; }
-        .hl-otp { color: #4ade80; font-weight: bold; font-size: 13px; background: rgba(74, 222, 128, 0.1); padding: 0 4px; border-radius: 3px; }
-
-        .hidden { display: none !important; }
+        .log-left { flex: 1; border-right: 1px solid #334155; padding-right: 8px; margin-right: 8px; }
+        .log-right { flex: 2; line-height: 1.3; }
         
-        /* LOGIN OVERLAY */
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-inner { width: 100%; max-width: 350px; text-align: center; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; }
+        .hl-otp-censored { color: #f43f5e; font-weight: bold; letter-spacing: 1px; }
+        .hl-otp-clear { color: #4ade80; font-weight: bold; font-size: 12px; }
+        
+        .hidden { display: none !important; }
+
+        /* LOGIN */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
 
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.4; } }
-        
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -110,66 +100,76 @@
     <!-- LOGIN -->
     <div id="loginOverlay">
         <div class="login-inner">
-            <h2 style="margin-bottom:20px;">VIP ACCESS</h2>
-            <input type="text" id="inputName" placeholder="Masukkan Nama Operator...">
-            <button class="btn-start" onclick="doLogin()">MASUK SYSTEM</button>
+            <h2 style="margin-bottom:15px;">VIP SYSTEM</h2>
+            <input type="text" id="inputName" placeholder="Nama Operator...">
+            <button class="btn-start" onclick="doLogin()">MASUK</button>
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="mainApp" class="hidden">
         
-        <div class="box">
-            <div class="header">
-                <h2>PANEL NYOBA2</h2>
-                <div class="op-name" id="opName">...</div>
+        <!-- HALAMAN MENU (GLOBAL FEED DISINI) -->
+        <div id="pageMenu">
+            <div class="box">
+                <div class="header">
+                    <h2>test</h2>
+                    <div class="op-name" id="opNameMenu">...</div>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:10px; color:#aaa;">Pilih Negara:</label>
+                    <select id="countryPick"><option>Loading...</option></select>
+                    <button class="btn-start" onclick="startFarming()">🚀 AMBIL NOMOR</button>
+                </div>
             </div>
 
-            <!-- MENU PILIH -->
-            <div id="menu">
-                <label style="font-size:11px; color:#aaa; margin-bottom:5px; display:block;">Pilih Negara:</label>
-                <select id="countryPick"><option>Memuat Server...</option></select>
-                <button class="btn-start" onclick="startFarming()">🚀 AMBIL NOMOR BARU</button>
+            <!-- GLOBAL LIVE FEED (Hanya muncul di Menu) -->
+            <div class="history-box">
+                <div class="h-title">🔴 GLOBAL LIVE FEED (SEMUA USER)</div>
+                <div id="globalFeedList">
+                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Menunggu aktivitas...</div>
+                </div>
             </div>
+        </div>
 
-            <!-- AREA KERJA -->
-            <div id="active" class="hidden">
-                <!-- Klik nomor akan copy text-nya -->
+        <!-- HALAMAN FARMING (PERSONAL HISTORY DISINI) -->
+        <div id="pageActive" class="hidden">
+            <div class="box">
+                <div class="header">
+                    <h2>ACTIVE NUMBER</h2>
+                    <div class="op-name" id="opNameActive">...</div>
+                </div>
+
                 <div class="display-num" onclick="copyText(document.getElementById('txtNum').innerText)">
                     <span id="txtNum">...</span>
                     <div class="country-badge" id="cBadge">UNK</div>
                 </div>
 
                 <div class="otp-area">
-                    <div id="statusWait" class="waiting">📡 LISTENING TO SERVER...</div>
-                    <!-- Klik OTP akan copy OTP-nya -->
+                    <div id="statusWait" class="waiting">📡 MENUNGGU SMS...</div>
                     <div id="myOTP" class="otp-code hidden" onclick="copyText(this.innerText)">---</div>
                 </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button id="btnBad" class="btn-bad" onclick="actionBad()">❌ GANTI NOMOR</button>
-                    <button id="btnNext" class="btn-next" onclick="actionNext()">✅ SELESAI (NEXT)</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btnBad" class="btn-bad" onclick="actionBad()">❌ GANTI</button>
+                    <button id="btnNext" class="btn-next" onclick="actionNext()">✅ LANJUT</button>
                 </div>
                 
-                <button class="btn-stop" onclick="stopFarming()">⏹️ MENU UTAMA</button>
+                <button class="btn-stop" onclick="stopFarming()">⏹️ KEMBALI KE MENU</button>
             </div>
-        </div>
 
-        <!-- HISTORY -->
-        <div class="history-box">
-            <div class="history-header">
-                <span>🔴 LIVE FEED</span>
-                <span id="dateDisplay" style="color:#666; font-weight:normal">...</span>
-            </div>
-            <div id="feedList">
-                <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Belum ada aktivitas hari ini</div>
+            <!-- PERSONAL HISTORY (Hanya muncul di Farming) -->
+            <div class="history-box">
+                <div class="h-title">👤 RIWAYAT SESI INI (PRIBADI)</div>
+                <div id="personalFeedList">
+                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Belum ada nomor sukses sesi ini.</div>
+                </div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // 🔥 CONFIG FIREBASE (ISI SESUAI PROJECT LO) 🔥
+        // 🔥 SETUP FIREBASE (GANTI CONFIG DI SINI) 🔥
         const firebaseConfig = {
   apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
   authDomain: "vipotpsystem.firebaseapp.com",
@@ -180,65 +180,62 @@
   appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
 };
 
-        // Initialize
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentUser = localStorage.getItem('vip_user_v126');
+        // VARIABLES
+        let currentUser = localStorage.getItem('vip_user_v127');
         let currentNum = null;
         let selectedRegion = "";
         let listenerRef = null;
         const mySessionID = "U_" + Math.floor(Math.random() * 999999);
+        
+        // AUDIO (NOTIF TUUT)
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
 
-        // --- 1. LOGIN & INIT ---
+        // --- 1. INIT ---
         if(currentUser) initApp();
 
         function doLogin() {
             const n = document.getElementById('inputName').value.trim();
-            if(!n) return alert("Wajib isi nama!");
+            if(!n) return alert("Isi nama!");
             currentUser = n;
-            localStorage.setItem('vip_user_v126', n);
+            localStorage.setItem('vip_user_v127', n);
             initApp();
         }
 
         function initApp() {
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('opName').innerText = currentUser;
-            document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString();
+            document.getElementById('opNameMenu').innerText = currentUser;
+            document.getElementById('opNameActive').innerText = currentUser;
             loadCountries();
+            initGlobalFeed(); // Start Global Listener
         }
 
-        // --- 2. LOAD COUNTRIES ---
         function loadCountries() {
             db.ref('settings/countries').on('value', snap => {
                 const d = snap.val();
                 const sel = document.getElementById('countryPick');
                 sel.innerHTML = "";
-                if(d) {
-                    Object.keys(d).forEach(k => {
-                        const opt = document.createElement('option');
-                        opt.value = k; opt.innerText = d[k];
-                        sel.appendChild(opt);
-                    });
-                } else sel.innerHTML = "<option>Tidak ada layanan</option>";
+                if(d) Object.keys(d).forEach(k => {
+                    const opt = document.createElement('option');
+                    opt.value = k; opt.innerText = d[k];
+                    sel.appendChild(opt);
+                });
             });
         }
 
-        // --- 3. FARMING LOGIC ---
+        // --- 2. FARMING FLOW ---
         function startFarming() {
-            const sel = document.getElementById('countryPick');
-            if(sel.value === "Memuat Server...") return;
-
-            selectedRegion = sel.value;
-            const regionName = sel.options[sel.selectedIndex].text;
+            selectedRegion = document.getElementById('countryPick').value;
+            const regionName = document.getElementById('countryPick').options[document.getElementById('countryPick').selectedIndex].text;
             
-            document.getElementById('cBadge').innerText = regionName; // Tampilkan nama negara, bukan kodenya
-            document.getElementById('menu').classList.add('hidden');
-            document.getElementById('active').classList.remove('hidden');
+            document.getElementById('cBadge').innerText = regionName;
+            
+            // Switch Page
+            document.getElementById('pageMenu').classList.add('hidden');
+            document.getElementById('pageActive').classList.remove('hidden');
             
             findNumber();
         }
@@ -247,208 +244,180 @@
             resetUI();
             document.getElementById('txtNum').innerText = "Mencari...";
             
-            // 1. Ambil Snapshot Sekali
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let candidates = [];
-                if(data) {
-                    Object.keys(data).forEach(k => {
-                        // Filter: Status AVAILABLE & Negara Sesuai
-                        if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) {
-                            candidates.push(k);
-                        }
-                    });
-                }
+                if(data) Object.keys(data).forEach(k => {
+                    if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) candidates.push(k);
+                });
 
                 if(candidates.length === 0) {
-                    alert("Stok Habis untuk negara ini!");
+                    alert("Stok Kosong!");
                     stopFarming(); return;
                 }
 
-                // 2. Acak kandidat biar gak rebutan di urutan 1
                 candidates.sort(() => Math.random() - 0.5);
                 const target = candidates[0];
 
-                // 3. Claim Ownership
-                db.ref('stock/'+target).update({ 
-                    status: 'TAKEN', 
-                    owner: mySessionID,
-                    timestamp_taken: firebase.database.ServerValue.TIMESTAMP 
-                }, (err) => {
+                db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID }, (err) => {
                     if(!err) {
-                        // Double check ownership (Anti Clash)
                         db.ref('stock/'+target).once('value', s => {
-                            if(s.val() && s.val().owner === mySessionID) {
-                                // Sukses dapet
+                            if(s.val().owner === mySessionID) {
                                 currentNum = target;
                                 document.getElementById('txtNum').innerText = currentNum;
-                                // Auto Copy Number buat user
                                 copyText(currentNum);
                                 attachListener(currentNum);
-                            } else {
-                                // Keduluan orang, cari lagi
-                                findNumber();
-                            }
+                            } else findNumber();
                         });
                     } else findNumber();
                 });
             });
         }
 
-        // --- 4. DIRECT REALTIME LISTENER (THE CORE) ---
+        // --- 3. LISTENER (OTOMATIS) ---
         function attachListener(num) {
-            // Matikan listener lama kalau ada
             if(listenerRef) listenerRef.off();
-            
-            // Pasang listener baru KHUSUS di nomor ini
             listenerRef = db.ref('stock/'+num);
             
             listenerRef.on('value', snap => {
                 const d = snap.val();
-                
-                // Jika node dihapus admin
                 if(!d) { stopFarming(); return; }
 
-                // DETEKSI OTP
-                if(d.otp && d.otp.length > 2) { // Minimal 3 karakter
-                    
+                // JIKA OTP MASUK
+                if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
                     
-                    // Cek apakah ini OTP baru (biar ga spam notif)
+                    // Cek biar gak loop/spam bunyi
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden');
                         elOTP.innerText = d.otp;
                         elOTP.classList.remove('hidden');
                         
-                        // Switch Button
                         document.getElementById('btnBad').style.display = 'none';
                         document.getElementById('btnNext').style.display = 'block';
 
-                        // Notif Suara & Getar
+                        // 🔥 BUNYI TUUUT 🔥
+                        audioBeep.currentTime = 0;
                         audioBeep.play().catch(()=>{});
-                        if("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
-
-                        // Auto Copy OTP
+                        
+                        // Auto Copy
                         copyText(d.otp);
+
+                        // TAMBAH KE PERSONAL HISTORY
+                        addPersonalLog(d);
                     }
                 }
             });
         }
 
-        // --- ACTIONS ---
         function actionBad() {
-            if(currentNum) {
-                // Set BAD dan hapus owner
-                db.ref('stock/'+currentNum).update({
-                    status: 'BAD',
-                    owner: null
-                }); 
-                if(listenerRef) listenerRef.off();
-            }
+            if(currentNum) db.ref('stock/'+currentNum).update({status:'BAD'});
             findNumber();
         }
 
         function actionNext() {
-            if(currentNum) {
-                // Set DONE
-                db.ref('stock/'+currentNum).update({
-                    status: 'DONE',
-                    last_update: firebase.database.ServerValue.TIMESTAMP
-                });
-                if(listenerRef) listenerRef.off();
-            }
+            if(currentNum) db.ref('stock/'+currentNum).update({status:'DONE'});
             findNumber();
         }
 
         function stopFarming() {
-            if(currentNum && listenerRef) listenerRef.off();
-            // Kalau stop di tengah jalan, balikin status ke AVAILABLE (opsional, atau biarkan TAKEN sampai timeout server)
-            // Disini kita biarkan saja, nanti server cleaner yg bersihkan.
+            if(listenerRef) listenerRef.off();
             currentNum = null;
-            document.getElementById('active').classList.add('hidden');
-            document.getElementById('menu').classList.remove('hidden');
+            document.getElementById('pageActive').classList.add('hidden');
+            document.getElementById('pageMenu').classList.remove('hidden');
         }
 
         function resetUI() {
             document.getElementById('statusWait').classList.remove('hidden');
-            const elOTP = document.getElementById('myOTP');
-            elOTP.classList.add('hidden');
-            elOTP.innerText = "---";
-            
+            document.getElementById('myOTP').classList.add('hidden');
+            document.getElementById('myOTP').innerText = "---";
             document.getElementById('btnBad').style.display = 'block';
             document.getElementById('btnNext').style.display = 'none';
         }
 
-        // --- HISTORY FEED (REALTIME) ---
-        // Menggunakan logic tanggal agar hanya history hari ini yg muncul
-        const todayStr = new Date().toDateString();
-        let isFirstLoad = true;
-        
-        // Listener Global Stock (Hemat bandwidth dengan limitToLast)
-        db.ref('stock').orderByChild('last_update').limitToLast(15).on('child_changed', snap => {
-            const d = snap.val();
-            
-            // Validasi Data History
-            if(d.otp && d.last_update) {
-                // Cek Tanggal
-                const dDate = new Date(d.last_update).toDateString();
-                if(dDate === todayStr) {
-                    // Hapus pesan "Belum ada aktivitas"
-                    const feed = document.getElementById('feedList');
-                    if(isFirstLoad) {
-                        feed.innerHTML = "";
-                        isFirstLoad = false;
-                    }
-                    addLog(d);
-                }
-            }
-        });
+        // --- 4. HISTORY SYSTEMS ---
 
-        function addLog(d) {
-            const feed = document.getElementById('feedList');
-            const time = new Date(d.last_update).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+        // A. PERSONAL HISTORY (Di Halaman Farming)
+        // Disimpan di array memory sementara
+        function addPersonalLog(d) {
+            const feed = document.getElementById('personalFeedList');
             
-            // Format Pesan SMS (Sensor OTP)
-            let rawMsg = d.full_msg || ("Kode OTP: " + d.otp);
-            // Highlight OTP
-            let displayMsg = rawMsg.replace(d.otp, `<span class="hl-otp">${d.otp}</span>`);
+            // Bersihkan teks "belum ada"
+            if(feed.innerText.includes('Belum ada')) feed.innerHTML = "";
 
             const div = document.createElement('div');
-            div.className = 'iva-row';
+            div.className = 'log-item';
+            div.style.borderLeft = "3px solid #4ade80"; // Hijau tanda sukses
+            
+            const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+            
             div.innerHTML = `
-                <div class="iva-col-left">
-                    <div style="font-weight:bold; color:#fff;">${d.country || 'UNK'}</div>
-                    <div style="font-family:monospace;">${d.number.substring(0, 8)}..</div>
+                <div class="log-left">
+                    <div style="font-weight:bold; color:#fff;">${d.country}</div>
+                    <div style="font-family:monospace; color:#aaa;">${d.number}</div>
                 </div>
-                <div class="iva-col-right">
-                    <div style="display:flex; justify-content:space-between; color:#555; font-size:9px; margin-bottom:2px;">
-                        <span>STATUS: ${d.status}</span>
-                        <span>${time}</span>
-                    </div>
-                    <div>${displayMsg}</div>
+                <div class="log-right">
+                    <div style="font-size:9px; color:#666;">${time} - SUKSES</div>
+                    <div class="hl-otp-clear">OTP: ${d.otp}</div>
                 </div>
             `;
             
-            // Efek Insert (Atas)
             feed.insertBefore(div, feed.firstChild);
-            
-            // Keep clean (max 20 items)
-            if(feed.children.length > 20) feed.removeChild(feed.lastChild);
         }
 
-        // --- UTILS ---
-        function copyText(text) {
-            if(!text || text === "...") return;
-            const t = document.createElement("textarea"); 
-            t.value = text; 
-            document.body.appendChild(t);
-            t.select(); 
-            document.execCommand('copy'); 
-            document.body.removeChild(t);
-            
-            // Opsional: Toast notif kecil bisa ditaruh disini
-            console.log("Copied: " + text);
+        // B. GLOBAL FEED (Di Halaman Menu)
+        function initGlobalFeed() {
+            const feed = document.getElementById('globalFeedList');
+            const todayDate = new Date().toDateString();
+
+            // Listen to LAST updates
+            db.ref('stock').orderByChild('last_update').limitToLast(10).on('child_added', snap => {
+                const d = snap.val();
+                const key = snap.key;
+
+                // FILTER: Harus ada OTP, status DONE, dan Tanggal Hari Ini
+                if(d.otp && d.status === 'DONE') {
+                    const dTime = new Date(d.last_update || Date.now());
+                    
+                    if(dTime.toDateString() === todayDate) {
+                        // CEK DUPLIKASI (Anti Masuk 2x)
+                        if(document.getElementById('glog-'+key)) return;
+
+                        if(feed.innerText.includes('Menunggu')) feed.innerHTML = "";
+
+                        const div = document.createElement('div');
+                        div.id = 'glog-' + key; // ID Unik biar gak double
+                        div.className = 'log-item';
+                        
+                        const timeStr = dTime.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+                        
+                        // SENSOR OTP (XXXXX) tapi NOMOR FULL
+                        div.innerHTML = `
+                            <div class="log-left">
+                                <div style="font-weight:bold;">${d.country}</div>
+                                <div style="font-family:monospace; color:#aaa;">${d.number}</div>
+                            </div>
+                            <div class="log-right">
+                                <div style="font-size:9px; color:#666;">User: ${d.owner ? d.owner.substring(0,4) : 'Someone'} • ${timeStr}</div>
+                                <div class="hl-otp-censored">OTP: XXXXX</div>
+                            </div>
+                        `;
+
+                        feed.insertBefore(div, feed.firstChild);
+                        
+                        // Batasi max 15 biar gak berat
+                        if(feed.children.length > 15) feed.removeChild(feed.lastChild);
+                    }
+                }
+            });
         }
+
+        function copyText(val) {
+            if(!val || val.includes("...")) return;
+            const t = document.createElement("textarea"); t.value = val; document.body.appendChild(t);
+            t.select(); document.execCommand('copy'); document.body.removeChild(t);
+        }
+
     </script>
 </body>
 </html>
