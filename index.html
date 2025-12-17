@@ -3,145 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PANEL TASIK V138 (SMART RESUME)</title>
+    <title>PANEL TASIK V139</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- GOOGLE FONTS (Untuk Pilihan Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Lobster&family=Monoton&family=Press+Start+2P&family=Orbitron&display=swap" rel="stylesheet">
     
     <style>
         /* RESET & BASE */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
-            margin: 0; padding: 10px; padding-top: 45px;
-            min-height: 100vh; display: flex; flex-direction: column; 
+            background: #0f172a; color: #fff; font-family: 'Roboto', sans-serif; 
+            margin: 0; padding: 0; padding-bottom: 70px; /* Space for Nav */
+            min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        /* NOTIF BAR */
-        #notifBar {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: #ffd700; color: #000;
-            z-index: 9999; font-weight: bold; font-size: 12px;
-            padding: 8px 0; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        /* --- NAVIGATION BAR (BOTTOM) --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #1e293b; border-top: 1px solid #334155;
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 10px 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
         }
-        marquee { width: 100%; display: block; letter-spacing: 0.5px; text-transform: uppercase; }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: #64748b; font-size: 10px; cursor: pointer; transition: 0.2s;
+            width: 25%; text-align: center;
+        }
+        .nav-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 4px; }
+        .nav-item.active { color: #f43f5e; font-weight: bold; }
+        .nav-item.active svg { fill: #f43f5e; transform: translateY(-2px); }
 
-        /* BOX */
+        /* --- PAGES --- */
+        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .page.active { display: block; }
+        
+        /* HEADER (GLOBAL) */
+        .top-header {
+            background: #1e293b; padding: 15px; 
+            border-bottom: 1px solid #334155; display: flex; 
+            justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .app-title { font-size: 16px; font-weight: bold; color: #f43f5e; }
+        .user-display { font-size: 12px; font-weight: bold; color: #fff; transition: 0.3s; }
+
+        /* BOX STYLES */
         .box { 
             width: 100%; background: #1e293b; 
             padding: 15px; border-radius: 12px; border: 1px solid #334155; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
             margin-bottom: 15px; position: relative;
         }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
-        .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 4px 10px; border-radius: 4px; border: 1px solid #334155; font-weight: bold; }
-
-        select, input { width: 100%; padding: 12px; background: #334155; color: #fff; border: 1px solid #475569; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
-        input { background: #000; border-color: #f43f5e; text-align: center; }
-        
+        /* INPUTS & BUTTONS */
+        select, input { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
         button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
         button:active { transform: scale(0.98); }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+        .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
-        .btn-next { background: #22c55e; color: #000; display: none; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
-        .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; display: block; margin-left: auto; margin-right: auto; }
+        .btn-next { background: #22c55e; color: #000; }
+        .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; }
+        .btn-save { background: #3b82f6; color: #fff; }
 
-        .display-num { 
-            font-size: 26px; font-family: monospace; background: #000; 
-            padding: 15px; border-radius: 8px; border: 2px dashed #f43f5e; 
-            margin: 10px 0; text-align: center; cursor: pointer; color: #fff;
-        }
-
-        .otp-area { 
-            background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155;
-            padding: 15px; text-align: center; margin-bottom: 15px; 
-            min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column;
-        }
-        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer;}
+        /* FARMING UI */
+        .display-num { font-size: 24px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 2px dashed #f43f5e; margin: 10px 0; text-align: center; color: #fff; }
+        .otp-area { background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155; padding: 15px; text-align: center; margin-bottom: 15px; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer; }
         .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
-        /* HISTORY FEED */
-        .history-box { 
-            width: 100%; background: #0f172a; border: 1px solid #334155; 
-            border-radius: 10px; overflow: hidden; margin-top: 5px; display: flex; flex-direction: column;
-        }
-        .h-header { background: #172033; padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .h-title { font-size: 11px; color: #f43f5e; font-weight: 800; }
-        .h-date { font-size: 10px; color: #94a3b8; font-weight: bold; font-family: monospace; }
-        .feed-list { padding: 10px; max-height: 350px; overflow-y: auto; }
-
-        .g-item { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 8px; position: relative; }
-        .g-user { color: #f43f5e; font-weight: 800; font-size: 12px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-        .g-msg { color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4; padding-right: 35px; }
-        .x-green { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
-        .g-time { position: absolute; bottom: 8px; right: 10px; font-size: 10px; color: #64748b; font-weight: bold; }
-
-        /* TABLE HISTORY */
-        .ph-table-header { display: grid; grid-template-columns: 1.5fr 1fr 2fr; background: #0f172a; padding: 8px 5px; font-size: 9px; color: #94a3b8; border-bottom: 1px solid #334155; font-weight: bold; text-transform: uppercase; }
-        .p-item { display: grid; grid-template-columns: 1.5fr 1fr 2fr; background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 5px; font-size: 10px; color: #ccc; align-items: center; }
-        .col-sms { display: flex; flex-direction: column; }
-        .sms-country { font-weight: bold; color: #fff; font-size: 10px; display: flex; align-items: center; gap: 4px; }
-        .sms-num { font-family: monospace; color: #94a3b8; font-size: 10px; margin-top: 2px; }
-        .col-app { font-weight: bold; color: #fff; font-size: 10px; letter-spacing: 0.5px; }
-        .col-msg { font-family: 'Courier New', monospace; font-size: 9px; line-height: 1.3; color: #94a3b8; word-break: break-all; }
+        /* LIST & FEED */
+        .feed-list { padding: 0; }
+        .g-item { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px; }
+        .x-green { color: #4ade80; font-weight: bold; }
         
-        .p-pending { border-left: 3px solid #f59e0b; }
-        .p-success { border-left: 3px solid #4ade80; }
-        .hidden { display: none !important; }
+        /* PERSONAL HISTORY TABLE */
+        .ph-table { width: 100%; border-collapse: collapse; }
+        .ph-row { border-bottom: 1px solid #334155; }
+        .ph-cell { padding: 10px; font-size: 10px; color: #ccc; }
+        .ph-status-pending { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
+        .ph-status-success { border-left: 3px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
 
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-inner { width: 85%; max-width: 320px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
+        /* PROFILE PAGE STYLES */
+        .profile-header { text-align: center; margin-bottom: 20px; }
+        .avatar-circle { width: 80px; height: 80px; background: #334155; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 2px solid #f43f5e; }
+        .color-picker-wrapper { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 10px; }
+        
+        .hidden { display: none !important; }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="notifBar"><marquee id="notifText">...</marquee></div>
-
-    <div id="loginOverlay">
-        <div class="login-inner">
-            <h2 style="margin-bottom:15px; color:#f43f5e;">PANEL TASIK V138</h2>
-            <input type="text" id="inputName" placeholder="Nama Kamu...">
-            <button class="btn-start" onclick="doLogin()">MASUK</button>
-        </div>
+    <!-- HEADER ATAS (Fixed) -->
+    <div class="top-header">
+        <div class="app-title">PANEL TASIK</div>
+        <div class="user-display" id="headerName">Guest</div>
     </div>
 
-    <div id="mainApp" class="hidden">
-        
-        <!-- MENU -->
-        <div id="pageMenu">
-            <div class="box">
-                <div class="header">
-                    <h2>PANEL BARUDAK TASIK</h2>
-                    <div class="op-name" id="opNameMenu">...</div>
-                </div>
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:10px; color:#aaa; margin-bottom:4px; display:block;">Pilih Negara:</label>
-                    <select id="countryPick"><option>Loading...</option></select>
-                    <button class="btn-start" onclick="startFarming()">AMBIL NOMOR</button>
-                </div>
-            </div>
-            <div class="history-box">
-                <div class="h-header">
-                    <div class="h-title">🔴 LIVE GLOBAL (INSTANT)</div>
-                    <div class="h-date" id="headerDate">...</div>
-                </div>
-                <div id="globalFeedList" class="feed-list">
-                    <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load History...</div>
-                </div>
-            </div>
+    <!-- 1. HALAMAN HOME -->
+    <div id="viewHome" class="page active">
+        <!-- Area Menu Awal -->
+        <div id="areaMenu" class="box">
+            <h3 style="margin-top:0; color:#aaa; font-size:12px;">PILIH SERVER</h3>
+            <select id="countryPick"><option>Loading...</option></select>
+            <button class="btn-start" onclick="startFarming()">AMBIL NOMOR</button>
         </div>
 
-        <!-- FARMING -->
-        <div id="pageActive" class="hidden">
+        <!-- Area Farming (Hidden by default) -->
+        <div id="areaFarming" class="hidden">
             <div class="box">
-                <div class="header">
-                    <h2>ACTIVE SESSION</h2>
-                    <div class="op-name" id="opNameActive">...</div>
-                </div>
-
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">ACTIVE NUMBER</div>
                 <div class="display-num" onclick="copyText(document.getElementById('txtNum').innerText)">
                     <span id="txtNum">...</span>
                 </div>
@@ -155,22 +129,101 @@
                     <button id="btnBad" class="btn-bad" onclick="actionBad()">🔄 GANTI</button>
                     <button id="btnNext" class="btn-next" onclick="actionNext()">✅ LANJUT</button>
                 </div>
-                
-                <button class="btn-stop" onclick="stopOnly()">⏹️ KEMBALI KE MENU</button>
-            </div>
-
-            <div class="history-box">
-                <div class="ph-table-header">
-                    <div>Live SMS</div>
-                    <div>Application</div>
-                    <div>Message content</div>
-                </div>
-                <div id="personalFeedList" class="feed-list" style="padding:0;">
-                    <div style="text-align:center; padding:15px; color:#444; font-size:10px;">Belum ada history.</div>
-                </div>
+                <button class="btn-stop" onclick="stopOnly()">⏹️ MINIMIZE (KEMBALI)</button>
             </div>
         </div>
 
+        <!-- Global Feed -->
+        <div class="box" style="margin-top:20px;">
+            <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">
+                🔴 LIVE GLOBAL FEED
+            </div>
+            <div id="globalFeedList" class="feed-list">
+                <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. HALAMAN HISTORY -->
+    <div id="viewHistory" class="page">
+        <div class="box">
+            <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">RIWAYAT PRIBADI</h3>
+            <div id="personalHistoryContainer">
+                <!-- Table will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. HALAMAN CHAT (Placeholder) -->
+    <div id="viewChat" class="page">
+        <div class="box" style="text-align:center; padding:50px 20px;">
+            <div style="font-size:40px;">💬</div>
+            <h3>GRUP CHAT</h3>
+            <p style="color:#666; font-size:12px;">Fitur Chat Team akan segera hadir.</p>
+        </div>
+    </div>
+
+    <!-- 4. HALAMAN PROFIL (CUSTOMIZE) -->
+    <div id="viewProfil" class="page">
+        <div class="box">
+            <div class="profile-header">
+                <div class="avatar-circle">👤</div>
+                <div style="font-size:12px; color:#aaa;">PENGATURAN AKUN</div>
+            </div>
+
+            <label style="font-size:11px; color:#aaa;">NAMA TAMPILAN:</label>
+            <input type="text" id="editNameInput" placeholder="Nama Kamu">
+
+            <label style="font-size:11px; color:#aaa;">GAYA FONT:</label>
+            <select id="editFontInput">
+                <option value="'Roboto', sans-serif">Roboto (Default)</option>
+                <option value="'Lobster', cursive">Lobster (Keren)</option>
+                <option value="'Monoton', cursive">Monoton (Unik)</option>
+                <option value="'Press Start 2P', cursive">Pixel Game</option>
+                <option value="'Orbitron', sans-serif">Sci-Fi</option>
+                <option value="monospace">Hacker (Monospace)</option>
+            </select>
+
+            <div class="color-picker-wrapper">
+                <label style="font-size:11px; color:#aaa; margin:0;">WARNA NAMA:</label>
+                <input type="color" id="editColorInput" value="#ffffff" style="width:50px; height:30px; padding:0; border:none;">
+            </div>
+
+            <button class="btn-save" onclick="saveProfileSettings()">💾 SIMPAN PROFIL</button>
+        </div>
+        
+        <div style="text-align:center; margin-top:20px;">
+            <button class="btn-bad" style="width:auto; font-size:10px;" onclick="doLogout()">LOGOUT / RESET</button>
+        </div>
+    </div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="navTo('viewHome', this)">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="navTo('viewHistory', this)">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            <span>History</span>
+        </div>
+        <div class="nav-item" onclick="navTo('viewChat', this)">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+            <span>Chat</span>
+        </div>
+        <div class="nav-item" onclick="navTo('viewProfil', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Profil</span>
+        </div>
+    </nav>
+
+    <!-- LOGIN OVERLAY (Hanya Muncul jika belum ada profil) -->
+    <div id="loginOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:10000; align-items:center; justify-content:center;">
+        <div class="box" style="width:80%; max-width:300px; text-align:center;">
+            <h2 style="color:#f43f5e;">SELAMAT DATANG</h2>
+            <input type="text" id="initNameInput" placeholder="Masukkan Nama Kamu...">
+            <button class="btn-start" onclick="firstTimeLogin()">MULAI</button>
+        </div>
     </div>
 
     <script>
@@ -187,47 +240,95 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const LS_KEY_NAME = 'TASIK_BOT_USERNAME_V138'; 
-        const LS_KEY_HIST = 'TASIK_BOT_HISTORY_V138';
+        // 🔒 KEYS STORAGE
+        const KEY_PROFILE = 'TASIK_PROFILE_V139'; // { name, color, font }
+        const KEY_HISTORY = 'TASIK_HISTORY_V139';
+        const KEY_SESSION = 'TASIK_SESSION_V139';
 
-        let currentUser = localStorage.getItem(LS_KEY_NAME);
+        // VARS
+        let userProfile = JSON.parse(localStorage.getItem(KEY_PROFILE)) || null;
+        let myHistory = JSON.parse(localStorage.getItem(KEY_HISTORY)) || [];
+        
         let currentNum = null;
         let selectedRegion = "";
         let listenerRef = null;
         let mySessionID = "U_" + Math.floor(Math.random() * 999999);
-        let myHistory = JSON.parse(localStorage.getItem(LS_KEY_HIST)) || [];
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
 
-        // NOTIF BAR
-        db.ref('system/notification').on('value', snap => {
-            const msg = snap.val();
-            const bar = document.getElementById('notifBar');
-            const txt = document.getElementById('notifText');
-            if(msg) { txt.innerText = msg; bar.style.display = 'block'; } else { bar.style.display = 'none'; }
-        });
+        // --- 1. INIT APP ---
+        if(userProfile) {
+            initApp();
+        } else {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
 
-        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
-        function getFlag(name) { return flags[name?.toUpperCase()] || "🌍"; }
-
-        if(currentUser) initApp();
-        else document.getElementById('loginOverlay').style.display = 'flex';
-
-        function doLogin() {
-            const n = document.getElementById('inputName').value.trim();
+        function firstTimeLogin() {
+            const n = document.getElementById('initNameInput').value.trim();
             if(!n) return alert("Isi nama!");
-            currentUser = n; localStorage.setItem(LS_KEY_NAME, n); initApp();
+            
+            // Save Default Profile
+            userProfile = { name: n, color: '#ffffff', font: "'Roboto', sans-serif" };
+            localStorage.setItem(KEY_PROFILE, JSON.stringify(userProfile));
+            
+            document.getElementById('loginOverlay').style.display = 'none';
+            initApp();
         }
 
         function initApp() {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('opNameMenu').innerText = currentUser;
-            document.getElementById('opNameActive').innerText = currentUser;
-            const today = new Date();
-            document.getElementById('headerDate').innerText = today.getDate() + "/" + (today.getMonth()+1) + "/" + today.getFullYear();
-            loadCountries(); initGlobalFeed(); renderPersonalHistory();
+            applyProfileToUI();
+            loadCountries();
+            initGlobalFeed();
+            renderPersonalHistory();
+            checkSavedSession();
         }
 
+        // --- 2. PROFILE & NAVIGATION LOGIC ---
+        function navTo(pageId, btnElement) {
+            // Hide All Pages
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            // Show Target
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update Nav Icons
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        function applyProfileToUI() {
+            if(!userProfile) return;
+            // Header Name
+            const header = document.getElementById('headerName');
+            header.innerText = userProfile.name;
+            header.style.color = userProfile.color;
+            header.style.fontFamily = userProfile.font;
+
+            // Fill Input in Profile Page
+            document.getElementById('editNameInput').value = userProfile.name;
+            document.getElementById('editColorInput').value = userProfile.color;
+            document.getElementById('editFontInput').value = userProfile.font;
+        }
+
+        function saveProfileSettings() {
+            const n = document.getElementById('editNameInput').value.trim();
+            const c = document.getElementById('editColorInput').value;
+            const f = document.getElementById('editFontInput').value;
+
+            if(!n) return alert("Nama tidak boleh kosong!");
+
+            userProfile = { name: n, color: c, font: f };
+            localStorage.setItem(KEY_PROFILE, JSON.stringify(userProfile));
+            applyProfileToUI();
+            alert("Profil Disimpan!");
+        }
+
+        function doLogout() {
+            if(confirm("Hapus data profil dan logout?")) {
+                localStorage.removeItem(KEY_PROFILE);
+                location.reload();
+            }
+        }
+
+        // --- 3. FARMING LOGIC ---
         function loadCountries() {
             db.ref('settings/countries').on('value', snap => {
                 const d = snap.val();
@@ -237,35 +338,33 @@
             });
         }
 
-        // 🔥 LOGIC START FARMING (SMART RESUME) 🔥
         function startFarming() {
             selectedRegion = document.getElementById('countryPick').value;
-            // Cek DB apakah user ini masih punya tanggungan TAKEN?
             const btn = document.querySelector('.btn-start');
-            btn.innerText = "⏳ MEMERIKSA STATUS...";
+            btn.innerText = "⏳ CEK SESI...";
             btn.disabled = true;
 
+            // Smart Resume Check
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
                 let myActiveNum = null;
                 
                 if(data) {
-                    // Cari nomor yang status TAKEN dan op_name == currentUser
                     Object.keys(data).forEach(k => {
-                        if(data[k].status === 'TAKEN' && data[k].op_name === currentUser) {
+                        // Cek ownership pakai op_name untuk resume antar device (opsional) 
+                        // atau pakai sessionID local
+                        if(data[k].status === 'TAKEN' && data[k].op_name === userProfile.name) {
                             myActiveNum = k;
-                            selectedRegion = data[k].country; // Sesuaikan negara
+                            selectedRegion = data[k].country;
                         }
                     });
                 }
 
                 if(myActiveNum) {
-                    // RESUME NOMOR LAMA
                     currentNum = myActiveNum;
                     enterFarmingMode();
-                    alert("⚠️ ANDA MEMILIKI SESI AKTIF!\nMelanjutkan nomor: " + currentNum);
+                    alert("Melanjutkan nomor: " + currentNum);
                 } else {
-                    // CARI NOMOR BARU
                     findNumber(data);
                 }
                 btn.innerText = "AMBIL NOMOR";
@@ -280,26 +379,26 @@
             });
 
             if(candidates.length === 0) return alert("Stok Habis!");
-            
             candidates.sort(() => Math.random() - 0.5);
             const target = candidates[0];
 
-            db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: currentUser }, (err) => {
+            db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: userProfile.name }, (err) => {
                 if(!err) {
                     db.ref('stock/'+target).once('value', s => {
                         if(s.val().owner === mySessionID) {
                             currentNum = target;
                             enterFarmingMode();
-                        } else findNumber(data); // Re-try
+                        } else findNumber(data);
                     });
                 }
             });
         }
 
         function enterFarmingMode() {
-            document.getElementById('pageMenu').classList.add('hidden');
-            document.getElementById('pageActive').classList.remove('hidden');
+            document.getElementById('areaMenu').classList.add('hidden');
+            document.getElementById('areaFarming').classList.remove('hidden');
             document.getElementById('txtNum').innerText = currentNum;
+            saveSessionData();
             resetUI();
             attachListener(currentNum);
         }
@@ -307,11 +406,12 @@
         function attachListener(num) {
             if(listenerRef) listenerRef.off();
             listenerRef = db.ref('stock/'+num);
-            let hasTriggeredFeed = false;
+            let hasTriggered = false;
+            
             listenerRef.on('value', snap => {
                 const d = snap.val();
                 if(!d) { stopOnly(); return; }
-                if(d.number !== currentNum) return; // Anti Leak
+                if(d.number !== currentNum) return;
 
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
@@ -321,12 +421,16 @@
                         elOTP.classList.remove('hidden');
                         document.getElementById('btnBad').style.display = 'none';
                         document.getElementById('btnNext').style.display = 'block';
+                        
                         audioBeep.currentTime = 0; audioBeep.play().catch(()=>{});
                         copyText(d.otp);
+                        
+                        // Upsert History
                         upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
-                        if(!hasTriggeredFeed) {
+
+                        if(!hasTriggered) {
                             db.ref('stock/'+num).update({ last_update: firebase.database.ServerValue.TIMESTAMP });
-                            hasTriggeredFeed = true; 
+                            hasTriggered = true; 
                         }
                     }
                 }
@@ -336,104 +440,141 @@
         function actionBad() {
             if(currentNum) {
                 upsertPersonalHistory(currentNum, selectedRegion, "PENDING", 'PENDING');
-                db.ref('stock/'+currentNum).update({status:'BAD'}); // Ini akan melepaskan nomor dari "Tanggungan"
+                db.ref('stock/'+currentNum).update({status:'BAD'});
                 if(listenerRef) listenerRef.off();
             }
-            // Langsung cari baru, tapi pakai findNumberWithFetch karena kita butuh snapshot baru
             db.ref('stock').once('value', snap => findNumber(snap.val()));
         }
 
         function actionNext() {
             if(currentNum) {
-                db.ref('stock/'+currentNum).update({status:'DONE'}); // Ini melepaskan nomor dari "Tanggungan"
+                db.ref('stock/'+currentNum).update({status:'DONE'});
                 if(listenerRef) listenerRef.off();
             }
             db.ref('stock').once('value', snap => findNumber(snap.val()));
         }
 
-        // FUNGSI STOP: Cuma kembali ke menu, JANGAN ubah status jadi BAD/DONE
-        // Jadi status tetap TAKEN, dan kalau klik AMBIL lagi bakal RESUME.
         function stopOnly() {
             if(listenerRef) listenerRef.off();
             currentNum = null;
-            document.getElementById('pageActive').classList.add('hidden');
-            document.getElementById('pageMenu').classList.remove('hidden');
+            clearSessionData();
+            document.getElementById('areaFarming').classList.add('hidden');
+            document.getElementById('areaMenu').classList.remove('hidden');
         }
 
-        function resetUI() {
-            document.getElementById('statusWait').classList.remove('hidden');
-            document.getElementById('myOTP').classList.add('hidden');
-            document.getElementById('myOTP').innerText = "---";
-            document.getElementById('btnBad').style.display = 'block';
-            document.getElementById('btnNext').style.display = 'none';
+        // --- SESSION & HISTORY ---
+        function saveSessionData() {
+            const sess = { status: 'active', number: currentNum, region: selectedRegion, sessionID: mySessionID };
+            localStorage.setItem(KEY_SESSION, JSON.stringify(sess));
         }
-
-        // --- GLOBAL & SYNC ---
-        function initGlobalFeed() {
-            const feed = document.getElementById('globalFeedList');
-            // LIMIT LAST 50 (Biar history gak kosong pas login)
-            const query = db.ref('stock').orderByChild('last_update').limitToLast(50);
-            
-            const render = (snap) => {
-                const d = snap.val();
-                const key = snap.key;
-                const pendingItem = myHistory.find(item => item.num === d.number && item.status === 'PENDING');
-                if(pendingItem && d.otp && d.otp.length > 2) upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
-
-                if(d.otp && d.otp.length > 2) {
-                    if(document.getElementById('glog-'+key)) return;
-                    if(feed.innerText.includes('Menunggu')) feed.innerHTML = "";
-                    const uName = d.op_name || "User";
-                    const flag = getFlag(d.country || "");
-                    const dt = new Date(d.last_update);
-                    const timeStr = dt.getHours().toString().padStart(2,'0') + ":" + dt.getMinutes().toString().padStart(2,'0');
-                    const div = document.createElement('div');
-                    div.id = 'glog-'+key; div.className = 'g-item';
-                    div.innerHTML = `<div class="g-user">${uName} ( ${d.country || ""} ${flag} )</div><div class="g-msg">FB-<span class="x-green">XXXXX</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">XXXXX</span></div><div class="g-time">${timeStr}</div>`;
-                    // Prepend biar yg baru di atas
-                    feed.insertBefore(div, feed.firstChild);
-                }
-            };
-            query.on('child_added', render); 
-            query.on('child_changed', render);
+        function clearSessionData() { localStorage.removeItem(KEY_SESSION); }
+        
+        function checkSavedSession() {
+            const saved = JSON.parse(localStorage.getItem(KEY_SESSION));
+            if(saved && saved.status === 'active') {
+                currentNum = saved.number;
+                mySessionID = saved.sessionID;
+                selectedRegion = saved.region;
+                enterFarmingMode();
+            }
         }
 
         function upsertPersonalHistory(num, country, otpVal, status) {
-            const index = myHistory.findIndex(item => item.num === num);
-            if(index > -1) {
-                if(myHistory[index].status === 'PENDING' && status === 'SUCCESS') {
-                     myHistory[index].otp = otpVal; myHistory[index].status = 'SUCCESS';
-                     new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3').play().catch(()=>{});
+            const idx = myHistory.findIndex(i => i.num === num);
+            if(idx > -1) {
+                if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') {
+                    myHistory[idx].otp = otpVal; 
+                    myHistory[idx].status = 'SUCCESS';
                 }
             } else {
                 myHistory.unshift({ num: num, country: country, otp: otpVal, status: status });
             }
-            localStorage.setItem(LS_KEY_HIST, JSON.stringify(myHistory));
+            localStorage.setItem(KEY_HISTORY, JSON.stringify(myHistory));
             renderPersonalHistory();
         }
 
         function renderPersonalHistory() {
-            const feed = document.getElementById('personalFeedList');
-            if(myHistory.length === 0) { feed.innerHTML = '<div style="text-align:center; padding:15px; color:#444; font-size:10px;">Belum ada history.</div>'; return; }
-            feed.innerHTML = "";
+            const container = document.getElementById('personalHistoryContainer');
+            if(myHistory.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:#666;">Belum ada riwayat.</div>';
+                return;
+            }
+            let html = '<table class="ph-table">';
             myHistory.forEach(item => {
-                const flag = getFlag(item.country);
-                let msgDisplay = item.status === "PENDING" ? `<span style="color:#f59e0b; font-weight:bold;">MENUNGGU KODE... (PENDING)</span>` : `FB-<span class="x-green">${item.otp}</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">${item.otp}</span>`;
-                const div = document.createElement('div');
-                div.className = `p-item ${item.status === "PENDING" ? "p-pending" : "p-success"}`;
-                div.innerHTML = `<div class="col-sms"><span class="sms-country">${flag} ${item.country || "UNK"}</span><span class="sms-num">${item.num}</span></div><div class="col-app">FACEBOOK</div><div class="col-msg">${msgDisplay}</div>`;
-                feed.appendChild(div);
+                const statusClass = item.status === 'PENDING' ? 'ph-status-pending' : 'ph-status-success';
+                const msg = item.status === 'PENDING' ? 'MENUNGGU KODE...' : `FB-${item.otp} confirm...`;
+                const color = item.status === 'PENDING' ? '#f59e0b' : '#4ade80';
+                
+                html += `
+                <tr class="ph-row ${statusClass}">
+                    <td class="ph-cell">
+                        <div style="font-weight:bold; color:#fff;">${getFlag(item.country)} ${item.country || 'UNK'}</div>
+                        <div style="font-family:monospace; margin-top:2px;">${item.num}</div>
+                    </td>
+                    <td class="ph-cell">FACEBOOK</td>
+                    <td class="ph-cell" style="color:${color}; font-family:monospace;">${msg}</td>
+                </tr>`;
             });
+            html += '</table>';
+            container.innerHTML = html;
         }
 
+        // --- GLOBAL FEED (FETCH + LISTEN) ---
+        function initGlobalFeed() {
+            const feed = document.getElementById('globalFeedList');
+            const query = db.ref('stock').orderByChild('last_update').limitToLast(50);
+            
+            // Render Helper
+            const renderItem = (snap) => {
+                const d = snap.val();
+                const key = snap.key;
+                
+                // Sync to Personal History if Pending
+                const isMinePending = myHistory.find(i => i.num === d.number && i.status === 'PENDING');
+                if(isMinePending && d.otp && d.otp.length > 2) upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
+
+                if(d.otp && d.otp.length > 2) {
+                    if(document.getElementById('glog-'+key)) return;
+                    if(feed.innerText.includes('Load')) feed.innerHTML = "";
+                    
+                    const uName = d.op_name || "User";
+                    const flag = getFlag(d.country || "");
+                    const timeStr = new Date(d.last_update).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const div = document.createElement('div');
+                    div.id = 'glog-'+key; div.className = 'g-item';
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="color:#f43f5e; font-weight:bold;">${uName}</span>
+                            <span style="color:#666;">${timeStr}</span>
+                        </div>
+                        <div style="color:#94a3b8; font-family:monospace;">
+                            ${flag} FB-<span class="x-green">XXXXX</span> is your code #<span class="x-green">XXXXX</span>
+                        </div>
+                    `;
+                    // Insert at top
+                    feed.insertBefore(div, feed.firstChild);
+                }
+            };
+
+            // Child Added (Initial Load + New Data)
+            query.on('child_added', renderItem);
+            query.on('child_changed', renderItem);
+        }
+
+        // UTILS
+        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        function getFlag(name) { return flags[name?.toUpperCase()] || "🌍"; }
         function copyText(val) {
             if(!val || val.includes("...") || val.includes("---")) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(val).catch(err => { fallbackCopyText(val); }); } else { fallbackCopyText(val); }
+            const t = document.createElement("textarea"); t.value = val; document.body.appendChild(t);
+            t.select(); document.execCommand('copy'); document.body.removeChild(t);
         }
-        function fallbackCopyText(val) {
-            var textArea = document.createElement("textarea"); textArea.value = val; textArea.style.top = "0"; textArea.style.left = "0"; textArea.style.position = "fixed";
-            document.body.appendChild(textArea); textArea.focus(); textArea.select();
-            try { document.execCommand('copy'); } catch (err) {} document.body.removeChild(textArea);
+        function resetUI() {
+            document.getElementById('statusWait').classList.remove('hidden');
+            document.getElementById('myOTP').classList.add('hidden');
+            document.getElementById('btnBad').style.display = 'block';
+            document.getElementById('btnNext').style.display = 'none';
         }
     </script>
 </body>
