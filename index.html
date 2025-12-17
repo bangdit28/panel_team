@@ -9,15 +9,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <style>
-        /* BASE SETUP */
+        /* RESET & BASE */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            background: #0f172a; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; 
             margin: 0; padding: 10px; min-height: 100vh;
             display: flex; flex-direction: column; 
         }
 
-        /* CONTAINER UTAMA */
+        /* CONTAINER */
         .box { 
             width: 100%; background: #1e293b; 
             padding: 15px; border-radius: 12px; border: 1px solid #334155; 
@@ -25,7 +25,7 @@
             margin-bottom: 15px; position: relative;
         }
 
-        /* HEADER PANEL */
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
         h2 { margin: 0; color: #f43f5e; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
         .op-name { font-size: 11px; color: #94a3b8; background: #0f172a; padding: 4px 10px; border-radius: 4px; border: 1px solid #334155; font-weight: bold; }
@@ -36,18 +36,18 @@
         
         button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
         button:active { transform: scale(0.98); }
-        .btn-start { background: #f43f5e; color: #fff; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3); }
+        .btn-start { background: #f43f5e; color: #fff; }
         .btn-bad { background: #ef4444; color: #fff; }
-        .btn-next { background: #22c55e; color: #000; display: none; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3); }
+        .btn-next { background: #22c55e; color: #000; display: none; }
         .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; width: auto; padding: 8px 20px; margin-top: 15px; font-size: 10px; display: block; margin-left: auto; margin-right: auto; }
 
-        /* ACTIVE DISPLAY */
+        /* DISPLAY NUMBER */
         .display-num { 
             font-size: 24px; font-family: monospace; background: #000; 
             padding: 12px; border-radius: 8px; border: 2px dashed #f43f5e; 
             margin: 10px 0; text-align: center; cursor: pointer; color: #fff;
         }
-        
+
         .otp-area { 
             background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155;
             padding: 15px; text-align: center; margin-bottom: 15px; 
@@ -56,25 +56,21 @@
         .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer;}
         .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
-        /* --- GLOBAL FEED STYLE (REVISI V129) --- */
+        /* --- GLOBAL FEED STYLE --- */
         .history-box { 
             width: 100%; background: #0f172a; border: 1px solid #334155; 
-            border-radius: 10px; padding: 0; overflow: hidden;
-            margin-top: 5px; display: flex; flex-direction: column;
+            border-radius: 10px; overflow: hidden; margin-top: 5px; display: flex; flex-direction: column;
         }
-        
-        /* HEADER FEED: Kiri Judul, Kanan Tanggal */
         .h-header {
             background: #172033; padding: 10px; border-bottom: 1px solid #334155;
             display: flex; justify-content: space-between; align-items: center;
         }
         .h-title { font-size: 11px; color: #f43f5e; font-weight: 800; }
         .h-date { font-size: 10px; color: #94a3b8; font-weight: bold; font-family: monospace; }
-
-        /* FEED LIST */
+        
         .feed-list { padding: 10px; max-height: 380px; overflow-y: auto; }
 
-        /* ITEM FEED */
+        /* ITEM FEED GLOBAL */
         .g-item {
             background: #1e293b; border: 1px solid #334155; border-radius: 6px;
             padding: 10px; margin-bottom: 8px; position: relative;
@@ -85,21 +81,26 @@
         }
         .g-msg {
             color: #94a3b8; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4;
-            padding-right: 35px; /* Space biar gak nabrak jam */
+            padding-right: 30px;
         }
         .x-green { color: #4ade80; font-weight: bold; letter-spacing: 1px; }
-        
-        /* JAM DI POJOK KANAN BAWAH ITEM */
         .g-time {
             position: absolute; bottom: 8px; right: 10px;
             font-size: 10px; color: #64748b; font-weight: bold;
+        }
+
+        /* PERSONAL HISTORY ITEM */
+        .p-item {
+            display: flex; justify-content: space-between; background: #1e293b;
+            padding: 10px; margin-bottom: 5px; border-radius: 4px; border-left: 3px solid #4ade80;
+            font-size: 11px; color: #ccc; align-items: center;
         }
 
         .hidden { display: none !important; }
 
         /* LOGIN */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-inner { width: 85%; max-width: 320px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-inner { width: 85%; max-width: 320px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
 
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes blink { 50% { opacity: 0.4; } }
@@ -111,8 +112,8 @@
     <div id="loginOverlay">
         <div class="login-inner">
             <h2 style="margin-bottom:15px; color:#f43f5e;">PANEL BARUDAK TASIK</h2>
-            <input type="text" id="inputName" placeholder="Nama Kamu (Wajib)...">
-            <button class="btn-start" onclick="doLogin()">MASUK PANEL</button>
+            <input type="text" id="inputName" placeholder="Nama Kamu...">
+            <button class="btn-start" onclick="doLogin()">MASUK</button>
         </div>
     </div>
 
@@ -126,22 +127,20 @@
                     <div class="op-name" id="opNameMenu">...</div>
                 </div>
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:10px; color:#aaa; margin-bottom:4px; display:block;">Server Negara:</label>
+                    <label style="font-size:10px; color:#aaa; margin-bottom:4px; display:block;">Pilih Negara:</label>
                     <select id="countryPick"><option>Loading...</option></select>
                     <button class="btn-start" onclick="startFarming()">AMBIL</button>
                 </div>
             </div>
 
-            <!-- GLOBAL LIVE FEED (FIXED) -->
+            <!-- GLOBAL LIVE FEED -->
             <div class="history-box">
                 <div class="h-header">
-                    <div class="h-title">🔴 LIVE GLOBAL FEED</div>
+                    <div class="h-title">🔴 LIVE GLOBAL (INSTANT)</div>
                     <div class="h-date" id="headerDate">...</div>
                 </div>
                 <div id="globalFeedList" class="feed-list">
-                    <div style="text-align:center; padding:20px; color:#444; font-size:10px;">
-                        Menunggu data history hari ini...
-                    </div>
+                    <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Menunggu aktivitas...</div>
                 </div>
             </div>
         </div>
@@ -170,53 +169,65 @@
                 
                 <button class="btn-stop" onclick="stopFarming()">⏹️ KEMBALI KE MENU</button>
             </div>
+
+            <!-- PERSONAL HISTORY -->
+            <div class="history-box">
+                <div class="h-header">
+                    <div class="h-title">👤 RIWAYAT SAYA (AUTO-SAVED)</div>
+                </div>
+                <div id="personalFeedList" class="feed-list">
+                    <div style="text-align:center; padding:10px; color:#444; font-size:10px;">Belum ada history.</div>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <script>
-        // 🔥 SETUP FIREBASE (GANTI CONFIG LO DI SINI) 🔥
+        // 🔥 CONFIG FIREBASE (TASIK) 🔥
         const firebaseConfig = {
-  apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
-  authDomain: "vipotpsystem.firebaseapp.com",
-  databaseURL: "https://vipotpsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "vipotpsystem",
-  storageBucket: "vipotpsystem.firebasestorage.app",
-  messagingSenderId: "1041472357696",
-  appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
-};
+            apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
+            authDomain: "vipotpsystem.firebaseapp.com",
+            databaseURL: "https://vipotpsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vipotpsystem",
+            storageBucket: "vipotpsystem.firebasestorage.app",
+            messagingSenderId: "1041472357696",
+            appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
+        };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // GLOBAL VARS
-        let currentUser = localStorage.getItem('vip_user_v129');
+        // VARS
+        const LS_KEY_NAME = 'tasik_user_permanent'; 
+        const LS_KEY_HIST = 'tasik_my_history_log';
+
+        let currentUser = localStorage.getItem(LS_KEY_NAME);
         let currentNum = null;
         let selectedRegion = "";
         let listenerRef = null;
+        // Load history dari LocalStorage
+        let myHistory = JSON.parse(localStorage.getItem(LS_KEY_HIST)) || [];
+        
         const mySessionID = "U_" + Math.floor(Math.random() * 999999);
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
 
-        // BENDERA
         const flags = {
             "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭",
             "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧",
-            "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷",
-            "CAMBODIA": "🇰🇭", "MYANMAR": "🇲🇲", "LAOS": "🇱🇦"
+            "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷"
         };
-        function getFlag(name) {
-            if(!name) return "";
-            return flags[name.toUpperCase()] || "🌍";
-        }
+        function getFlag(name) { return flags[name.toUpperCase()] || "🌍"; }
 
-        // --- 1. INIT ---
+        // --- 1. INIT & LOGIN ---
         if(currentUser) initApp();
+        else document.getElementById('loginOverlay').style.display = 'flex';
 
         function doLogin() {
             const n = document.getElementById('inputName').value.trim();
-            if(!n) return alert("Isi nama operator!");
+            if(!n) return alert("Wajib isi nama!");
             currentUser = n;
-            localStorage.setItem('vip_user_v129', n);
+            localStorage.setItem(LS_KEY_NAME, n);
             initApp();
         }
 
@@ -225,14 +236,15 @@
             document.getElementById('mainApp').classList.remove('hidden');
             document.getElementById('opNameMenu').innerText = currentUser;
             document.getElementById('opNameActive').innerText = currentUser;
-            
-            // Set Tanggal Header (DD/MM/YYYY)
+
+            // Set Header Date
             const today = new Date();
-            const dateStr = today.getDate().toString().padStart(2,0) + "/" + (today.getMonth()+1).toString().padStart(2,0) + "/" + today.getFullYear();
+            const dateStr = today.getDate().toString().padStart(2,'0') + "/" + (today.getMonth()+1).toString().padStart(2,'0') + "/" + today.getFullYear();
             document.getElementById('headerDate').innerText = dateStr;
 
             loadCountries();
-            initGlobalFeed();
+            initGlobalFeed(); 
+            renderPersonalHistory(); 
         }
 
         function loadCountries() {
@@ -248,7 +260,7 @@
             });
         }
 
-        // --- 2. FARMING CORE ---
+        // --- 2. FARMING SYSTEM ---
         function startFarming() {
             selectedRegion = document.getElementById('countryPick').value;
             document.getElementById('pageMenu').classList.add('hidden');
@@ -275,7 +287,6 @@
                 candidates.sort(() => Math.random() - 0.5);
                 const target = candidates[0];
 
-                // 🔥 PENTING: Simpan op_name saat ambil nomor 🔥
                 db.ref('stock/'+target).update({ 
                     status: 'TAKEN', 
                     owner: mySessionID,
@@ -295,17 +306,20 @@
             });
         }
 
-        // --- 3. LISTENER ---
+        // --- 3. LISTENER & REAL-TIME FEED TRIGGER ---
         function attachListener(num) {
             if(listenerRef) listenerRef.off();
             listenerRef = db.ref('stock/'+num);
             
+            let hasTriggeredFeed = false;
+
             listenerRef.on('value', snap => {
                 const d = snap.val();
                 if(!d) { stopFarming(); return; }
 
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
+                    
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden');
                         elOTP.innerText = d.otp;
@@ -313,10 +327,17 @@
                         document.getElementById('btnBad').style.display = 'none';
                         document.getElementById('btnNext').style.display = 'block';
 
-                        // BUNYI TUUUT
                         audioBeep.currentTime = 0;
                         audioBeep.play().catch(()=>{});
-                        copyText(d.otp);
+                        savePersonalHistory(d); 
+
+                        // 🔥 TRIGGER FEED INSTANT 🔥
+                        if(!hasTriggeredFeed) {
+                            db.ref('stock/'+num).update({
+                                last_update: firebase.database.ServerValue.TIMESTAMP
+                            });
+                            hasTriggeredFeed = true; 
+                        }
                     }
                 }
             });
@@ -328,14 +349,7 @@
         }
 
         function actionNext() {
-            if(currentNum) {
-                // 🔥 TRIGGER UPDATE GLOBAL FEED 🔥
-                // Kita update last_update jadi SERVER TIMESTAMP pas klik Lanjut/Done
-                db.ref('stock/'+currentNum).update({
-                    status: 'DONE',
-                    last_update: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
+            if(currentNum) db.ref('stock/'+currentNum).update({status:'DONE'});
             findNumber();
         }
 
@@ -354,67 +368,91 @@
             document.getElementById('btnNext').style.display = 'none';
         }
 
-        // --- 4. GLOBAL FEED SYSTEM (FIXED) ---
+        // --- 4. GLOBAL FEED (REAL-TIME INSTANT) ---
         function initGlobalFeed() {
             const feed = document.getElementById('globalFeedList');
             
-            // 1. Tentukan batas waktu Hari Ini (Jam 00:00)
             const startOfDay = new Date();
             startOfDay.setHours(0,0,0,0);
-            const timestampStart = startOfDay.getTime();
+            const tsStart = startOfDay.getTime();
 
-            // 2. Query data yg berubah/ditambah HARI INI
-            const query = db.ref('stock').orderByChild('last_update').startAt(timestampStart);
+            const query = db.ref('stock').orderByChild('last_update').limitToLast(40);
 
-            // Handler untuk render item
-            const renderItem = (snap) => {
+            const render = (snap) => {
                 const d = snap.val();
                 const key = snap.key;
-
-                // VALIDASI: Hanya tampilkan yg sudah DONE dan ada OTP
-                if(d.status === 'DONE' && d.otp) {
+                
+                // Tampil jika ada OTP dan update hari ini
+                if(d.otp && d.otp.length > 2 && d.last_update >= tsStart) {
                     
-                    // Cek duplikasi (biar ga render ulang kalo ada update kecil)
                     if(document.getElementById('glog-'+key)) return;
-
-                    // Bersihkan teks loading
                     if(feed.innerText.includes('Menunggu')) feed.innerHTML = "";
 
-                    // Data User
-                    const uName = d.op_name || "Unknown";
-                    const uCountry = d.country || "";
-                    const flag = getFlag(uCountry);
+                    const uName = d.op_name || "User";
+                    const flag = getFlag(d.country || "");
                     
-                    // Waktu (Jam:Menit)
-                    const dateObj = new Date(d.last_update);
-                    const timeStr = dateObj.getHours().toString().padStart(2,'0') + ":" + dateObj.getMinutes().toString().padStart(2,'0');
-
-                    // Format Pesan
-                    const msg = `FB-<span class="x-green">XXXXX</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">XXXXX</span>`;
-
+                    const dt = new Date(d.last_update);
+                    const timeStr = dt.getHours().toString().padStart(2,'0') + ":" + dt.getMinutes().toString().padStart(2,'0');
+                    
                     const div = document.createElement('div');
-                    div.id = 'glog-' + key;
+                    div.id = 'glog-'+key;
                     div.className = 'g-item';
                     div.innerHTML = `
-                        <div class="g-user">
-                            ${uName} ( ${uCountry} ${flag} )
-                        </div>
+                        <div class="g-user">${uName} ( ${d.country || ""} ${flag} )</div>
                         <div class="g-msg">
-                            ${msg}
+                            FB-<span class="x-green">XXXXX</span> is your Facebook confirmation code @m.facebook.com #<span class="x-green">XXXXX</span>
                         </div>
                         <div class="g-time">${timeStr}</div>
                     `;
-
-                    // Taruh paling atas
+                    
                     feed.insertBefore(div, feed.firstChild);
                 }
             };
 
-            // Dengerin Data Baru (Initial load hari ini)
-            query.on('child_added', renderItem);
-            
-            // Dengerin Perubahan (Realtime saat user lain klik Lanjut)
-            query.on('child_changed', renderItem);
+            query.on('child_added', render);
+            query.on('child_changed', render);
+        }
+
+        // --- 5. PERSONAL HISTORY (PERMANEN) ---
+        function savePersonalHistory(d) {
+            const exists = myHistory.find(item => item.otp === d.otp && item.num === d.number);
+            if(exists) return;
+
+            const newItem = {
+                num: d.number,
+                country: d.country,
+                otp: d.otp,
+                time: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})
+            };
+
+            myHistory.unshift(newItem);
+            localStorage.setItem(LS_KEY_HIST, JSON.stringify(myHistory));
+            renderPersonalHistory();
+        }
+
+        function renderPersonalHistory() {
+            const feed = document.getElementById('personalFeedList');
+            if(myHistory.length === 0) {
+                feed.innerHTML = '<div style="text-align:center; padding:10px; color:#444; font-size:10px;">Belum ada history.</div>';
+                return;
+            }
+
+            feed.innerHTML = "";
+            myHistory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-item';
+                div.innerHTML = `
+                    <div>
+                        <div style="font-weight:bold;">${item.country}</div>
+                        <div style="font-family:monospace; color:#888;">${item.num}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="color:#4ade80; font-weight:bold; font-size:14px;">${item.otp}</div>
+                        <div style="font-size:9px; color:#666;">${item.time}</div>
+                    </div>
+                `;
+                feed.appendChild(div);
+            });
         }
 
         function copyText(val) {
@@ -422,7 +460,6 @@
             const t = document.createElement("textarea"); t.value = val; document.body.appendChild(t);
             t.select(); document.execCommand('copy'); document.body.removeChild(t);
         }
-
     </script>
 </body>
 </html>
