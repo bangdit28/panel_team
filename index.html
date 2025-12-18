@@ -196,7 +196,7 @@
         const db = firebase.database();
 
         // 🟢 FIX 1: DEFINISI FLAGS DI PINDAH KE ATAS BIAR GAK ERROR "Cannot Access"
-        const flags = { "MOROCCO": "🇲🇦", "SAUDI ARABIA": "🇸🇦", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        const flags = { "MOROCCO": "🇲🇦", "SAUDIARABIA": "🇸🇦", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
         function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
 
         // 🔒 KEYS STORAGE
