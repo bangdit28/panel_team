@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTER ADMIN V120 (CLEANER)</title>
+    <title>MASTER ADMIN V121 (COUNTRY FIX)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        /* CSS SAMA PERSIS DENGAN V119 */
+        /* CSS ADMIN DARK MODE */
         body { background: #000; color: #fff; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .box { width: 100%; max-width: 800px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         h2 { margin-top: 0; color: #00ff88; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
@@ -22,29 +22,29 @@
         .stat-num { font-size: 28px; font-weight: bold; display: block; margin-bottom: 5px; }
         .stat-label { font-size: 10px; color: #aaa; }
         .c-green { color: #00e676; } .c-blue { color: #2979ff; } .c-red { color: #ff1744; }
-        .notif-box { background: rgba(255, 215, 0, 0.05); border: 1px dashed #ffd700; padding: 15px; border-radius: 8px; }
-        .notif-input { width: 100%; padding: 10px; background: #000; color: #ffd700; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; font-weight: bold; }
-        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; }
+        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; margin-top:10px; }
         .list-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 8px 12px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; }
         .item-info { font-size: 12px; }
-        .item-actions { display: flex; gap: 5px; }
-        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; }
-        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
-        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; } .bg-yellow { background: #ffd700; color:#000; }
-        button:hover { opacity: 0.8; }
+        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
+        button.action-btn { border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; transition:0.2s; }
+        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; } 
+        button:hover { opacity: 0.8; transform: scale(1.02); }
+        .notif-box { background: rgba(255, 215, 0, 0.05); border: 1px dashed #ffd700; padding: 15px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ V120 ADMIN (ZOMBIE CLEANER)</h2>
+        <h2>⚡ V121 ADMIN (COUNTRY FIX)</h2>
 
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab('dash')">📊 DASHBOARD</button>
             <button class="tab-btn" onclick="switchTab('range')">📂 MONITOR</button>
+            <button class="tab-btn" onclick="switchTab('country')">🌍 NEGARA</button>
             <button class="tab-btn" onclick="switchTab('upload')">🛠️ TOOLS</button>
         </div>
 
+        <!-- TAB DASHBOARD -->
         <div id="dash" class="tab-content active">
             <div class="grid-stats">
                 <div class="stat-card" style="border-color: #00e676;">
@@ -53,48 +53,72 @@
                 </div>
                 <div class="stat-card" style="border-color: #2979ff;">
                     <span id="countActive" class="stat-num c-blue">0</span>
-                    <span class="stat-label">ACTIVE (TAKEN)</span>
+                    <span class="stat-label">ACTIVE</span>
                 </div>
                 <div class="stat-card" style="border-color: #ff1744;">
                     <span id="countTrash" class="stat-num c-red">0</span>
-                    <span class="stat-label">TRASH (DONE/BAD)</span>
+                    <span class="stat-label">TRASH</span>
                 </div>
             </div>
-
-            <!-- TOMBOL BARU BUAT BERSIHIN STUCK NUMBER -->
-            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; font-size:12px; margin-bottom:15px;">
+            
+            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; margin-bottom:15px;">
                 🧹 LEPASKAN NOMOR STUCK ( > 30 MENIT)
             </button>
 
             <div class="notif-box">
-                <label style="color:#ffd700; font-size:11px;">📢 KIRIM NOTIFIKASI:</label>
+                <label style="color:#ffd700; font-size:11px;">📢 RUNNING TEXT:</label>
                 <div style="display:flex; gap:5px; margin-top:5px;">
-                    <input type="text" id="notifMsg" class="notif-input" placeholder="Tulis pesan disini...">
-                    <button onclick="sendNotif()" class="action-btn bg-yellow" style="width:auto;">KIRIM</button>
-                    <button onclick="clearNotif()" class="action-btn bg-red" style="width:auto;">HAPUS</button>
+                    <input type="text" id="notifMsg" placeholder="Isi pesan...">
+                    <button onclick="sendNotif()" class="action-btn" style="background:#ffd700; color:#000;">KIRIM</button>
+                    <button onclick="clearNotif()" class="action-btn bg-red">HAPUS</button>
                 </div>
-                <div id="currentNotif" style="font-size:10px; color:#777; margin-top:5px;"></div>
             </div>
         </div>
 
+        <!-- TAB RANGE -->
         <div id="range" class="tab-content">
             <div class="list-container" id="rangeListContainer">Loading...</div>
         </div>
 
+        <!-- TAB COUNTRY (YANG DIPERBAIKI) -->
+        <div id="country" class="tab-content">
+            <div style="background:#222; padding:10px; border-radius:5px;">
+                <label style="font-size:10px; color:#aaa;">TAMBAH NEGARA:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="cCodeInput" placeholder="Kode (cth: ID)" style="width:30%;">
+                    <input type="text" id="cNameInput" placeholder="Nama (cth: INDONESIA)">
+                    <button onclick="saveCountry()" class="action-btn bg-green">SIMPAN</button>
+                </div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                <span style="font-size:11px; color:#aaa;">DAFTAR NEGARA AKTIF:</span>
+                <button onclick="clearAllCountries()" class="action-btn bg-red" style="padding:5px 10px; font-size:10px;">🗑️ HAPUS SEMUA NEGARA</button>
+            </div>
+
+            <div class="list-container" id="countryListDisplay">
+                <div style="text-align:center; padding:20px; color:#555;">Belum ada negara.</div>
+            </div>
+        </div>
+
+        <!-- TAB UPLOAD -->
         <div id="upload" class="tab-content">
-            <label style="font-size:11px; color:#aaa;">UPLOAD NOMOR MANUAL:</label>
-            <input type="text" id="cCode" placeholder="Kode Negara (e.g. US)" style="margin-bottom:5px;">
+            <label style="font-size:11px; color:#aaa;">UPLOAD NOMOR KE NEGARA:</label>
+            <select id="countrySelectUpload"><option>Loading...</option></select>
+            
             <textarea id="numList" placeholder="Paste nomor disini..." style="height:100px;"></textarea>
-            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%; padding:10px; margin-top:10px;">UPLOAD</button>
+            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%; padding:12px; margin-top:5px;">🚀 UPLOAD NOMOR</button>
+            
             <hr style="border-color:#333; margin:20px 0;">
             <div style="display:flex; gap:10px;">
-                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:10px;">BERSIHKAN TRASH</button>
-                <button onclick="clearAll()" class="action-btn bg-red" style="flex:1; padding:10px;">RESET DATABASE</button>
+                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:12px;">BERSIHKAN TRASH</button>
+                <button onclick="clearAllStock()" class="action-btn bg-red" style="flex:1; padding:12px;">RESET DATABASE (NOMOR)</button>
             </div>
         </div>
     </div>
 
     <script>
+        // 🔥 CONFIG 🔥
         const firebaseConfig = {
             apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
             authDomain: "vipotpsystem.firebaseapp.com",
@@ -107,18 +131,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // THROTTLED MONITORING
+        // --- DASHBOARD MONITORING ---
         let lastUpdate = 0;
         db.ref('stock').on('value', snap => {
             const now = Date.now();
-            if (now - lastUpdate > 1000) {
-                renderDashboard(snap.val());
-                lastUpdate = now;
-            }
+            if (now - lastUpdate > 1000) { renderDashboard(snap.val()); lastUpdate = now; }
         });
 
         function renderDashboard(data) {
-            if(!data) return;
+            if(!data) {
+                document.getElementById('countAvail').innerText = 0;
+                document.getElementById('countActive').innerText = 0;
+                document.getElementById('countTrash').innerText = 0;
+                document.getElementById('rangeListContainer').innerHTML = "<div style='text-align:center;color:#555;'>Kosong</div>";
+                return;
+            }
             let avail=0, active=0, trash=0;
             let ranges = {};
 
@@ -139,91 +166,149 @@
 
             let html = "";
             Object.keys(ranges).forEach(k => {
-                html += `<div class="list-item"><div class="item-info"><b>${k}</b>: ${ranges[k].avail}/${ranges[k].total}</div><button class="action-btn bg-red" onclick="deleteRange('${k}')">DEL</button></div>`;
+                const color = ranges[k].avail > 0 ? '#00ff88' : '#555';
+                html += `<div class="list-item" style="border-left-color:${color}">
+                            <div class="item-info"><b>${k}</b>: ${ranges[k].avail}/${ranges[k].total}</div>
+                            <button class="action-btn bg-red" onclick="deleteRange('${k}')">HAPUS</button>
+                         </div>`;
             });
             document.getElementById('rangeListContainer').innerHTML = html;
         }
 
+        // --- 🔥 COUNTRY MANAGER FIX 🔥 ---
+        // Listener ini akan update list di Tab NEGARA dan Dropdown di Tab UPLOAD sekaligus
+        db.ref('settings/countries').on('value', snap => {
+            const data = snap.val();
+            const listDiv = document.getElementById('countryListDisplay');
+            const selectUpload = document.getElementById('countrySelectUpload');
+            
+            listDiv.innerHTML = ""; 
+            selectUpload.innerHTML = "";
+
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    // Render di List Tab Negara
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.innerHTML = `
+                        <div class="item-info"><span style="color:#00e5ff; font-weight:bold;">${key}</span> : ${data[key]}</div>
+                        <button class="action-btn bg-red" onclick="delCountry('${key}')">X</button>
+                    `;
+                    listDiv.appendChild(div);
+
+                    // Render di Dropdown Upload
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = data[key]; // Tampilkan Nama (INDONESIA)
+                    selectUpload.appendChild(opt);
+                });
+            } else {
+                listDiv.innerHTML = "<div style='text-align:center;color:#555;padding:10px;'>Belum ada negara. Tambahkan diatas.</div>";
+                selectUpload.innerHTML = "<option value=''>Kosong</option>";
+            }
+        });
+
+        // Simpan Negara
+        window.saveCountry = () => {
+            const c = document.getElementById('cCodeInput').value.toUpperCase().trim();
+            const n = document.getElementById('cNameInput').value.trim();
+            if(c && n) {
+                // Simpan ke path settings/countries
+                db.ref('settings/countries/' + c).set(n, (err) => {
+                    if(!err) {
+                        alert("Negara " + n + " ditambahkan!");
+                        document.getElementById('cCodeInput').value = "";
+                        document.getElementById('cNameInput').value = "";
+                    }
+                });
+            } else {
+                alert("Kode dan Nama wajib diisi!");
+            }
+        }
+
+        window.delCountry = (key) => {
+            if(confirm("Hapus negara " + key + "?")) {
+                db.ref('settings/countries/' + key).remove();
+            }
+        }
+
+        window.clearAllCountries = () => {
+            if(confirm("YAKIN HAPUS SEMUA LIST NEGARA? (Pengaturan negara akan hilang)")) {
+                db.ref('settings/countries').remove();
+            }
+        }
+
+        // --- UPLOAD & STOCK ---
+        window.uploadStockSafe = () => {
+            const raw = document.getElementById('numList').value;
+            // Ambil value dari dropdown (Kode Negara, misal ID)
+            const c = document.getElementById('countrySelectUpload').value; 
+            
+            if(!c) return alert("Pilih Negara dulu! Kalau kosong, tambah di tab Negara.");
+            if(!raw) return alert("Nomor kosong!");
+
+            const lines = raw.split(/\n/);
+            const ts = Date.now();
+            const btn = event.target;
+            btn.innerText = "⏳ Uploading..."; btn.disabled = true;
+            
+            db.ref('stock').once('value', snap => {
+                const ex = snap.val() || {};
+                let u = {};
+                let count = 0;
+                lines.forEach(l => {
+                    let n = l.replace(/\D/g, '');
+                    // Anti Duplikat
+                    if(n.length > 6 && !ex[n]) {
+                        u[n] = { number: n, country: c, status: 'AVAILABLE', range_name: "MANUAL", timestamp: ts, otp: "" };
+                        count++;
+                    }
+                });
+                
+                if(count > 0) {
+                    db.ref('stock').update(u, (e) => { 
+                        if(!e) alert("Berhasil upload " + count + " nomor!"); 
+                        document.getElementById('numList').value="";
+                        btn.innerText = "🚀 UPLOAD NOMOR"; btn.disabled = false;
+                    });
+                } else {
+                    alert("Tidak ada nomor baru (Duplikat semua).");
+                    btn.innerText = "🚀 UPLOAD NOMOR"; btn.disabled = false;
+                }
+            });
+        }
+
+        // --- CLEANERS ---
+        window.clearZombies = () => {
+            if(!confirm("Lepas nomor stuck?")) return;
+            db.ref('stock').once('value', s => {
+                const d = s.val(); let u={}; const now=Date.now(); const limit=30*60*1000;
+                if(d) {
+                    Object.keys(d).forEach(k => {
+                        if(d[k].status==='TAKEN' && (now - (d[k].timestamp||0) > limit)) {
+                            u[k+'/status']='AVAILABLE'; u[k+'/owner']=null;
+                        }
+                    });
+                    db.ref('stock').update(u);
+                    alert("Zombie cleaned.");
+                }
+            });
+        }
+        window.deleteRange = (r) => { if(confirm("Hapus Range "+r+"?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].range_name===r)u[k]=null;});db.ref('stock').update(u);}); }
+        window.clearTrash = () => { if(confirm("Hapus Sampah?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].status==='DONE'||d[k].status==='BAD')u[k]=null;});db.ref('stock').update(u);}); }
+        window.clearAllStock = () => { if(confirm("RESET DATABASE NOMOR?")) db.ref('stock').remove(); }
+        
+        // --- NOTIF ---
+        window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
+        window.clearNotif = () => db.ref('system/notification').remove();
+
+        // NAV
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.target.classList.add('active');
         }
-
-        // 🔥 ZOMBIE CLEANER 🔥
-        window.clearZombies = () => {
-            if(!confirm("Lepaskan nomor yg status TAKEN lebih dari 30 menit?")) return;
-            db.ref('stock').once('value', snap => {
-                const data = snap.val();
-                let updates = {};
-                let count = 0;
-                const now = Date.now();
-                // 30 menit = 30 * 60 * 1000 ms
-                const limit = 30 * 60 * 1000; 
-
-                if(data) {
-                    Object.keys(data).forEach(k => {
-                        // Cek kalau status TAKEN
-                        if(data[k].status === 'TAKEN') {
-                            // Cek timestamp (Kalau gak ada timestamp, anggap lama dan reset)
-                            const takenTime = data[k].timestamp || 0; 
-                            // Kalau selisih waktu > 30 menit, reset jadi AVAILABLE
-                            if(now - takenTime > limit) {
-                                updates[k + '/status'] = 'AVAILABLE';
-                                updates[k + '/owner'] = null;
-                                count++;
-                            }
-                        }
-                    });
-                    if(count > 0) {
-                        db.ref('stock').update(updates);
-                        alert(`Berhasil melepas ${count} nomor zombie.`);
-                    } else {
-                        alert("Tidak ada nomor yang stuck.");
-                    }
-                }
-            });
-        }
-
-        window.uploadStockSafe = () => {
-            const raw = document.getElementById('numList').value;
-            const c = document.getElementById('cCode').value || "UNK";
-            const lines = raw.split(/\n/);
-            const ts = Date.now();
-            
-            db.ref('stock').once('value', snap => {
-                const ex = snap.val() || {};
-                let u = {};
-                lines.forEach(l => {
-                    let n = l.replace(/\D/g, '');
-                    if(n.length > 6 && !ex[n]) {
-                        u[n] = { number: n, country: c, status: 'AVAILABLE', range_name: "MANUAL", timestamp: ts, otp: "" };
-                    }
-                });
-                db.ref('stock').update(u, (e) => { if(!e) alert("Done"); });
-            });
-        }
-
-        window.deleteRange = (r) => {
-            if(confirm("Hapus Range?")) {
-                db.ref('stock').once('value', s => {
-                    const d = s.val(); let u={};
-                    Object.keys(d).forEach(k => { if(d[k].range_name===r) u[k]=null; });
-                    db.ref('stock').update(u);
-                });
-            }
-        }
-        window.clearTrash = () => {
-            db.ref('stock').once('value', s => {
-                const d = s.val(); let u={};
-                Object.keys(d).forEach(k => { if(d[k].status==='DONE'||d[k].status==='BAD') u[k]=null; });
-                db.ref('stock').update(u);
-            });
-        }
-        window.clearAll = () => { if(confirm("RESET ALL?")) db.ref('stock').remove(); }
-        window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
-        window.clearNotif = () => db.ref('system/notification').remove();
     </script>
 </body>
 </html>
