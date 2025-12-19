@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LOGIN PANEL</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; outline: none; }
+        body { 
+            margin: 0; padding: 0; height: 100vh; font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-card {
+            background: #fff; width: 85%; max-width: 350px;
+            padding: 30px; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .logo-area { font-size: 30px; font-weight: 800; color: #4c1d95; margin-bottom: 5px; letter-spacing: -1px; }
+        .sub-logo { font-size: 12px; color: #666; margin-bottom: 25px; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { font-size: 11px; font-weight: 600; color: #333; display: block; margin-bottom: 5px; }
+        .form-input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; background: #f9fafb; font-size: 13px; transition: 0.3s;
+        }
+        .form-input:focus { border-color: #4c1d95; background: #fff; }
+
+        .btn-login {
+            width: 100%; padding: 12px; background: #10b981; color: #fff;
+            border: none; border-radius: 8px; font-weight: bold; font-size: 14px;
+            cursor: pointer; margin-top: 10px; transition: 0.2s;
+        }
+        .btn-login:active { transform: scale(0.98); }
+        .captcha-box { display: flex; gap: 10px; align-items: center; }
+        .captcha-q { font-weight: bold; color: #4c1d95; font-size: 14px; white-space: nowrap; }
+
+        #errorMsg { color: #ef4444; font-size: 11px; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-area">IMS TASIK</div>
+        <div class="sub-logo">Silakan login untuk melanjutkan</div>
+
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="userInput" class="form-input" placeholder="Masukkan username">
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="passInput" class="form-input" placeholder="••••••">
+        </div>
+
+        <div class="input-group">
+            <label>Security Question</label>
+            <div class="captcha-box">
+                <span id="captchaQ" class="captcha-q">What is 0 + 0 ?</span>
+                <input type="number" id="captchaInput" class="form-input" placeholder="Jawaban">
+            </div>
+        </div>
+
+        <button class="btn-login" onclick="doLogin()">SIGN IN</button>
+        <div id="errorMsg">Username atau Password salah!</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
+            authDomain: "vipotpsystem.firebaseapp.com",
+            databaseURL: "https://vipotpsystem-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vipotpsystem",
+            storageBucket: "vipotpsystem.firebasestorage.app",
+            messagingSenderId: "1041472357696",
+            appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 🧠 CAPTCHA LOGIC
+        let num1 = Math.floor(Math.random() * 10);
+        let num2 = Math.floor(Math.random() * 10);
+        document.getElementById('captchaQ').innerText = `What is ${num1} + ${num2} ?`;
+
+        function doLogin() {
+            const u = document.getElementById('userInput').value.trim().toLowerCase();
+            const p = document.getElementById('passInput').value.trim();
+            const c = parseInt(document.getElementById('captchaInput').value);
+            const err = document.getElementById('errorMsg');
+
+            err.style.display = 'none';
+
+            // 1. Cek Captcha
+            if (c !== (num1 + num2)) {
+                err.innerText = "Captcha Salah!";
+                err.style.display = 'block';
+                return;
+            }
+
+            if (!u || !p) {
+                err.innerText = "Isi semua kolom!";
+                err.style.display = 'block';
+                return;
+            }
+
+            // 2. Cek Firebase
+            const btn = document.querySelector('.btn-login');
+            btn.innerText = "Checking...";
+            btn.disabled = true;
+
+            db.ref('accounts/' + u).once('value', snap => {
+                const acc = snap.val();
+                if (acc && acc.password === p) {
+                    // LOGIN SUKSES
+                    localStorage.setItem('TASIK_SESSION_USER', u);
+                    localStorage.setItem('TASIK_SESSION_TOKEN', 'LOGGED_IN');
+                    window.location.href = 'index.html'; // Pindah ke Dashboard
+                } else {
+                    // LOGIN GAGAL
+                    btn.innerText = "SIGN IN";
+                    btn.disabled = false;
+                    err.innerText = "Username atau Password salah!";
+                    err.style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
