@@ -1,37 +1,27 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PANEL TASIK V156 (FULL FITUR)</title>
+    <title>PANEL TASIK V159 (FORCE FIX)</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron&display=swap" rel="stylesheet">
     
     <style>
-        /* RESET */
+        /* RESET & BASE */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: #0f172a; color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; padding-bottom: 70px; padding-top: 30px; /* Space for Notif */ min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-
-        /* 🔥 NOTIFIKASI ADMIN (RUNNING TEXT) 🔥 */
-        #notifBar {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: #ffd700; color: #000;
-            z-index: 99999; font-weight: bold; font-size: 11px;
-            padding: 6px 0; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-        marquee { width: 100%; display: block; letter-spacing: 0.5px; text-transform: uppercase; }
+        body { background: #0f172a; color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; padding-bottom: 70px; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
         /* HEADER */
-        .top-header { background: #1e293b; padding: 10px 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 30px; z-index: 100; }
+        .top-header { background: #1e293b; padding: 10px 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .app-title { font-size: 16px; font-weight: bold; color: #f43f5e; }
         .user-info-header { display: flex; align-items: center; gap: 8px; }
         .header-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #f43f5e; background: #333; }
         .header-name { font-size: 12px; font-weight: bold; color: #fff; }
 
-        /* PAGES & BOX */
+        /* PAGES */
         .page { display: none; padding: 15px; animation: fadeIn 0.3s; padding-bottom: 80px; }
         .page.active { display: block; }
         .box { width: 100%; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 15px; position: relative; }
@@ -42,64 +32,42 @@
         .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer; }
         .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
 
+        /* INPUTS */
         select, input[type="text"], input[type="color"] { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
         button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
         .btn-start { background: #f43f5e; color: #fff; } .btn-bad { background: #ef4444; color: #fff; } .btn-next { background: #22c55e; color: #000; } .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; } .btn-save { background: #3b82f6; color: #fff; }
 
-        /* 🔥 HISTORY STYLE (SCROLLABLE & FULL MSG) 🔥 */
-        .ph-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .ph-row { border-bottom: 1px solid #334155; }
-        .ph-cell { padding: 10px 5px; font-size: 10px; color: #ccc; vertical-align: middle; }
-        
-        /* Kolom Message yang bisa digeser */
-        .ph-msg-box {
-            display: block;
-            width: 100%;
-            white-space: nowrap;      /* Teks satu baris */
-            overflow-x: auto;         /* Scroll horizontal jika panjang */
-            font-family: monospace;
-            padding-bottom: 2px;
-        }
-        /* Sembunyikan scrollbar tapi tetap bisa scroll */
-        .ph-msg-box::-webkit-scrollbar { height: 2px; }
-        .ph-msg-box::-webkit-scrollbar-thumb { background: #444; }
+        /* STATUS & FIX BUTTON */
+        #dbStatus { font-size: 10px; text-align: center; margin-top: 5px; color: #aaa; font-family: monospace; }
+        #forceFixBtn { display: none; background: #eab308; color: #000; margin-top: 10px; width: 100%; animation: popIn 0.5s; border: 1px solid #fbbf24; }
 
-        .ph-status-pending { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-        .ph-status-success { border-left: 3px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
-        .ph-status-failed { border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.05); opacity: 0.7; }
-
-        /* GLOBAL FEED LIST */
+        /* LISTS */
         .g-item { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px; }
         .x-green { color: #4ade80; font-weight: bold; }
+        .ph-table { width: 100%; border-collapse: collapse; } .ph-row { border-bottom: 1px solid #334155; } .ph-cell { padding: 10px; font-size: 10px; color: #ccc; } .ph-status-pending { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); } .ph-status-success { border-left: 3px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
 
-        /* CHAT & PROFIL */
-        #chatContainer { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 10px; }
-        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; }
-        .chat-left { align-self: flex-start; background: #334155; color: #fff; border-bottom-left-radius: 2px; }
-        .chat-right { align-self: flex-end; background: #059669; color: #fff; border-bottom-right-radius: 2px; }
-        .chat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
-        .chat-avatar { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; background: #000; }
-        .chat-input-area { position: fixed; bottom: 65px; left: 0; width: 100%; background: #0f172a; padding: 10px; border-top: 1px solid #334155; display: flex; gap: 10px; z-index: 999; }
-        #msgInput { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: #fff; outline: none; }
-        #sendBtn { width: 40px; height: 40px; border-radius: 50%; background: #f43f5e; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .profile-pic-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; } .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f43f5e; background: #0f172a; } .upload-icon { position: absolute; bottom: 0; right: 0; background: #f43f5e; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #1e293b; } #fileInput { display: none; }
+        /* TOAST */
+        #toast { visibility: hidden; min-width: 120px; background-color: #4ade80; color: #000; text-align: center; border-radius: 50px; padding: 8px 15px; position: fixed; z-index: 10000; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 11px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; } #toast.show { visibility: visible; opacity: 1; }
+        
+        /* LOGIN */
+        #loginOverlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10000; align-items: center; justify-content: center; }
+        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
 
+        /* NAV */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 10px; cursor: pointer; transition: 0.2s; width: 25%; text-align: center; }
         .nav-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 4px; }
         .nav-item.active { color: #f43f5e; font-weight: bold; }
         .nav-item.active svg { fill: #f43f5e; transform: translateY(-2px); }
 
-        #loginOverlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10000; align-items: center; justify-content: center; }
-        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
-        #toast { visibility: hidden; min-width: 120px; background-color: #4ade80; color: #000; text-align: center; border-radius: 50px; padding: 8px 15px; position: fixed; z-index: 10000; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 11px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; } #toast.show { visibility: visible; opacity: 1; }
+        /* CHAT & PROFIL (COMPRESSED) */
+        #chatContainer { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 10px; } .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; } .chat-left { align-self: flex-start; background: #334155; color: #fff; border-bottom-left-radius: 2px; } .chat-right { align-self: flex-end; background: #059669; color: #fff; border-bottom-right-radius: 2px; } .chat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; } .chat-avatar { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; background: #000; } .chat-input-area { position: fixed; bottom: 65px; left: 0; width: 100%; background: #0f172a; padding: 10px; border-top: 1px solid #334155; display: flex; gap: 10px; z-index: 999; } #msgInput { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: #fff; outline: none; } #sendBtn { width: 40px; height: 40px; border-radius: 50%; background: #f43f5e; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; } .profile-pic-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; } .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f43f5e; background: #0f172a; } .upload-icon { position: absolute; bottom: 0; right: 0; background: #f43f5e; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #1e293b; } #fileInput { display: none; }
         .hidden { display: none !important; }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="notifBar"><marquee id="notifText">INFO ADMIN...</marquee></div>
     <div id="toast">Disalin!</div>
 
     <div class="top-header">
@@ -114,12 +82,18 @@
     <div id="viewHome" class="page active">
         <div id="areaMenu" class="box">
             <h3 style="margin-top:0; color:#aaa; font-size:12px;">PILIH SERVER</h3>
-            <select id="countryPick"><option>Memuat Server...</option></select>
-            <button class="btn-start" onclick="startFarming()">AMBIL NOMOR</button>
+            <select id="countryPick"><option>Menghubungkan...</option></select>
+            
+            <!-- STATUS KONEKSI -->
+            <div id="dbStatus">Status: Menunggu Respon...</div>
+            <!-- TOMBOL DARURAT -->
+            <button id="forceFixBtn" onclick="forceFixDatabase()">⚠️ PAKSA ISI DATABASE & REFRESH</button>
+            
+            <button class="btn-start" onclick="startFarming()" style="margin-top:10px;">AMBIL NOMOR</button>
         </div>
         <div id="areaFarming" class="hidden">
             <div class="box">
-                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">ACTIVE NUMBER</div>
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">ACTIVE NUMBER (TAP SALIN)</div>
                 <div class="display-num" onclick="tryCopy(document.getElementById('txtNum').innerText)">
                     <span id="txtNum">...</span>
                 </div>
@@ -148,9 +122,7 @@
             <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">
                 🔴 GLOBAL LIVE FEED
             </div>
-            <div id="globalFeedList" class="feed-list">
-                <div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load data...</div>
-            </div>
+            <div id="globalFeedList" class="feed-list"><div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load data...</div></div>
         </div>
     </div>
 
@@ -195,9 +167,10 @@
         <div class="nav-item" onclick="navTo('viewProfil', this)"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
     </nav>
 
+    <!-- LOGIN -->
     <div id="loginOverlay">
         <div class="login-inner">
-            <h2 style="color:#f43f5e;">LOGIN TEAM</h2>
+            <h2 style="color:#f43f5e;">LOGIN TEAM V159</h2>
             <input type="text" id="initNameInput" placeholder="Nama Panggilan...">
             <button class="btn-start" onclick="firstTimeLogin()">MASUK</button>
         </div>
@@ -213,16 +186,17 @@
             messagingSenderId: "1041472357696",
             appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e){}
         const db = firebase.database();
 
-        const flags = { "SIERRALEONE": "🇸🇱", "IVORYCOAST": "🇨🇮", "MYANMAR": "🇲🇲", "YEMEN": "🇾🇪", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        // 🟢 FLAGS
+        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
         function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
 
         // KEYS
-        const KEY_PROFILE = 'TASIK_156_PROF'; 
-        const KEY_HISTORY = 'TASIK_156_HIST';
-        const KEY_SESSION = 'TASIK_156_SESS';
+        const KEY_PROFILE = 'TASIK_159_PROF'; 
+        const KEY_HISTORY = 'TASIK_159_HIST';
+        const KEY_SESSION = 'TASIK_159_SESS';
 
         function safeParse(key, defaultVal) {
             try { const item = localStorage.getItem(key); return item ? JSON.parse(item) : defaultVal; } 
@@ -252,84 +226,74 @@
         }
 
         function initApp() {
-            applyProfileToUI();
-            renderPersonalHistory(); 
-            loadCountries();
-            initGlobalFeed();
-            checkSavedSession();
-            initChatSystem();
-            initNotification();
-            startAutoFailCheck(); // 🔥 START CHECKER
+            try {
+                applyProfileToUI(); renderPersonalHistory(); 
+                loadCountries(); initGlobalFeed(); checkSavedSession(); initChatSystem();
+            } catch (e) { console.error("Init Error:", e); }
         }
 
-        // --- NOTIF ADMIN ---
-        function initNotification() {
-            db.ref('system/notification').on('value', snap => {
-                const msg = snap.val();
-                const bar = document.getElementById('notifBar');
-                const txt = document.getElementById('notifText');
-                if(msg) { txt.innerText = msg; bar.style.display = 'block'; } else { bar.style.display = 'none'; }
+        // 🔥 FITUR UTAMA V159: FORCE FIX DB 🔥
+        function forceFixDatabase() {
+            if(!confirm("Yakin database error/kosong? Ini akan mengisi ulang daftar negara.")) return;
+            const defaults = {
+                "INDONESIA": "INDONESIA 🇮🇩", "MALAYSIA": "MALAYSIA 🇲🇾", "VIETNAM": "VIETNAM 🇻🇳", "PHILIPPINES": "PHILIPPINES 🇵🇭", "THAILAND": "THAILAND 🇹🇭", "RUSSIA": "RUSSIA 🇷🇺", "USA": "UNITED STATES 🇺🇸", "UK": "UNITED KINGDOM 🇬🇧", "ETHIOPIA": "ETHIOPIA 🇪🇹", "KENYA": "KENYA 🇰🇪", "NIGERIA": "NIGERIA 🇳🇬", "BRAZIL": "BRAZIL 🇧🇷", "SUDAN": "SUDAN 🇸🇩", "MYANMAR": "MYANMAR 🇲🇲"
+            };
+            db.ref('settings/countries').set(defaults, (error) => {
+                if(error) alert("GAGAL: " + error.message + "\nCek Rules Firebase!");
+                else { alert("BERHASIL DIPERBAIKI! Refresh halaman."); location.reload(); }
             });
         }
 
-        // --- AUTO FAIL PENDING (5 MENIT) ---
-        function startAutoFailCheck() {
-            setInterval(() => {
-                const now = Date.now();
-                let updated = false;
-                myHistory.forEach(item => {
-                    if (item.status === 'PENDING') {
-                        // Jika sudah > 5 menit (300.000 ms)
-                        if (now - (item.timestamp || now) > 300000) {
-                            item.status = 'FAILED';
-                            item.otp = 'FAILED / TIMEOUT';
-                            updated = true;
-                        }
-                    }
-                });
-                if(updated) {
-                    localStorage.setItem(KEY_HISTORY, JSON.stringify(myHistory));
-                    renderPersonalHistory();
-                }
-            }, 10000); // Cek tiap 10 detik
-        }
-
         function loadCountries() {
+            const statusEl = document.getElementById('dbStatus');
+            const fixBtn = document.getElementById('fixDbBtn'); // Not used, logic moved to timer
+            
+            // TIMER DARURAT: 5 Detik gak loading -> Muncul Tombol Fix
+            setTimeout(() => {
+                const sel = document.getElementById('countryPick');
+                if(sel.innerHTML.includes("Memuat")) {
+                    statusEl.innerText = "Koneksi Bermasalah / Database Kosong!";
+                    statusEl.style.color = "#f43f5e";
+                    document.getElementById('forceFixBtn').style.display = 'block';
+                }
+            }, 5000);
+
             db.ref('settings/countries').on('value', snap => {
-                const d = snap.val(); const sel = document.getElementById('countryPick'); sel.innerHTML = "";
-                if(d) Object.keys(d).forEach(k => { const opt = document.createElement('option'); opt.value = k; opt.innerText = d[k]; sel.appendChild(opt); });
-                else sel.innerHTML = "<option>Kosong / Error</option>";
+                const d = snap.val();
+                const sel = document.getElementById('countryPick');
+                sel.innerHTML = "";
+                if(d) {
+                    statusEl.innerText = "Status: Terhubung ✅";
+                    statusEl.style.color = "#4ade80";
+                    document.getElementById('forceFixBtn').style.display = 'none';
+                    Object.keys(d).forEach(k => {
+                        const opt = document.createElement('option'); opt.value = k; opt.innerText = d[k]; sel.appendChild(opt);
+                    });
+                } else {
+                    statusEl.innerText = "Database Kosong!";
+                    document.getElementById('forceFixBtn').style.display = 'block';
+                }
             });
         }
 
         function startFarming() {
             const chosen = document.getElementById('countryPick').value; 
-            if(!chosen) return alert("Pilih negara dulu!");
-            selectedRegion = chosen;
+            if(!chosen || chosen.includes("Memuat")) return alert("Tunggu database siap!");
+            selectedRegion = chosen; 
             const btn = document.querySelector('.btn-start'); btn.disabled = true; btn.innerText = "⏳...";
             
             db.ref('stock').once('value', snap => {
                 const data = snap.val();
-                let sameCountryNum = null;
-                let differentCountryNum = null;
-
+                let myActiveNum = null;
                 if(data) {
                     Object.keys(data).forEach(k => {
                         if(data[k].status === 'TAKEN' && data[k].op_name === userProfile.name) {
-                            if(data[k].country === selectedRegion) { sameCountryNum = k; } 
-                            else { differentCountryNum = k; }
+                            myActiveNum = k; selectedRegion = data[k].country;
                         }
                     });
                 }
-
-                if(sameCountryNum) {
-                    currentNum = sameCountryNum; enterFarmingMode(); alert("Melanjutkan nomor: " + currentNum);
-                } else {
-                    if(differentCountryNum) {
-                        db.ref('stock/'+differentCountryNum).update({ status: 'AVAILABLE', owner: null, op_name: null });
-                    }
-                    findNumber(data);
-                }
+                if(myActiveNum) { currentNum = myActiveNum; enterFarmingMode(); alert("Melanjutkan: " + currentNum); }
+                else { findNumber(data); }
                 btn.disabled = false; btn.innerText = "AMBIL NOMOR";
             });
         }
@@ -353,33 +317,23 @@
         }
 
         function attachListener(num) {
-            if(listenerRef) listenerRef.off(); listenerRef = db.ref('stock/'+num); let hasTriggered = false;
+            if(listenerRef) listenerRef.off(); listenerRef = db.ref('stock/'+num);
             listenerRef.on('value', snap => {
-                const d = snap.val(); if(!d) return; 
-                if(d.number !== currentNum) return;
-
+                const d = snap.val(); if(!d) { stopOnly(); return; } if(d.number !== currentNum) return;
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden'); elOTP.innerText = d.otp; elOTP.classList.remove('hidden');
                         document.getElementById('btnBad').style.display = 'none'; document.getElementById('btnNext').style.display = 'block';
                         audioBeep.play().catch(()=>{}); tryCopy(d.otp);
-                        
-                        // Pass full_msg if available, else construct
-                        const fullMsg = d.full_msg || `FB-${d.otp} is your code #${d.otp}`;
-                        upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS', fullMsg);
-
-                        if(!hasTriggered) { db.ref('stock/'+num).update({ last_update: firebase.database.ServerValue.TIMESTAMP }); hasTriggered = true; }
+                        upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
                     }
                 }
             });
         }
 
         function actionBad() {
-            if(currentNum) { 
-                upsertPersonalHistory(currentNum, selectedRegion, "PENDING", 'PENDING', null);
-                db.ref('stock/'+currentNum).update({status:'BAD'});
-            }
+            if(currentNum) { upsertPersonalHistory(currentNum, selectedRegion, "PENDING", 'PENDING'); db.ref('stock/'+currentNum).update({status:'BAD'}); }
             db.ref('stock').once('value', snap => findNumber(snap.val()));
         }
         function actionNext() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'DONE'}); } db.ref('stock').once('value', snap => findNumber(snap.val())); }
@@ -389,56 +343,21 @@
         function clearSessionData() { localStorage.removeItem(KEY_SESSION); }
         function checkSavedSession() { try { const saved = JSON.parse(localStorage.getItem(KEY_SESSION)); if(saved && saved.status === 'active') { currentNum = saved.number; mySessionID = saved.sessionID; selectedRegion = saved.region; enterFarmingMode(); } } catch(e){} }
         
-        // 🔥 MODIFIED UPSERT FOR TIMESTAMP & FULL MSG 🔥
-        function upsertPersonalHistory(num, country, otpVal, status, fullMsg) {
+        function upsertPersonalHistory(num, country, otpVal, status) {
             const idx = myHistory.findIndex(i => i.num === num);
-            if(idx > -1) { 
-                if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') { 
-                    myHistory[idx].otp = otpVal; 
-                    myHistory[idx].status = 'SUCCESS'; 
-                    myHistory[idx].msg = fullMsg; // Update Full Msg
-                } 
-            } else { 
-                myHistory.unshift({ 
-                    num: num, country: country, otp: otpVal, status: status, 
-                    msg: fullMsg, timestamp: Date.now() // Save Timestamp for auto-fail
-                }); 
-            }
+            if(idx > -1) { if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') { myHistory[idx].otp = otpVal; myHistory[idx].status = 'SUCCESS'; } }
+            else { myHistory.unshift({ num: num, country: country, otp: otpVal, status: status }); }
             localStorage.setItem(KEY_HISTORY, JSON.stringify(myHistory)); renderPersonalHistory();
         }
-
-        // 🔥 MODIFIED RENDER (SCROLLABLE & FULL MSG) 🔥
         function renderPersonalHistory() {
             const c = document.getElementById('personalHistoryContainer');
             if(myHistory.length === 0) { c.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:#666;">Belum ada riwayat.</div>'; return; }
             let h = '<table class="ph-table">';
             myHistory.forEach(i => {
-                let statusClass = 'ph-status-success';
-                let msgContent = i.msg || `FB-${i.otp} confirm...`;
-                let textColor = '#4ade80';
-
-                if(i.status === 'PENDING') {
-                    statusClass = 'ph-status-pending';
-                    msgContent = 'MENUNGGU KODE...';
-                    textColor = '#f59e0b';
-                } else if(i.status === 'FAILED') {
-                    statusClass = 'ph-status-failed';
-                    msgContent = 'TIMEOUT / FAILED';
-                    textColor = '#ef4444';
-                }
-
-                h += `<tr class="ph-row ${statusClass}">
-                    <td class="ph-cell" style="width:30%;">
-                        <div style="font-weight:bold; color:#fff;">${getFlag(i.country)} ${i.country||'UNK'}</div>
-                        <div style="font-family:monospace; margin-top:2px;">${i.num}</div>
-                    </td>
-                    <td class="ph-cell" style="width:20%;">FACEBOOK</td>
-                    <td class="ph-cell" style="width:50%;">
-                        <div class="ph-msg-box" style="color:${textColor};">
-                            ${msgContent}
-                        </div>
-                    </td>
-                </tr>`;
+                const s = i.status === 'PENDING' ? 'ph-status-pending' : 'ph-status-success';
+                const m = i.status === 'PENDING' ? 'MENUNGGU KODE...' : `FB-${i.otp} confirm...`;
+                const col = i.status === 'PENDING' ? '#f59e0b' : '#4ade80';
+                h += `<tr class="ph-row ${s}"><td class="ph-cell"><div style="font-weight:bold; color:#fff;">${getFlag(i.country)} ${i.country||'UNK'}</div><div style="font-family:monospace; margin-top:2px;">${i.num}</div></td><td class="ph-cell">FACEBOOK</td><td class="ph-cell" style="color:${col}; font-family:monospace;">${m}</td></tr>`;
             });
             h += '</table>'; c.innerHTML = h;
         }
@@ -448,19 +367,14 @@
             const q = db.ref('stock').orderByChild('last_update').limitToLast(50);
             const render = (snap) => {
                 const d = snap.val(); const key = snap.key;
-                
-                // Construct Full Msg if missing
-                let fullMsg = d.full_msg || `FB-${d.otp} is your code #${d.otp}`;
-                
                 const mine = myHistory.find(i => i.num === d.number && i.status === 'PENDING');
-                if(mine && d.otp && d.otp.length > 2) upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS', fullMsg);
-
+                if(mine && d.otp && d.otp.length > 2) upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS');
                 if(d.otp && d.otp.length > 2) {
                     if(document.getElementById('glog-'+key)) return;
                     if(feed.innerText.includes('Load')) feed.innerHTML = "";
                     const u = d.op_name || "User"; const g = getFlag(d.country || "");
                     const t = new Date(d.last_update).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                    
+                    let fullMsg = d.full_msg || `FB-${d.otp} is your code #${d.otp}`;
                     fullMsg = fullMsg.replace(d.otp, `<span class="x-green">XXXXX</span>`).replace(d.otp, `<span class="x-green">XXXXX</span>`);
                     const div = document.createElement('div'); div.id = 'glog-'+key; div.className = 'g-item';
                     div.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#f43f5e;font-weight:bold;">${u}</span><span style="color:#666;">${t}</span></div><div style="color:#cbd5e1;font-family:Roboto;">${g} ${fullMsg}</div>`;
