@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTER ADMIN V122 (RECYCLE SYSTEM)</title>
+    <title>MASTER ADMIN V123 (KEUANGAN)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -16,47 +16,48 @@
         .tabs-header { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; flex-wrap: wrap; }
         .tab-btn { background: #222; border: 1px solid #444; color: #aaa; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 11px; min-width: 80px; }
         .tab-btn.active { background: #00ff88; color: #000; border-color: #00ff88; }
-        .tab-btn.recycle-tab.active { background: #ff9800; color: #000; border-color: #ff9800; }
+        .tab-btn.money-tab.active { background: #f43f5e; color: #fff; border-color: #f43f5e; } /* Tab Uang Merah */
+
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* DASHBOARD GRID */
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .grid-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* LISTS */
+        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; margin-top: 10px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; }
+        .item-info { font-size: 12px; }
+
+        /* MONEY CARD STYLE */
+        .wd-card { border-left: 3px solid #f43f5e !important; background: #1f1212 !important; }
+        .wd-info { display: flex; flex-direction: column; gap: 2px; }
+        .wd-user { font-weight: bold; color: #f43f5e; font-size: 13px; }
+        .wd-amount { color: #fff; font-weight: bold; font-size: 14px; }
+        .wd-dana { color: #aaa; font-size: 11px; font-family: sans-serif; }
+        .wd-time { color: #666; font-size: 10px; }
+
+        /* BUTTONS */
+        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
+        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; } 
+        button:hover { opacity: 0.8; }
+
+        /* GRID STATS */
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: #1a1a1a; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #444; margin-bottom: 5px; }
         .stat-num { font-size: 24px; font-weight: bold; display: block; margin-bottom: 5px; }
         .stat-label { font-size: 10px; color: #aaa; }
         
-        .c-green { color: #00e676; } 
-        .c-blue { color: #2979ff; } 
-        .c-orange { color: #ff9800; } 
-        .c-red { color: #ff1744; }
-
-        /* LISTS */
-        .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 8px 12px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; }
-        .item-info { font-size: 12px; }
-        
-        /* INPUTS & BUTTONS */
         input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
-        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
-        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; } 
-        .bg-orange { background: #ff9800; color: #000; }
-        button:hover { opacity: 0.8; }
-        
-        .notif-box { background: rgba(255, 215, 0, 0.05); border: 1px dashed #ffd700; padding: 15px; border-radius: 8px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ V122 ADMIN (RECYCLE SYSTEM)</h2>
+        <h2>⚡ V123 ADMIN (FINANCE)</h2>
 
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab('dash')">📊 DASHBOARD</button>
-            <button class="tab-btn recycle-tab" onclick="switchTab('recycle')">♻️ RECYCLE BIN (<span id="recCountBadge">0</span>)</button>
-            <button class="tab-btn" onclick="switchTab('range')">📂 MONITOR</button>
+            <button class="tab-btn money-tab" onclick="switchTab('money')">💰 KEUANGAN (<span id="wdCount">0</span>)</button>
+            <button class="tab-btn" onclick="switchTab('recycle')">♻️ RECYCLE</button>
             <button class="tab-btn" onclick="switchTab('country')">🌍 NEGARA</button>
             <button class="tab-btn" onclick="switchTab('upload')">🛠️ TOOLS</button>
         </div>
@@ -65,31 +66,25 @@
         <div id="dash" class="tab-content active">
             <div class="grid-stats">
                 <div class="stat-card" style="border-color: #00e676;">
-                    <span id="countAvail" class="stat-num c-green">0</span>
+                    <span id="countAvail" class="stat-num" style="color:#00e676">0</span>
                     <span class="stat-label">AVAILABLE</span>
                 </div>
                 <div class="stat-card" style="border-color: #2979ff;">
-                    <span id="countActive" class="stat-num c-blue">0</span>
-                    <span class="stat-label">ACTIVE (TAKEN)</span>
+                    <span id="countActive" class="stat-num" style="color:#2979ff">0</span>
+                    <span class="stat-label">ACTIVE</span>
+                </div>
+                <div class="stat-card" style="border-color: #f43f5e;">
+                    <span id="countWdPending" class="stat-num" style="color:#f43f5e">0</span>
+                    <span class="stat-label">WD PENDING</span>
                 </div>
             </div>
-            <div class="grid-row-2">
-                <div class="stat-card" style="border-color: #ff9800;">
-                    <span id="countRecycle" class="stat-num c-orange">0</span>
-                    <span class="stat-label">RECYCLE BIN</span>
-                </div>
-                <div class="stat-card" style="border-color: #ff1744;">
-                    <span id="countTrash" class="stat-num c-red">0</span>
-                    <span class="stat-label">DONE / SUKSES</span>
-                </div>
-            </div>
+            
+            <!-- BUTTONS -->
+            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; margin-bottom:10px;">🧹 LEPASKAN NOMOR STUCK ( > 30 MENIT)</button>
 
-            <div style="background:#111; border:1px solid #333; padding:10px; font-size:10px; color:#aaa; margin-top:10px;">
-                ⚙️ <b>AUTO CLEANER AKTIF:</b> Nomor yang status <b>TAKEN</b> lebih dari <b>2 Menit</b> otomatis dipindah ke <b>RECYCLE BIN</b>.
-            </div>
-
-            <div class="notif-box">
-                <label style="color:#ffd700; font-size:11px;">📢 RUNNING TEXT TEAM:</label>
+            <!-- NOTIF -->
+            <div style="background:rgba(255, 215, 0, 0.05); border:1px dashed #ffd700; padding:15px; border-radius:8px;">
+                <label style="color:#ffd700; font-size:11px;">📢 RUNNING TEXT:</label>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                     <input type="text" id="notifMsg" placeholder="Isi pesan...">
                     <button onclick="sendNotif()" class="action-btn" style="background:#ffd700; color:#000;">KIRIM</button>
@@ -98,34 +93,40 @@
             </div>
         </div>
 
-        <!-- ♻️ RECYCLE TAB (FITUR BARU) ♻️ -->
-        <div id="recycle" class="tab-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="font-size:11px; color:#ff9800;">Nomor Gagal / Timeout (2 Menit):</span>
-                <div>
-                    <button onclick="restoreAllRecycle()" class="action-btn bg-green">♻️ RESTORE SEMUA (JADI AVAILABLE)</button>
-                    <button onclick="flushRecycle()" class="action-btn bg-red">🗑️ HAPUS SEMUA</button>
-                </div>
+        <!-- 💰 TAB KEUANGAN (NEW) 💰 -->
+        <div id="money" class="tab-content">
+            <div style="text-align:center; color:#aaa; font-size:11px; margin-bottom:10px;">
+                Permintaan penarikan saldo member (DANA).<br>
+                Klik <b>TF DONE</b> jika sudah transfer manual. Klik <b>TOLAK</b> untuk kembalikan saldo.
             </div>
-            <div class="list-container" id="recycleListContainer">Loading...</div>
+            <div class="list-container" id="wdListContainer">Loading...</div>
         </div>
 
-        <!-- MONITOR RANGE -->
-        <div id="range" class="tab-content">
-            <div class="list-container" id="rangeListContainer">Loading...</div>
+        <!-- RECYCLE -->
+        <div id="recycle" class="tab-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="font-size:11px; color:#ff9800;">Nomor Gagal / Timeout:</span>
+                <div>
+                    <button onclick="restoreAllRecycle()" class="action-btn bg-green">♻️ RESTORE ALL</button>
+                    <button onclick="flushRecycle()" class="action-btn bg-red">🗑️ HAPUS ALL</button>
+                </div>
+            </div>
+            <div class="list-container" id="recycleListContainer"></div>
         </div>
 
         <!-- NEGARA -->
         <div id="country" class="tab-content">
             <div style="background:#222; padding:10px; border-radius:5px;">
-                <label style="font-size:10px; color:#aaa;">TAMBAH NEGARA:</label>
                 <div style="display:flex; gap:5px;">
-                    <input type="text" id="cCodeInput" placeholder="Kode (cth: ID)" style="width:30%;">
-                    <input type="text" id="cNameInput" placeholder="Nama (cth: INDONESIA)">
+                    <input type="text" id="cCodeInput" placeholder="Kode (ID)" style="width:30%;">
+                    <input type="text" id="cNameInput" placeholder="Nama (INDONESIA)">
                     <button onclick="saveCountry()" class="action-btn bg-green">SIMPAN</button>
                 </div>
             </div>
-            <div class="list-container" id="countryListDisplay" style="margin-top:10px;">Loading...</div>
+            <div style="margin-top:5px; text-align:right;">
+                <button onclick="clearAllCountries()" class="action-btn bg-red">HAPUS SEMUA NEGARA</button>
+            </div>
+            <div class="list-container" id="countryListDisplay"></div>
         </div>
 
         <!-- TOOLS -->
@@ -133,17 +134,17 @@
             <label style="font-size:11px; color:#aaa;">UPLOAD NOMOR:</label>
             <select id="countrySelectUpload"><option>Loading...</option></select>
             <textarea id="numList" placeholder="Paste nomor disini..." style="height:100px;"></textarea>
-            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%; padding:12px; margin-top:5px;">🚀 UPLOAD NOMOR</button>
-            
+            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%; padding:12px; margin-top:5px;">🚀 UPLOAD</button>
             <hr style="border-color:#333; margin:20px 0;">
             <div style="display:flex; gap:10px;">
-                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:12px;">BERSIHKAN HISTORY SUKSES</button>
+                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:12px;">BERSIHKAN HISTORY</button>
                 <button onclick="clearAll()" class="action-btn bg-red" style="flex:1; padding:12px;">RESET DATABASE</button>
             </div>
         </div>
     </div>
 
     <script>
+        // CONFIG FIREBASE (WAJIB SAMA)
         const firebaseConfig = {
             apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
             authDomain: "vipotpsystem.firebaseapp.com",
@@ -156,147 +157,131 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- DASHBOARD & MONITORING ---
+        // --- 1. MONITORING WD (KEUANGAN) ---
+        db.ref('withdrawals').on('value', snap => {
+            const data = snap.val();
+            const container = document.getElementById('wdListContainer');
+            container.innerHTML = "";
+            let pendingCount = 0;
+
+            if(data) {
+                // Ubah object ke array biar bisa disort
+                const arr = Object.keys(data).map(key => ({...data[key], key: key}));
+                // Sort dari yang terbaru
+                arr.sort((a,b) => b.time - a.time);
+
+                arr.forEach(item => {
+                    if(item.status === 'PENDING') {
+                        pendingCount++;
+                        const date = new Date(item.time).toLocaleString();
+                        
+                        const div = document.createElement('div');
+                        div.className = 'list-item wd-card';
+                        div.innerHTML = `
+                            <div class="wd-info">
+                                <span class="wd-user">${item.user}</span>
+                                <span class="wd-amount">Rp ${item.amount.toLocaleString()}</span>
+                                <span class="wd-dana">DANA: ${item.dana}</span>
+                                <span class="wd-time">${date}</span>
+                            </div>
+                            <div style="display:flex; gap:5px; flex-direction:column;">
+                                <button class="action-btn bg-green" onclick="approveWD('${item.key}', '${item.user}', ${item.amount})">✅ TF DONE</button>
+                                <button class="action-btn bg-red" onclick="rejectWD('${item.key}', '${item.user}', ${item.amount})">❌ TOLAK</button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    }
+                });
+            }
+
+            if(pendingCount === 0) container.innerHTML = "<div style='padding:20px; text-align:center; color:#555;'>Tidak ada permintaan pending.</div>";
+            
+            // Update Badges
+            document.getElementById('wdCount').innerText = pendingCount;
+            document.getElementById('countWdPending').innerText = pendingCount;
+        });
+
+        // --- ACTION WD ---
+        window.approveWD = (key, user, amount) => {
+            if(confirm(`Sudah transfer Rp ${amount} ke ${user}?`)) {
+                // Tandai Sukses
+                db.ref('withdrawals/'+key).update({ status: 'SUCCESS' });
+            }
+        }
+
+        window.rejectWD = (key, user, amount) => {
+            const reason = prompt("Alasan penolakan (Wajib):", "Salah nomor / Fraud");
+            if(reason) {
+                // 1. Update Status WD jadi REJECTED
+                db.ref('withdrawals/'+key).update({ status: 'REJECTED', reason: reason });
+                
+                // 2. KEMBALIKAN SALDO USER (PENTING!)
+                db.ref('users/'+user+'/balance').once('value', s => {
+                    const currentBal = s.val() || 0;
+                    const newBal = currentBal + amount;
+                    db.ref('users/'+user).update({ balance: newBal });
+                    alert(`Saldo dikembalikan ke ${user}. Total: Rp ${newBal}`);
+                });
+            }
+        }
+
+        // --- 2. STOCK & DASHBOARD ---
         let lastUpdate = 0;
-        
-        // Listener Utama
         db.ref('stock').on('value', snap => {
             const now = Date.now();
-            if (now - lastUpdate > 1000) { 
-                processData(snap.val()); 
-                lastUpdate = now; 
-            }
+            if (now - lastUpdate > 1000) { processData(snap.val()); lastUpdate = now; }
         });
 
         function processData(data) {
-            if(!data) {
-                updateStats(0,0,0,0);
-                document.getElementById('rangeListContainer').innerHTML = "<div style='padding:10px; text-align:center;'>Kosong</div>";
-                document.getElementById('recycleListContainer').innerHTML = "<div style='padding:10px; text-align:center;'>Kosong</div>";
-                return;
+            let avail=0, active=0, recycle=0;
+            let recycleHTML = "";
+
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    if (item.status === 'AVAILABLE') avail++;
+                    else if (item.status === 'TAKEN') active++;
+                    else if (item.status === 'RECYCLE' || item.status === 'BAD') {
+                        recycle++;
+                        recycleHTML += `
+                            <div class="list-item" style="border-left-color: #ff9800;">
+                                <div class="item-info">
+                                    <span style="color:#ff9800; font-weight:bold;">${item.country}</span> ${item.number}<br>
+                                    <span style="color:#666; font-size:10px;">User: ${item.op_name || 'Unk'}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="action-btn bg-green" onclick="restoreOne('${key}')">RESTORE</button>
+                                    <button class="action-btn" style="background:#333;" onclick="navigator.clipboard.writeText('${item.number}')">COPY</button>
+                                </div>
+                            </div>`;
+                    }
+                });
             }
 
-            let avail=0, active=0, done=0, recycle=0;
-            let ranges = {};
-            let recycleListHTML = "";
-
-            Object.keys(data).forEach(key => {
-                const item = data[key];
-                
-                // STATS COUNT
-                if (item.status === 'AVAILABLE') avail++;
-                else if (item.status === 'TAKEN') active++;
-                else if (item.status === 'DONE') done++;
-                else if (item.status === 'RECYCLE' || item.status === 'BAD') {
-                    // KITA ANGGAP BAD JUGA MASUK RECYCLE DI UI ADMIN
-                    recycle++;
-                    
-                    // Build Recycle List
-                    recycleListHTML += `
-                        <div class="list-item" style="border-left-color: #ff9800;">
-                            <div class="item-info">
-                                <span style="color:#ff9800; font-weight:bold;">${item.country}</span> ${item.number}<br>
-                                <span style="color:#666; font-size:10px;">User: ${item.op_name || 'Unknown'}</span>
-                            </div>
-                            <div class="item-actions">
-                                <button class="action-btn bg-green" onclick="restoreOne('${key}')">RESTORE</button>
-                                <button class="action-btn" style="background:#333;" onclick="copyTxt('${item.number}')">COPY</button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Range Stats
-                const r = item.range_name || "MANUAL";
-                if (!ranges[r]) ranges[r] = { total: 0, avail: 0 };
-                ranges[r].total++;
-                if (item.status === 'AVAILABLE') ranges[r].avail++;
-            });
-
-            // Update UI
-            updateStats(avail, active, done, recycle);
-            document.getElementById('recCountBadge').innerText = recycle;
-            document.getElementById('recycleListContainer').innerHTML = recycleListHTML || "<div style='padding:10px;text-align:center;color:#666;'>Tidak ada nomor recycle.</div>";
-
-            // Render Range
-            let rangeHTML = "";
-            Object.keys(ranges).forEach(k => {
-                rangeHTML += `<div class="list-item"><div class="item-info"><b>${k}</b>: ${ranges[k].avail}/${ranges[k].total}</div><button class="action-btn bg-red" onclick="deleteRange('${k}')">DEL</button></div>`;
-            });
-            document.getElementById('rangeListContainer').innerHTML = rangeHTML;
+            document.getElementById('countAvail').innerText = avail;
+            document.getElementById('countActive').innerText = active;
+            document.getElementById('recycleListContainer').innerHTML = recycleHTML || "<div style='padding:10px;text-align:center;'>Kosong</div>";
         }
 
-        function updateStats(a, b, c, d) {
-            document.getElementById('countAvail').innerText = a;
-            document.getElementById('countActive').innerText = b;
-            document.getElementById('countTrash').innerText = c;
-            document.getElementById('countRecycle').innerText = d;
-        }
-
-        // 🔥 AUTO ZOMBIE KILLER (2 MENIT) 🔥
-        // Jalan setiap 10 detik di background admin
+        // --- 3. AUTO ZOMBIE KILLER ---
         setInterval(() => {
             db.ref('stock').once('value', snap => {
-                const d = snap.val();
-                if(!d) return;
-                
-                const now = Date.now();
-                const LIMIT = 2 * 60 * 1000; // 2 Menit
-                let updates = {};
-                let count = 0;
-
+                const d = snap.val(); if(!d) return;
+                const now = Date.now(); const LIMIT = 2 * 60 * 1000; 
+                let updates = {}; let count = 0;
                 Object.keys(d).forEach(k => {
-                    // Cek yang TAKEN dan Expired
                     if(d[k].status === 'TAKEN') {
-                        const takenTime = d[k].timestamp || 0; // Pastikan panel team kirim timestamp pas ambil nomor
-                        // Kalau gak ada timestamp (data lama), atau udah lewat 2 menit
-                        if(takenTime === 0 || (now - takenTime > LIMIT)) {
-                            // PINDAH KE RECYCLE, BUKAN AVAILABLE
-                            updates[k + '/status'] = 'RECYCLE';
-                            updates[k + '/op_name'] = d[k].op_name + ' (Timeout)';
-                            count++;
+                        const t = d[k].timestamp || 0;
+                        if(t === 0 || (now - t > LIMIT)) {
+                            updates[k+'/status'] = 'RECYCLE'; updates[k+'/op_name'] = d[k].op_name + ' (Timeout)'; count++;
                         }
                     }
                 });
-
-                if(count > 0) {
-                    db.ref('stock').update(updates);
-                    console.log(`Auto-Recycled ${count} stuck numbers.`);
-                }
+                if(count > 0) db.ref('stock').update(updates);
             });
-        }, 10000); // Cek tiap 10 detik
+        }, 10000);
 
-        // --- RECYCLE ACTIONS ---
-        window.restoreOne = (key) => {
-            db.ref('stock/'+key).update({ status: 'AVAILABLE', owner: null, op_name: null, otp: null });
-        }
-        window.restoreAllRecycle = () => {
-            if(!confirm("Restore semua nomor recycle jadi Available?")) return;
-            db.ref('stock').once('value', s => {
-                const d = s.val(); let u={};
-                Object.keys(d).forEach(k => {
-                    if(d[k].status === 'RECYCLE' || d[k].status === 'BAD') {
-                        u[k+'/status'] = 'AVAILABLE';
-                        u[k+'/owner'] = null;
-                        u[k+'/op_name'] = null;
-                        u[k+'/otp'] = null;
-                    }
-                });
-                db.ref('stock').update(u);
-            });
-        }
-        window.flushRecycle = () => {
-            if(!confirm("Hapus permanen semua nomor di Recycle Bin?")) return;
-            db.ref('stock').once('value', s => {
-                const d = s.val(); let u={};
-                Object.keys(d).forEach(k => {
-                    if(d[k].status === 'RECYCLE' || d[k].status === 'BAD') u[k] = null;
-                });
-                db.ref('stock').update(u);
-            });
-        }
-
-        // --- COMMON ---
+        // --- COMMON TOOLS ---
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
@@ -304,39 +289,28 @@
             event.target.classList.add('active');
         }
         
-        window.copyTxt = (t) => {
-            navigator.clipboard.writeText(t).then(() => alert("Copied: " + t));
-        }
-
-        // --- COUNTRY & UPLOAD ---
+        // --- COUNTRY MANAGER ---
         db.ref('settings/countries').on('value', snap => {
-            const data = snap.val();
+            const d = snap.val();
             const listDiv = document.getElementById('countryListDisplay');
             const selectUpload = document.getElementById('countrySelectUpload');
             listDiv.innerHTML = ""; selectUpload.innerHTML = "";
-            if(data) {
-                Object.keys(data).forEach(key => {
-                    const div = document.createElement('div'); div.className = 'list-item';
-                    div.innerHTML = `<div class="item-info"><span style="color:#00e5ff; font-weight:bold;">${key}</span> : ${data[key]}</div><button class="action-btn bg-red" onclick="delCountry('${key}')">X</button>`;
-                    listDiv.appendChild(div);
-                    const opt = document.createElement('option'); opt.value = key; opt.innerText = data[key];
-                    selectUpload.appendChild(opt);
+            if(d) {
+                Object.keys(d).forEach(key => {
+                    listDiv.innerHTML += `<div class="list-item"><div class="item-info"><span style="color:#00e5ff;">${key}</span>: ${d[key]}</div><button class="action-btn bg-red" onclick="delCountry('${key}')">X</button></div>`;
+                    const opt = document.createElement('option'); opt.value = key; opt.innerText = d[key]; selectUpload.appendChild(opt);
                 });
             }
         });
-        window.saveCountry = () => {
-            const c = document.getElementById('cCodeInput').value.toUpperCase().trim();
-            const n = document.getElementById('cNameInput').value.trim();
-            if(c&&n) db.ref('settings/countries/'+c).set(n);
-        }
+        window.saveCountry = () => { const c = document.getElementById('cCodeInput').value.toUpperCase().trim(); const n = document.getElementById('cNameInput').value.trim(); if(c&&n) db.ref('settings/countries/'+c).set(n); }
         window.delCountry = (k) => { if(confirm("Hapus?")) db.ref('settings/countries/'+k).remove(); }
+        window.clearAllCountries = () => { if(confirm("Reset Semua Negara?")) db.ref('settings/countries').remove(); }
 
+        // --- UPLOAD & RESET ---
         window.uploadStockSafe = () => {
-            const raw = document.getElementById('numList').value;
-            const c = document.getElementById('countrySelectUpload').value;
+            const raw = document.getElementById('numList').value; const c = document.getElementById('countrySelectUpload').value;
             if(!c) return alert("Pilih Negara!");
-            const lines = raw.split(/\n/);
-            const ts = Date.now();
+            const lines = raw.split(/\n/); const ts = Date.now();
             db.ref('stock').once('value', snap => {
                 const ex = snap.val() || {}; let u = {};
                 lines.forEach(l => {
@@ -346,13 +320,14 @@
                 db.ref('stock').update(u, (e) => { if(!e) { alert("Done"); document.getElementById('numList').value=""; } });
             });
         }
-
-        window.deleteRange = (r) => { if(confirm("Del Range?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].range_name===r)u[k]=null;});db.ref('stock').update(u);}); }
-        window.clearTrash = () => { if(confirm("Clear DONE?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].status==='DONE')u[k]=null;});db.ref('stock').update(u);}); }
-        window.clearAll = () => { if(confirm("RESET ALL?")) db.ref('stock').remove(); }
+        window.restoreOne = (k) => db.ref('stock/'+k).update({ status: 'AVAILABLE', owner: null, op_name: null, otp: null });
+        window.restoreAllRecycle = () => { if(!confirm("Restore All?")) return; db.ref('stock').once('value', s => { const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') { u[k+'/status']='AVAILABLE'; u[k+'/owner']=null; u[k+'/otp']=null; } }); db.ref('stock').update(u); }); }
+        window.flushRecycle = () => { if(!confirm("Hapus All Recycle?")) return; db.ref('stock').once('value', s => { const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k]=null; }); db.ref('stock').update(u); }); }
+        window.clearZombies = () => { db.ref('stock').once('value', s => { const d=s.val(); let u={}; const now=Date.now(); Object.keys(d).forEach(k=>{ if(d[k].status==='TAKEN' && (now-(d[k].timestamp||0)>1800000)) { u[k+'/status']='AVAILABLE'; u[k+'/owner']=null; } }); db.ref('stock').update(u); }); }
+        window.clearTrash = () => { if(confirm("Clear History?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].status==='DONE')u[k]=null;});db.ref('stock').update(u);}); }
+        window.clearAll = () => { if(confirm("RESET ALL DB?")) db.ref('stock').remove(); }
         window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
         window.clearNotif = () => db.ref('system/notification').remove();
-
     </script>
 </body>
 </html>
