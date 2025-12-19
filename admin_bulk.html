@@ -3,60 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTER ADMIN V123 (KEUANGAN)</title>
+    <title>MASTER ADMIN V124 (SYSTEM)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        /* BASE CSS */
         body { background: #000; color: #fff; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .box { width: 100%; max-width: 800px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         h2 { margin-top: 0; color: #00ff88; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        
-        /* TABS */
         .tabs-header { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; flex-wrap: wrap; }
         .tab-btn { background: #222; border: 1px solid #444; color: #aaa; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 11px; min-width: 80px; }
         .tab-btn.active { background: #00ff88; color: #000; border-color: #00ff88; }
-        .tab-btn.money-tab.active { background: #f43f5e; color: #fff; border-color: #f43f5e; } /* Tab Uang Merah */
+        .tab-btn.money-tab.active { background: #f43f5e; color: #fff; border-color: #f43f5e; }
+        .tab-btn.sys-tab.active { background: #eab308; color: #000; border-color: #eab308; }
 
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* LISTS */
         .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; margin-top: 10px; }
         .list-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; }
-        .item-info { font-size: 12px; }
-
-        /* MONEY CARD STYLE */
         .wd-card { border-left: 3px solid #f43f5e !important; background: #1f1212 !important; }
-        .wd-info { display: flex; flex-direction: column; gap: 2px; }
-        .wd-user { font-weight: bold; color: #f43f5e; font-size: 13px; }
-        .wd-amount { color: #fff; font-weight: bold; font-size: 14px; }
-        .wd-dana { color: #aaa; font-size: 11px; font-family: sans-serif; }
-        .wd-time { color: #666; font-size: 10px; }
-
-        /* BUTTONS */
-        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
-        .bg-red { background: #d32f2f; } .bg-blue { background: #2979ff; } .bg-green { background: #00e676; color:#000; } 
-        button:hover { opacity: 0.8; }
-
-        /* GRID STATS */
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: #1a1a1a; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #444; margin-bottom: 5px; }
-        .stat-num { font-size: 24px; font-weight: bold; display: block; margin-bottom: 5px; }
-        .stat-label { font-size: 10px; color: #aaa; }
+        .wd-info { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
         
-        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
+        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; }
+        .bg-red { background: #d32f2f; } .bg-green { background: #00e676; color:#000; } .bg-blue { background: #2979ff; }
+        
+        /* SYSTEM TAB */
+        .sys-group { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
+        .sys-label { font-size: 11px; color: #aaa; display: block; margin-bottom: 5px; }
+        .switch-btn { padding: 10px; width: 100%; border: none; font-weight: bold; cursor: pointer; }
+        .sw-on { background: #00e676; color: #000; } .sw-off { background: #d32f2f; color: #fff; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ V123 ADMIN (FINANCE)</h2>
+        <h2>⚡ V124 ADMIN (SYSTEM CONTROL)</h2>
 
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab('dash')">📊 DASHBOARD</button>
-            <button class="tab-btn money-tab" onclick="switchTab('money')">💰 KEUANGAN (<span id="wdCount">0</span>)</button>
+            <button class="tab-btn money-tab" onclick="switchTab('money')">💰 KEUANGAN</button>
+            <button class="tab-btn sys-tab" onclick="switchTab('system')">⚙️ SYSTEM</button>
             <button class="tab-btn" onclick="switchTab('recycle')">♻️ RECYCLE</button>
             <button class="tab-btn" onclick="switchTab('country')">🌍 NEGARA</button>
             <button class="tab-btn" onclick="switchTab('upload')">🛠️ TOOLS</button>
@@ -64,87 +52,74 @@
 
         <!-- DASHBOARD -->
         <div id="dash" class="tab-content active">
-            <div class="grid-stats">
-                <div class="stat-card" style="border-color: #00e676;">
-                    <span id="countAvail" class="stat-num" style="color:#00e676">0</span>
-                    <span class="stat-label">AVAILABLE</span>
-                </div>
-                <div class="stat-card" style="border-color: #2979ff;">
-                    <span id="countActive" class="stat-num" style="color:#2979ff">0</span>
-                    <span class="stat-label">ACTIVE</span>
-                </div>
-                <div class="stat-card" style="border-color: #f43f5e;">
-                    <span id="countWdPending" class="stat-num" style="color:#f43f5e">0</span>
-                    <span class="stat-label">WD PENDING</span>
-                </div>
+            <!-- Stats -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center; margin-bottom:15px;">
+                <div style="background:#1a1a1a; padding:10px; border:1px solid #444;">Available: <span id="cAvail" style="color:#00ff88">0</span></div>
+                <div style="background:#1a1a1a; padding:10px; border:1px solid #444;">Active: <span id="cActive" style="color:#2979ff">0</span></div>
             </div>
-            
-            <!-- BUTTONS -->
-            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; margin-bottom:10px;">🧹 LEPASKAN NOMOR STUCK ( > 30 MENIT)</button>
+            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px;">🧹 LEPASKAN NOMOR STUCK ( > 2 MENIT)</button>
+        </div>
 
-            <!-- NOTIF -->
-            <div style="background:rgba(255, 215, 0, 0.05); border:1px dashed #ffd700; padding:15px; border-radius:8px;">
-                <label style="color:#ffd700; font-size:11px;">📢 RUNNING TEXT:</label>
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <input type="text" id="notifMsg" placeholder="Isi pesan...">
-                    <button onclick="sendNotif()" class="action-btn" style="background:#ffd700; color:#000;">KIRIM</button>
-                    <button onclick="clearNotif()" class="action-btn bg-red">HAPUS</button>
+        <!-- ⚙️ SYSTEM SETTINGS (NEW) -->
+        <div id="system" class="tab-content">
+            <!-- REWARD CONFIG -->
+            <div class="sys-group">
+                <div class="sys-label">ATUR NOMINAL HADIAH (PER OTP):</div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <span class="sys-label">MIN (Rp)</span>
+                        <input type="number" id="rewMin" value="20">
+                    </div>
+                    <div style="flex:1;">
+                        <span class="sys-label">MAX (Rp)</span>
+                        <input type="number" id="rewMax" value="50">
+                    </div>
                 </div>
+                <button onclick="saveRewardConfig()" class="action-btn bg-green" style="width:100%; margin-top:5px;">SIMPAN HARGA</button>
+            </div>
+
+            <!-- WALLET STATUS -->
+            <div class="sys-group">
+                <div class="sys-label">STATUS FITUR WALLET & WITHDRAW:</div>
+                <div style="display:flex; gap:10px; margin-top:5px;">
+                    <button onclick="setWalletStatus('ON')" class="switch-btn sw-on">BUKA (ON)</button>
+                    <button onclick="setWalletStatus('OFF')" class="switch-btn sw-off">TUTUP (MAINTENANCE)</button>
+                </div>
+                <div style="margin-top:5px; font-size:10px; text-align:center;" id="walletStatusText">Status Saat Ini: ...</div>
             </div>
         </div>
 
-        <!-- 💰 TAB KEUANGAN (NEW) 💰 -->
+        <!-- KEUANGAN -->
         <div id="money" class="tab-content">
-            <div style="text-align:center; color:#aaa; font-size:11px; margin-bottom:10px;">
-                Permintaan penarikan saldo member (DANA).<br>
-                Klik <b>TF DONE</b> jika sudah transfer manual. Klik <b>TOLAK</b> untuk kembalikan saldo.
-            </div>
             <div class="list-container" id="wdListContainer">Loading...</div>
         </div>
 
         <!-- RECYCLE -->
         <div id="recycle" class="tab-content">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span style="font-size:11px; color:#ff9800;">Nomor Gagal / Timeout:</span>
-                <div>
-                    <button onclick="restoreAllRecycle()" class="action-btn bg-green">♻️ RESTORE ALL</button>
-                    <button onclick="flushRecycle()" class="action-btn bg-red">🗑️ HAPUS ALL</button>
-                </div>
-            </div>
+            <div style="margin-bottom:10px;"><button onclick="restoreAllRecycle()" class="action-btn bg-green">RESTORE ALL</button> <button onclick="flushRecycle()" class="action-btn bg-red">HAPUS ALL</button></div>
             <div class="list-container" id="recycleListContainer"></div>
         </div>
 
-        <!-- NEGARA -->
+        <!-- COUNTRY -->
         <div id="country" class="tab-content">
-            <div style="background:#222; padding:10px; border-radius:5px;">
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="cCodeInput" placeholder="Kode (ID)" style="width:30%;">
-                    <input type="text" id="cNameInput" placeholder="Nama (INDONESIA)">
-                    <button onclick="saveCountry()" class="action-btn bg-green">SIMPAN</button>
-                </div>
-            </div>
-            <div style="margin-top:5px; text-align:right;">
-                <button onclick="clearAllCountries()" class="action-btn bg-red">HAPUS SEMUA NEGARA</button>
-            </div>
+            <div style="display:flex; gap:5px;"><input id="cCode" placeholder="ID"><input id="cName" placeholder="INDONESIA"><button onclick="saveCountry()" class="action-btn bg-green">SAVE</button></div>
+            <button onclick="clearAllCountries()" class="action-btn bg-red" style="margin-top:5px;">RESET NEGARA</button>
             <div class="list-container" id="countryListDisplay"></div>
         </div>
 
         <!-- TOOLS -->
         <div id="upload" class="tab-content">
-            <label style="font-size:11px; color:#aaa;">UPLOAD NOMOR:</label>
-            <select id="countrySelectUpload"><option>Loading...</option></select>
-            <textarea id="numList" placeholder="Paste nomor disini..." style="height:100px;"></textarea>
-            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%; padding:12px; margin-top:5px;">🚀 UPLOAD</button>
-            <hr style="border-color:#333; margin:20px 0;">
-            <div style="display:flex; gap:10px;">
-                <button onclick="clearTrash()" class="action-btn" style="background:#ff9800; flex:1; padding:12px;">BERSIHKAN HISTORY</button>
-                <button onclick="clearAll()" class="action-btn bg-red" style="flex:1; padding:12px;">RESET DATABASE</button>
+            <select id="countrySelectUpload"></select>
+            <textarea id="numList" placeholder="Paste nomor..." style="height:80px;"></textarea>
+            <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%;">UPLOAD</button>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="clearTrash()" class="action-btn bg-red" style="flex:1;">CLEAR HISTORY</button>
+                <button onclick="clearAll()" class="action-btn bg-red" style="flex:1;">RESET ALL</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIG FIREBASE (WAJIB SAMA)
         const firebaseConfig = {
             apiKey: "AIzaSyDQ6jBWPxaItR4LntBwdviM5BAGxhd2N7Q",
             authDomain: "vipotpsystem.firebaseapp.com",
@@ -157,177 +132,100 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- 1. MONITORING WD (KEUANGAN) ---
-        db.ref('withdrawals').on('value', snap => {
-            const data = snap.val();
-            const container = document.getElementById('wdListContainer');
-            container.innerHTML = "";
-            let pendingCount = 0;
-
-            if(data) {
-                // Ubah object ke array biar bisa disort
-                const arr = Object.keys(data).map(key => ({...data[key], key: key}));
-                // Sort dari yang terbaru
-                arr.sort((a,b) => b.time - a.time);
-
-                arr.forEach(item => {
-                    if(item.status === 'PENDING') {
-                        pendingCount++;
-                        const date = new Date(item.time).toLocaleString();
-                        
-                        const div = document.createElement('div');
-                        div.className = 'list-item wd-card';
-                        div.innerHTML = `
-                            <div class="wd-info">
-                                <span class="wd-user">${item.user}</span>
-                                <span class="wd-amount">Rp ${item.amount.toLocaleString()}</span>
-                                <span class="wd-dana">DANA: ${item.dana}</span>
-                                <span class="wd-time">${date}</span>
-                            </div>
-                            <div style="display:flex; gap:5px; flex-direction:column;">
-                                <button class="action-btn bg-green" onclick="approveWD('${item.key}', '${item.user}', ${item.amount})">✅ TF DONE</button>
-                                <button class="action-btn bg-red" onclick="rejectWD('${item.key}', '${item.user}', ${item.amount})">❌ TOLAK</button>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    }
-                });
-            }
-
-            if(pendingCount === 0) container.innerHTML = "<div style='padding:20px; text-align:center; color:#555;'>Tidak ada permintaan pending.</div>";
-            
-            // Update Badges
-            document.getElementById('wdCount').innerText = pendingCount;
-            document.getElementById('countWdPending').innerText = pendingCount;
+        // --- SYSTEM CONFIG ---
+        // Load settings saat ini
+        db.ref('settings/config').on('value', snap => {
+            const conf = snap.val() || { reward_min: 20, reward_max: 50, wallet_status: 'ON' };
+            document.getElementById('rewMin').value = conf.reward_min;
+            document.getElementById('rewMax').value = conf.reward_max;
+            document.getElementById('walletStatusText').innerText = "Status Saat Ini: " + conf.wallet_status;
+            document.getElementById('walletStatusText').style.color = conf.wallet_status === 'ON' ? '#00e676' : '#d32f2f';
         });
 
-        // --- ACTION WD ---
-        window.approveWD = (key, user, amount) => {
-            if(confirm(`Sudah transfer Rp ${amount} ke ${user}?`)) {
-                // Tandai Sukses
-                db.ref('withdrawals/'+key).update({ status: 'SUCCESS' });
+        window.saveRewardConfig = () => {
+            const min = parseInt(document.getElementById('rewMin').value);
+            const max = parseInt(document.getElementById('rewMax').value);
+            db.ref('settings/config').update({ reward_min: min, reward_max: max }, (e) => {
+                if(!e) alert("Harga Reward Diupdate!");
+            });
+        }
+
+        window.setWalletStatus = (status) => {
+            if(confirm("Ubah status Wallet jadi " + status + "?")) {
+                db.ref('settings/config').update({ wallet_status: status });
             }
         }
 
-        window.rejectWD = (key, user, amount) => {
-            const reason = prompt("Alasan penolakan (Wajib):", "Salah nomor / Fraud");
-            if(reason) {
-                // 1. Update Status WD jadi REJECTED
-                db.ref('withdrawals/'+key).update({ status: 'REJECTED', reason: reason });
-                
-                // 2. KEMBALIKAN SALDO USER (PENTING!)
-                db.ref('users/'+user+'/balance').once('value', s => {
-                    const currentBal = s.val() || 0;
-                    const newBal = currentBal + amount;
-                    db.ref('users/'+user).update({ balance: newBal });
-                    alert(`Saldo dikembalikan ke ${user}. Total: Rp ${newBal}`);
-                });
-            }
-        }
-
-        // --- 2. STOCK & DASHBOARD ---
+        // --- DASHBOARD ---
         let lastUpdate = 0;
         db.ref('stock').on('value', snap => {
-            const now = Date.now();
-            if (now - lastUpdate > 1000) { processData(snap.val()); lastUpdate = now; }
+            if (Date.now() - lastUpdate > 1000) { renderDashboard(snap.val()); lastUpdate = Date.now(); }
         });
 
-        function processData(data) {
+        function renderDashboard(data) {
             let avail=0, active=0, recycle=0;
-            let recycleHTML = "";
-
-            if(data) {
-                Object.keys(data).forEach(key => {
-                    const item = data[key];
-                    if (item.status === 'AVAILABLE') avail++;
-                    else if (item.status === 'TAKEN') active++;
-                    else if (item.status === 'RECYCLE' || item.status === 'BAD') {
-                        recycle++;
-                        recycleHTML += `
-                            <div class="list-item" style="border-left-color: #ff9800;">
-                                <div class="item-info">
-                                    <span style="color:#ff9800; font-weight:bold;">${item.country}</span> ${item.number}<br>
-                                    <span style="color:#666; font-size:10px;">User: ${item.op_name || 'Unk'}</span>
-                                </div>
-                                <div class="item-actions">
-                                    <button class="action-btn bg-green" onclick="restoreOne('${key}')">RESTORE</button>
-                                    <button class="action-btn" style="background:#333;" onclick="navigator.clipboard.writeText('${item.number}')">COPY</button>
-                                </div>
-                            </div>`;
-                    }
-                });
-            }
-
-            document.getElementById('countAvail').innerText = avail;
-            document.getElementById('countActive').innerText = active;
-            document.getElementById('recycleListContainer').innerHTML = recycleHTML || "<div style='padding:10px;text-align:center;'>Kosong</div>";
-        }
-
-        // --- 3. AUTO ZOMBIE KILLER ---
-        setInterval(() => {
-            db.ref('stock').once('value', snap => {
-                const d = snap.val(); if(!d) return;
-                const now = Date.now(); const LIMIT = 2 * 60 * 1000; 
-                let updates = {}; let count = 0;
-                Object.keys(d).forEach(k => {
-                    if(d[k].status === 'TAKEN') {
-                        const t = d[k].timestamp || 0;
-                        if(t === 0 || (now - t > LIMIT)) {
-                            updates[k+'/status'] = 'RECYCLE'; updates[k+'/op_name'] = d[k].op_name + ' (Timeout)'; count++;
-                        }
-                    }
-                });
-                if(count > 0) db.ref('stock').update(updates);
+            let recHTML = "";
+            if(data) Object.keys(data).forEach(k => {
+                const i = data[k];
+                if(i.status==='AVAILABLE') avail++;
+                else if(i.status==='TAKEN') active++;
+                else if(i.status==='RECYCLE' || i.status==='BAD') {
+                    recycle++;
+                    recHTML += `<div class="list-item" style="border-left-color:#ff9800"><div class="item-info"><span style="color:#ff9800">${i.country}</span> ${i.number}<br><span style="color:#666;font-size:10px">${i.op_name||'-'}</span></div><div><button class="action-btn bg-green" onclick="restoreOne('${k}')">R</button> <button class="action-btn" onclick="navigator.clipboard.writeText('${i.number}')">C</button></div></div>`;
+                }
             });
-        }, 10000);
-
-        // --- COMMON TOOLS ---
-        window.switchTab = (id) => {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
+            document.getElementById('cAvail').innerText=avail; document.getElementById('cActive').innerText=active;
+            document.getElementById('recycleListContainer').innerHTML=recHTML || "Kosong";
         }
-        
-        // --- COUNTRY MANAGER ---
-        db.ref('settings/countries').on('value', snap => {
-            const d = snap.val();
-            const listDiv = document.getElementById('countryListDisplay');
-            const selectUpload = document.getElementById('countrySelectUpload');
-            listDiv.innerHTML = ""; selectUpload.innerHTML = "";
+
+        // --- WD LIST ---
+        db.ref('withdrawals').on('value', snap => {
+            const d = snap.val(); const c = document.getElementById('wdListContainer'); c.innerHTML="";
             if(d) {
-                Object.keys(d).forEach(key => {
-                    listDiv.innerHTML += `<div class="list-item"><div class="item-info"><span style="color:#00e5ff;">${key}</span>: ${d[key]}</div><button class="action-btn bg-red" onclick="delCountry('${key}')">X</button></div>`;
-                    const opt = document.createElement('option'); opt.value = key; opt.innerText = d[key]; selectUpload.appendChild(opt);
+                Object.keys(d).forEach(k => {
+                    const i = d[k];
+                    if(i.status === 'PENDING') {
+                        const date = new Date(i.time).toLocaleString();
+                        c.innerHTML += `<div class="list-item wd-card"><div class="wd-info"><span style="color:#f43f5e;font-weight:bold;">${i.user}</span><span>Rp ${i.amount} -> ${i.dana}</span><span style="color:#666;font-size:10px;">${date}</span></div><div><button class="action-btn bg-green" onclick="accWD('${k}')">ACC</button> <button class="action-btn bg-red" onclick="decWD('${k}','${i.user}',${i.amount})">TOLAK</button></div></div>`;
+                    }
                 });
             }
+            if(c.innerHTML==="") c.innerHTML="<div style='text-align:center;padding:10px;'>Tidak ada request.</div>";
         });
-        window.saveCountry = () => { const c = document.getElementById('cCodeInput').value.toUpperCase().trim(); const n = document.getElementById('cNameInput').value.trim(); if(c&&n) db.ref('settings/countries/'+c).set(n); }
-        window.delCountry = (k) => { if(confirm("Hapus?")) db.ref('settings/countries/'+k).remove(); }
-        window.clearAllCountries = () => { if(confirm("Reset Semua Negara?")) db.ref('settings/countries').remove(); }
+        window.accWD = (k) => { if(confirm("ACC?")) db.ref('withdrawals/'+k).update({status:'SUCCESS'}); }
+        window.decWD = (k,u,a) => { if(confirm("Tolak & Refund?")) { db.ref('withdrawals/'+k).update({status:'REJECTED'}); db.ref('users/'+u+'/balance').once('value',s=>db.ref('users/'+u).update({balance:(s.val()||0)+a})); } }
 
-        // --- UPLOAD & RESET ---
-        window.uploadStockSafe = () => {
-            const raw = document.getElementById('numList').value; const c = document.getElementById('countrySelectUpload').value;
-            if(!c) return alert("Pilih Negara!");
-            const lines = raw.split(/\n/); const ts = Date.now();
-            db.ref('stock').once('value', snap => {
-                const ex = snap.val() || {}; let u = {};
-                lines.forEach(l => {
-                    let n = l.replace(/\D/g, '');
-                    if(n.length>6 && !ex[n]) u[n] = { number: n, country: c, status: 'AVAILABLE', range_name: "MANUAL", timestamp: ts, otp: "" };
-                });
-                db.ref('stock').update(u, (e) => { if(!e) { alert("Done"); document.getElementById('numList').value=""; } });
+        // --- OTHERS ---
+        db.ref('settings/countries').on('value', s => {
+            const d=s.val(); const l=document.getElementById('countryListDisplay'); const u=document.getElementById('countrySelectUpload');
+            l.innerHTML=""; u.innerHTML="";
+            if(d) Object.keys(d).forEach(k => {
+                l.innerHTML+=`<div class="list-item"><span>${d[k]}</span><button class="action-btn bg-red" onclick="delCountry('${k}')">X</button></div>`;
+                const o=document.createElement('option'); o.value=k; o.innerText=d[k]; u.appendChild(o);
+            });
+        });
+        window.saveCountry=()=>{const c=document.getElementById('cCode').value; const n=document.getElementById('cName').value; if(c&&n)db.ref('settings/countries/'+c).set(n);}
+        window.delCountry=(k)=>{if(confirm("Del?"))db.ref('settings/countries/'+k).remove();}
+        window.clearAllCountries=()=>{if(confirm("Reset Negara?"))db.ref('settings/countries').remove();}
+        
+        window.uploadStockSafe=()=>{
+            const raw=document.getElementById('numList').value; const c=document.getElementById('countrySelectUpload').value;
+            if(!c)return alert("Pilih Negara!");
+            const lines=raw.split(/\n/); const ts=Date.now();
+            db.ref('stock').once('value', snap=>{
+                const ex=snap.val()||{}; let u={};
+                lines.forEach(l=>{ let n=l.replace(/\D/g,''); if(n.length>6 && !ex[n]) u[n]={number:n, country:c, status:'AVAILABLE', range_name:"MANUAL", timestamp:ts, otp:""}; });
+                db.ref('stock').update(u, e=>{ if(!e) {alert("Done"); document.getElementById('numList').value="";} });
             });
         }
-        window.restoreOne = (k) => db.ref('stock/'+k).update({ status: 'AVAILABLE', owner: null, op_name: null, otp: null });
-        window.restoreAllRecycle = () => { if(!confirm("Restore All?")) return; db.ref('stock').once('value', s => { const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') { u[k+'/status']='AVAILABLE'; u[k+'/owner']=null; u[k+'/otp']=null; } }); db.ref('stock').update(u); }); }
-        window.flushRecycle = () => { if(!confirm("Hapus All Recycle?")) return; db.ref('stock').once('value', s => { const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k]=null; }); db.ref('stock').update(u); }); }
-        window.clearZombies = () => { db.ref('stock').once('value', s => { const d=s.val(); let u={}; const now=Date.now(); Object.keys(d).forEach(k=>{ if(d[k].status==='TAKEN' && (now-(d[k].timestamp||0)>1800000)) { u[k+'/status']='AVAILABLE'; u[k+'/owner']=null; } }); db.ref('stock').update(u); }); }
-        window.clearTrash = () => { if(confirm("Clear History?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].status==='DONE')u[k]=null;});db.ref('stock').update(u);}); }
-        window.clearAll = () => { if(confirm("RESET ALL DB?")) db.ref('stock').remove(); }
-        window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
-        window.clearNotif = () => db.ref('system/notification').remove();
+
+        window.switchTab=(id)=>{ document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.target.classList.add('active'); }
+        window.restoreOne=(k)=>db.ref('stock/'+k).update({status:'AVAILABLE',owner:null,op_name:null,otp:null});
+        window.restoreAllRecycle=()=>{ if(confirm("All?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k+'/status']='AVAILABLE'; }); db.ref('stock').update(u); }); }
+        window.flushRecycle=()=>{ if(confirm("Flush?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k]=null; }); db.ref('stock').update(u); }); }
+        window.clearZombies=()=>{ db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; const now=Date.now(); Object.keys(d).forEach(k=>{ if(d[k].status==='TAKEN' && (now-(d[k].timestamp||0)>120000)) { u[k+'/status']='RECYCLE'; u[k+'/op_name']='(Timeout)'; } }); db.ref('stock').update(u); }); }
+        window.clearTrash=()=>{ if(confirm("Clean History?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='DONE') u[k]=null; }); db.ref('stock').update(u); }); }
+        window.clearAll=()=>{ if(confirm("RESET ALL?")) db.ref('stock').remove(); }
     </script>
 </body>
 </html>
