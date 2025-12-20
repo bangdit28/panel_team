@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PANEL TASIK V166 (RECYCLE FIX)</title>
+    <title>PANEL TASIK</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -169,7 +169,7 @@
         try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e){}
         const db = firebase.database();
 
-        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        const flags = { "ETHIOPIA": "🇪🇹", "BENIN": "🇧🇯", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
         function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
 
         // KEYS
