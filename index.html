@@ -1,66 +1,81 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <!-- 🔒 SECURITY CHECK V165 🔒 -->
-    <script>
-        // Cek apakah user punya kunci akses?
-        if (localStorage.getItem('TASIK_V165_ACCESS') !== 'GRANTED') {
-            // Kalau gak punya, tendang ke login.html
-            window.location.href = 'login.html';
-        }
-    </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PANEL TASIK V165</title>
+    <title>PANEL TASIK</title>
     <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Orbitron&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS RAPI V150 */
+        /* BASE */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: #0f172a; color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; padding-bottom: 70px; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        .top-header { background: #1e293b; padding: 12px 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .app-title { font-size: 16px; font-weight: 800; color: #f43f5e; letter-spacing: 0.5px; }
+        /* HEADER */
+        .top-header { background: #1e293b; padding: 10px 15px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .app-title { font-size: 16px; font-weight: bold; color: #f43f5e; }
         .user-info-header { display: flex; align-items: center; gap: 8px; }
-        .header-name { font-size: 12px; font-weight: bold; color: #fff; text-transform: uppercase; }
+        .header-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #f43f5e; background: #333; }
+        .header-name { font-size: 12px; font-weight: bold; color: #fff; }
 
-        #toast { visibility: hidden; min-width: 120px; background-color: #4ade80; color: #000; text-align: center; border-radius: 50px; padding: 10px 20px; position: fixed; z-index: 10000; left: 50%; bottom: 90px; transform: translateX(-50%); font-size: 12px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; }
-        #toast.show { visibility: visible; opacity: 1; }
-
-        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        /* PAGES */
+        .page { display: none; padding: 15px; animation: fadeIn 0.3s; padding-bottom: 80px; }
         .page.active { display: block; }
-        .box { width: 100%; background: #1e293b; padding: 15px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 15px; position: relative; }
+        .box { width: 100%; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 15px; position: relative; }
 
-        .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 12px; border: 2px dashed #f43f5e; margin: 15px 0; text-align: center; color: #fff; cursor: pointer; letter-spacing: 1px; transition: 0.2s; }
-        .otp-area { background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid #334155; padding: 15px; text-align: center; margin-bottom: 15px; min-height: 90px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
-        .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; letter-spacing: 1px; }
+        /* FARMING UI */
+        .display-num { font-size: 26px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 2px dashed #f43f5e; margin: 10px 0; text-align: center; color: #fff; cursor: pointer; letter-spacing: 1px; }
+        .otp-area { background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid #334155; padding: 15px; text-align: center; margin-bottom: 15px; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .otp-code { font-size: 42px; font-weight: 800; color: #4ade80; letter-spacing: 4px; animation: popIn 0.3s; cursor: pointer; }
+        .waiting { font-size: 11px; color: #fbbf24; animation: blink 1.5s infinite; font-weight: bold; }
+        /* ALERT STOCK */
+        #stockStatus { color: #f97316; font-size: 11px; font-weight: bold; margin-top: 5px; min-height: 15px; text-align: center; }
 
-        select, input { width: 100%; padding: 14px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 10px; font-weight: bold; margin-bottom: 10px; font-size: 14px; outline: none; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.2s; }
-        .btn-start { background: #f43f5e; color: #fff; } .btn-bad { background: #ef4444; color: #fff; } .btn-next { background: #10b981; color: #fff; } .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; } .btn-save { background: #3b82f6; color: #fff; }
+        /* WALLET */
+        .wallet-card { background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); border-radius: 15px; padding: 20px; color: #fff; text-align: center; margin-bottom: 20px; }
+        .wallet-balance { font-size: 32px; font-weight: bold; margin: 10px 0; font-family: 'Orbitron', sans-serif; }
+        .wd-form label { font-size: 11px; color: #aaa; display: block; margin-bottom: 5px; }
+        .maintenance-view { text-align: center; padding: 50px 20px; } .maintenance-icon { font-size: 50px; margin-bottom: 15px; }
 
-        .ph-table { width: 100%; border-collapse: collapse; } .ph-row { border-bottom: 1px solid #334155; } .ph-cell { padding: 12px 5px; font-size: 11px; color: #ccc; vertical-align: middle; }
-        .ph-status-pending { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); } .ph-status-success { border-left: 3px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
-        .x-green { color: #4ade80; font-weight: bold; font-family: monospace; background: rgba(74, 222, 128, 0.1); padding: 2px 4px; border-radius: 4px; }
-        .g-item { background: #1e293b; border-bottom: 1px solid #334155; padding: 12px; margin-bottom: 0; font-size: 11px; }
+        /* INPUTS & BUTTONS */
+        select, input { width: 100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 8px; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px; text-transform: uppercase; transition: 0.1s; }
+        .btn-start { background: #f43f5e; color: #fff; } .btn-bad { background: #ef4444; color: #fff; } .btn-next { background: #22c55e; color: #000; } .btn-stop { background: transparent; border: 1px solid #475569; color: #94a3b8; } .btn-save { background: #3b82f6; color: #fff; }
 
-        .wallet-card { background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); border-radius: 16px; padding: 25px; color: #fff; text-align: center; margin-bottom: 20px; }
-        .wallet-balance { font-size: 36px; font-weight: bold; margin: 10px 0; font-family: 'Orbitron', sans-serif; }
+        /* LISTS */
+        .g-item { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 11px; }
+        .x-green { color: #4ade80; font-weight: bold; }
+        .ph-table { width: 100%; border-collapse: collapse; } .ph-row { border-bottom: 1px solid #334155; } .ph-cell { padding: 10px; font-size: 10px; color: #ccc; } 
+        .ph-status-pending { border-left: 3px solid #f59e0b; background: rgba(245, 158, 11, 0.05); } 
+        .ph-status-success { border-left: 3px solid #4ade80; background: rgba(74, 222, 128, 0.05); }
+        .trx-list { max-height: 200px; overflow-y: auto; } .trx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #334155; font-size: 11px; } .trx-plus { color: #4ade80; font-weight: bold; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 10px; cursor: pointer; transition: 0.2s; width: 20%; text-align: center; }
-        .nav-item svg { width: 22px; height: 22px; fill: currentColor; margin-bottom: 3px; }
+        /* TOAST */
+        #toast { visibility: hidden; min-width: 120px; background-color: #4ade80; color: #000; text-align: center; border-radius: 50px; padding: 8px 15px; position: fixed; z-index: 10000; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 11px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; } #toast.show { visibility: visible; opacity: 1; }
+        #loginOverlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10000; align-items: center; justify-content: center; }
+        .login-inner { width: 80%; max-width: 300px; text-align: center; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
+
+        /* CHAT & PROFIL */
+        #chatContainer { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 10px; } .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; } .chat-left { align-self: flex-start; background: #334155; color: #fff; border-bottom-left-radius: 2px; } .chat-right { align-self: flex-end; background: #059669; color: #fff; border-bottom-right-radius: 2px; } .chat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; } .chat-avatar { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; background: #000; } .chat-input-area { position: fixed; bottom: 65px; left: 0; width: 100%; background: #0f172a; padding: 10px; border-top: 1px solid #334155; display: flex; gap: 10px; z-index: 999; } #msgInput { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: #fff; outline: none; } #sendBtn { width: 40px; height: 40px; border-radius: 50%; background: #f43f5e; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; } 
+        .profile-pic-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; } .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f43f5e; background: #0f172a; } .upload-icon { position: absolute; bottom: 0; right: 0; background: #f43f5e; color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #1e293b; } #fileInput { display: none; }
+
+        /* NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 9999; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 10px; cursor: pointer; transition: 0.2s; width: 18%; text-align: center; }
+        .nav-item svg { width: 20px; height: 20px; fill: currentColor; margin-bottom: 3px; }
         .nav-item.active { color: #f43f5e; font-weight: bold; }
-        .nav-item.active svg { fill: #f43f5e; transform: translateY(-3px); }
-        .nav-item.wallet-nav { margin-top: -30px; } .nav-item.wallet-nav .icon-circle { width: 50px; height: 50px; background: #f43f5e; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.6); border: 4px solid #0f172a; } .nav-item.wallet-nav svg { fill: #fff; width: 24px; height: 24px; margin: 0; }
+        .nav-item.active svg { fill: #f43f5e; transform: translateY(-2px); }
+        .nav-item.wallet-nav { margin-top: -25px; }
+        .nav-item.wallet-nav .icon-circle { width: 45px; height: 45px; background: #f43f5e; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.5); border: 4px solid #0f172a; }
+        .nav-item.wallet-nav svg { fill: #fff; width: 22px; height: 22px; margin: 0; }
+        .nav-item.wallet-nav span { margin-top: 5px; }
 
         .hidden { display: none !important; }
-        @keyframes popIn { 0% { transform: scale(0.5); } 100% { transform: scale(1); } } @keyframes blink { 50% { opacity: 0.5; } }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -68,9 +83,10 @@
     <div id="toast">Disalin!</div>
 
     <div class="top-header">
-        <div class="app-title">PANEL TASIK V165</div>
+        <div class="app-title">PANEL TASIK</div>
         <div class="user-info-header">
-            <div class="header-name" id="displayUsername">...</div>
+            <img src="" id="headerAvatar" class="header-avatar" onerror="this.src='https://via.placeholder.com/30?text=U'">
+            <div class="header-name" id="headerName">Guest</div>
         </div>
     </div>
 
@@ -79,20 +95,31 @@
         <div id="areaMenu" class="box">
             <h3 style="margin-top:0; color:#aaa; font-size:12px;">PILIH SERVER</h3>
             <select id="countryPick"><option>Memuat...</option></select>
-            <div id="stockStatus" style="color:#f97316; font-size:11px; text-align:center; margin-top:5px;"></div>
+            <div id="stockStatus"></div>
             <button class="btn-start" onclick="startFarming()">AMBIL NOMOR</button>
         </div>
         <div id="areaFarming" class="hidden">
             <div class="box">
-                <div style="font-size:11px; color:#aaa; margin-bottom:5px; text-align:center;">ACTIVE NUMBER</div>
-                <div class="display-num" onclick="tryCopy(document.getElementById('txtNum').innerText)"><span id="txtNum">...</span></div>
-                <div class="otp-area"><div id="statusWait" class="waiting">📡 MENUNGGU SMS...</div><div id="myOTP" class="otp-code hidden" onclick="tryCopy(this.innerText)">---</div></div>
-                <div style="display: flex; gap: 10px;"><button id="btnBad" class="btn-bad" onclick="actionBad()">🔄 GANTI</button><button id="btnNext" class="btn-next" onclick="actionNext()">✅ LANJUT</button></div>
-                <button class="btn-stop" onclick="stopOnly()">⏹️ KEMBALI</button>
+                <div style="font-size:10px; color:#aaa; margin-bottom:5px;">ACTIVE NUMBER (TAP SALIN)</div>
+                <!-- 🔥 NOMOR DENGAN PLUS 🔥 -->
+                <div class="display-num" onclick="tryCopy(this.innerText)">
+                    <span id="txtNum">...</span>
+                </div>
+                <div class="otp-area">
+                    <div id="statusWait" class="waiting">📡 MENUNGGU SMS...</div>
+                    <div id="myOTP" class="otp-code hidden" onclick="tryCopy(this.innerText)">---</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="btnBad" class="btn-bad" onclick="actionBad()">🔄 GANTI</button>
+                    <button id="btnNext" class="btn-next" onclick="actionNext()">✅ LANJUT</button>
+                </div>
+                <button class="btn-stop" onclick="stopOnly()">⏹️ MINIMIZE</button>
             </div>
         </div>
-        <div class="box" style="margin-top:20px;">
-            <div style="font-size:12px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:10px;">👤 RIWAYAT PRIBADI SAYA</div>
+        <div class="box" style="margin-top:15px;">
+            <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">
+                👤 HISTORY PRIBADI SAYA
+            </div>
             <div id="personalHistoryContainer"></div>
         </div>
     </div>
@@ -100,46 +127,65 @@
     <!-- 2. HISTORY -->
     <div id="viewHistory" class="page">
         <div class="box">
-            <div style="font-size:12px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:10px;">🔴 GLOBAL LIVE FEED</div>
-            <div id="globalFeedList" class="feed-list" style="padding:0;"><div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load data...</div></div>
+            <div style="font-size:11px; color:#f43f5e; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px;">🔴 GLOBAL LIVE FEED</div>
+            <div id="globalFeedList" class="feed-list"><div style="text-align:center; padding:20px; color:#444; font-size:10px;">Load data...</div></div>
         </div>
     </div>
 
     <!-- 3. WALLET -->
     <div id="viewWallet" class="page">
-        <div class="wallet-card">
-            <div style="font-size:10px; opacity:0.8;">SALDO KAMU</div>
-            <div class="wallet-balance" id="displayBalance">Rp 0</div>
-            <div style="font-size:9px;">Per OTP: Rp 20 - Rp 50</div>
+        <div id="walletContent">
+            <div class="wallet-card">
+                <div class="wallet-label">SALDO KAMU</div>
+                <div class="wallet-balance" id="displayBalance">Rp 0</div>
+                <div style="font-size:10px;">EVENT: Rp <span id="lblMin">20</span> - Rp <span id="lblMax">50</span> / OTP</div>
+            </div>
+            <div class="box wd-form">
+                <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px; color:#f43f5e;">TARIK DANA</h3>
+                <label>NOMOR DANA:</label><input type="number" id="wdNumber" placeholder="08xxxxx">
+                <label>JUMLAH (Min 5000):</label><input type="number" id="wdAmount" placeholder="Rp ...">
+                <button class="btn-save" onclick="requestWithdraw()">KIRIM PERMINTAAN</button>
+            </div>
+            <div class="box">
+                <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">RIWAYAT</h3>
+                <div id="trxListContainer" class="trx-list"><div style="text-align:center; color:#555; padding:10px;">Belum ada pendapatan.</div></div>
+            </div>
         </div>
-        <div class="box">
-            <h3 style="margin-top:0; color:#aaa; font-size:12px;">TARIK DANA</h3>
-            <input type="number" id="wdNum" placeholder="Nomor DANA">
-            <input type="number" id="wdAmount" placeholder="Jumlah (Min 5000)">
-            <button class="btn-save" onclick="reqWithdraw()">KIRIM PERMINTAAN</button>
+        <div id="walletMaintenance" class="maintenance-view hidden">
+            <div class="maintenance-icon">🛠️</div>
+            <h3 style="color:#f43f5e;">SEDANG DALAM PERBAIKAN</h3>
+            <p style="color:#aaa; font-size:12px;">Fitur dompet sedang ditingkatkan oleh Admin.</p>
         </div>
     </div>
 
     <!-- 4. CHAT -->
     <div id="viewChat" class="page">
-        <div class="box" style="text-align:center; padding:50px;">Fitur Chat Aktif (Placeholder)</div>
+        <div id="chatContainer"></div>
+        <div class="chat-input-area"><input type="text" id="msgInput" placeholder="Ketik pesan..."><button id="sendBtn" onclick="sendChat()">➤</button></div>
     </div>
 
     <!-- 5. PROFIL -->
     <div id="viewProfil" class="page">
-        <div class="box" style="text-align:center; padding:30px;">
-            <h2 id="profileName">...</h2>
-            <button class="btn-bad" onclick="doLogout()">LOGOUT</button>
+        <div class="box">
+            <div class="profile-pic-wrapper"><img src="" id="profilePreview" class="profile-pic" onerror="this.src='https://via.placeholder.com/100?text=U'"><label for="fileInput" class="upload-icon">📷</label><input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)"></div>
+            <label style="font-size:11px; color:#aaa;">NAMA:</label><input type="text" id="editNameInput" placeholder="Nama Kamu">
+            <label style="font-size:11px; color:#aaa;">WARNA:</label><input type="color" id="editColorInput" value="#ffffff" style="height:40px; padding:0;">
+            <button class="btn-save" onclick="saveProfileSettings()">SIMPAN PROFIL</button>
         </div>
+        <div style="text-align:center; margin-top:20px;"><button class="btn-bad" style="width:auto; font-size:10px;" onclick="doLogout()">RESET / LOGOUT</button></div>
     </div>
 
+    <!-- NAV -->
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchPage('viewHome', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
-        <div class="nav-item" onclick="switchPage('viewHistory', this)"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>History</span></div>
-        <div class="nav-item wallet-nav" onclick="switchPage('viewWallet', this)"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .89-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></div><span>Wallet</span></div>
-        <div class="nav-item" onclick="switchPage('viewChat', this)"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span>Chat</span></div>
-        <div class="nav-item" onclick="switchPage('viewProfil', this)"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
+        <div class="nav-item active" onclick="navTo('viewHome', this)"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
+        <div class="nav-item" onclick="navTo('viewHistory', this)"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>History</span></div>
+        <div class="nav-item wallet-nav" onclick="navTo('viewWallet', this)"><div class="icon-circle"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .89-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></div><span>Wallet</span></div>
+        <div class="nav-item" onclick="navTo('viewChat', this)"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg><span>Chat</span></div>
+        <div class="nav-item" onclick="navTo('viewProfil', this)"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Profil</span></div>
     </nav>
+
+    <!-- LOGIN -->
+    <div id="loginOverlay"><div class="login-inner"><h2 style="color:#f43f5e;">LOGIN TEAM V162</h2><input type="text" id="initNameInput" placeholder="Nama Panggilan..."><button class="btn-start" onclick="firstTimeLogin()">MASUK</button></div></div>
 
     <script>
         const firebaseConfig = {
@@ -151,47 +197,60 @@
             messagingSenderId: "1041472357696",
             appId: "1:1041472357696:web:d3070f47a3c263657da6a5"
         };
-        firebase.initializeApp(firebaseConfig);
+        try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e){}
         const db = firebase.database();
 
-        // 🔒 AMBIL DATA DARI LOGIN 🔒
-        const currentUser = localStorage.getItem('TASIK_USER');
-        const KEY_HISTORY = 'TASIK_HIST_' + currentUser;
+        const flags = { "SIERRALEONE": "🇸🇱", "IVORYCOAST": "🇨🇮", "ETHIOPIA": "🇪🇹", "MYANMAR": "🇲🇲", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
 
-        // SET UI
-        document.getElementById('displayUsername').innerText = currentUser || "User";
-        document.getElementById('profileName').innerText = currentUser || "User";
+        // KEYS
+        const KEY_PROFILE = 'TASIK_162_PROF'; 
+        const KEY_HISTORY = 'TASIK_162_HIST';
+        const KEY_SESSION = 'TASIK_162_SESS';
+        const KEY_BALANCE = 'TASIK_162_BAL';
 
-        let myHistory = JSON.parse(localStorage.getItem(KEY_HISTORY)) || [];
-        let currentNum = null;
-        let selectedRegion = "";
-        let listenerRef = null;
+        function safeParse(key, defaultVal) { try { const item = localStorage.getItem(key); return item ? JSON.parse(item) : defaultVal; } catch (e) { localStorage.removeItem(key); return defaultVal; } }
+        let userProfile = safeParse(KEY_PROFILE, null);
+        let myHistory = safeParse(KEY_HISTORY, []);
+        let userBalance = safeParse(KEY_BALANCE, 0);
+        let currentNum = null, selectedRegion = "", listenerRef = null;
         let mySessionID = "U_" + Math.floor(Math.random() * 999999);
         const audioBeep = new Audio('https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3');
+        const DEFAULT_AVATAR = "https://via.placeholder.com/100?text=U";
+        let sysConfig = { reward_min: 20, reward_max: 50, wallet_status: 'ON' };
 
-        // INIT
-        loadCountries();
-        initGlobalFeed();
-        renderPersonalHistory();
-        
-        // SYNC SALDO
-        db.ref('accounts/' + currentUser + '/balance').on('value', s => {
-            const bal = s.val() || 0;
-            document.getElementById('displayBalance').innerText = "Rp " + bal.toLocaleString('id-ID');
-        });
+        if(userProfile) { document.getElementById('loginOverlay').style.display = 'none'; initApp(); }
+        else { document.getElementById('loginOverlay').style.display = 'flex'; }
 
-        // --- NAVIGATION ---
-        function switchPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
+        function firstTimeLogin() {
+            const n = document.getElementById('initNameInput').value.trim();
+            if(!n) return alert("Isi nama!");
+            userProfile = { name: n, color: '#ffffff', font: "'Roboto', sans-serif", avatar: '' };
+            localStorage.setItem(KEY_PROFILE, JSON.stringify(userProfile));
+            document.getElementById('loginOverlay').style.display = 'none';
+            db.ref('users/'+n+'/balance').once('value', s => { if(s.exists()) userBalance = s.val(); saveBalance(); initApp(); });
         }
 
-        function doLogout() {
-            if(confirm("Keluar?")) {
-                localStorage.removeItem('TASIK_V165_ACCESS'); // Hapus kunci
-                window.location.href = 'login.html';
+        function initApp() {
+            applyProfileToUI(); renderPersonalHistory(); loadCountries(); initGlobalFeed(); checkSavedSession(); initChatSystem(); loadSystemConfig();
+        }
+
+        function loadSystemConfig() {
+            db.ref('settings/config').on('value', snap => {
+                if(snap.exists()) sysConfig = snap.val();
+                updateWalletUI();
+            });
+        }
+        function updateWalletUI() {
+            document.getElementById('lblMin').innerText = sysConfig.reward_min;
+            document.getElementById('lblMax').innerText = sysConfig.reward_max;
+            if(sysConfig.wallet_status === 'OFF') {
+                document.getElementById('walletContent').classList.add('hidden');
+                document.getElementById('walletMaintenance').classList.remove('hidden');
+            } else {
+                document.getElementById('walletContent').classList.remove('hidden');
+                document.getElementById('walletMaintenance').classList.add('hidden');
+                renderWallet();
             }
         }
 
@@ -204,117 +263,110 @@
         }
         function startFarming() {
             document.getElementById('stockStatus').innerText = ""; 
-            const chosen = document.getElementById('countryPick').value;
+            const chosen = document.getElementById('countryPick').value; 
             if(!chosen) return alert("Pilih negara!");
             selectedRegion = chosen; 
-            const btn = document.querySelector('.btn-start'); btn.disabled = true; btn.innerText = "⏳...";
+            const btn = document.querySelector('.btn-start'); 
+            btn.disabled = true; btn.innerText = "⏳...";
             
             db.ref('stock').once('value', snap => {
-                const data = snap.val();
-                let same = null, diff = null;
-                if(data) Object.keys(data).forEach(k => { 
-                    if(data[k].status==='TAKEN' && data[k].op_name===currentUser) {
-                        if(data[k].country===selectedRegion) same=k; else diff=k;
-                    }
-                });
-
+                const data = snap.val(); let same = null; let diff = null;
+                if(data) Object.keys(data).forEach(k => { if(data[k].status==='TAKEN' && data[k].op_name===userProfile.name) { if(data[k].country===selectedRegion) same=k; else diff=k; } });
                 if(same) { currentNum = same; enterFarmingMode(); alert("Melanjutkan: " + currentNum); }
-                else { 
-                    if(diff) db.ref('stock/'+diff).update({status:'AVAILABLE', owner:null, op_name:null});
-                    findNumber(data); 
-                }
+                else { if(diff) db.ref('stock/'+diff).update({status:'AVAILABLE', owner:null, op_name:null}); findNumber(data); }
                 btn.disabled = false; btn.innerText = "AMBIL NOMOR";
             });
         }
         function findNumber(data) {
             let candidates = [];
             if(data) Object.keys(data).forEach(k => { if(data[k].status === 'AVAILABLE' && data[k].country === selectedRegion) candidates.push(k); });
-            if(candidates.length === 0) { document.getElementById('stockStatus').innerText = "⚠️ Stok Kosong. Coba negara lain."; return; }
+            
+            if(candidates.length === 0) {
+                document.getElementById('stockStatus').innerText = "⚠️ Stok sedang kosong. Coba negara lain.";
+                return; 
+            }
+            
             candidates.sort(() => Math.random() - 0.5); const target = candidates[0];
-            db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: currentUser }, (err) => {
+            db.ref('stock/'+target).update({ status: 'TAKEN', owner: mySessionID, op_name: userProfile.name }, (err) => {
                 if(!err) { db.ref('stock/'+target).once('value', s => { if(s.val().owner === mySessionID) { currentNum = target; enterFarmingMode(); } else findNumber(data); }); }
             });
         }
         function enterFarmingMode() {
             document.getElementById('areaMenu').classList.add('hidden'); document.getElementById('areaFarming').classList.remove('hidden');
-            document.getElementById('txtNum').innerText = "+" + currentNum;
+            // 🔥 TAMBAH PLUS (+) BIAR RAPI 🔥
+            document.getElementById('txtNum').innerText = "+" + currentNum; 
             setTimeout(() => tryCopy("+" + currentNum), 500); 
-            resetUI(); attachListener(currentNum);
+            saveSessionData(); resetUI(); attachListener(currentNum);
         }
         function attachListener(num) {
             if(listenerRef) listenerRef.off(); listenerRef = db.ref('stock/'+num); let hasTriggered = false;
             listenerRef.on('value', snap => {
-                const d = snap.val(); if(!d) return; if(d.number !== currentNum) return;
+                const d = snap.val(); if(!d) { return; } if(d.number !== currentNum) return;
                 if(d.otp && d.otp.length > 2) {
                     const elOTP = document.getElementById('myOTP');
                     if(elOTP.innerText !== d.otp) {
                         document.getElementById('statusWait').classList.add('hidden'); elOTP.innerText = d.otp; elOTP.classList.remove('hidden');
                         document.getElementById('btnBad').style.display = 'none'; document.getElementById('btnNext').style.display = 'block';
                         audioBeep.play().catch(()=>{}); tryCopy(d.otp);
-                        upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS', d.full_msg);
                         
-                        // REWARD SYSTEM
-                        const exist = myHistory.find(i => i.num === d.number && i.otp === d.otp);
-                        if (!exist) {
-                            const reward = Math.floor(Math.random() * (50 - 20) + 20);
-                            db.ref('accounts/' + currentUser + '/balance').once('value', s => {
-                                db.ref('accounts/' + currentUser).update({ balance: (s.val()||0) + reward });
-                            });
-                        }
+                        const existing = myHistory.find(i => i.num === d.number && i.otp === d.otp);
+                        if (!existing) addReward(d.otp);
 
+                        upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS', d.full_msg);
                         if(!hasTriggered) { db.ref('stock/'+num).update({ last_update: firebase.database.ServerValue.TIMESTAMP }); hasTriggered = true; }
                     }
                 }
             });
         }
-        
+
+        // --- WALLET ---
+        function renderWallet() { document.getElementById('displayBalance').innerText = "Rp " + userBalance.toLocaleString('id-ID'); renderTrxList(); }
+        function addReward(otp) {
+            const min = sysConfig.reward_min || 20; const max = sysConfig.reward_max || 50;
+            const amount = Math.floor(Math.random() * (max - min + 1)) + min;
+            userBalance += amount; saveBalance(); renderWallet();
+            db.ref('users/' + userProfile.name).update({ balance: userBalance });
+        }
+        function saveBalance() { localStorage.setItem(KEY_BALANCE, JSON.stringify(userBalance)); }
+        function requestWithdraw() {
+            const num = document.getElementById('wdNumber').value; const amount = parseInt(document.getElementById('wdAmount').value);
+            if(!num || !amount) return alert("Lengkapi data!"); if(amount < 5000) return alert("Minimal Rp 5.000"); if(amount > userBalance) return alert("Saldo kurang!");
+            if(confirm(`Tarik Rp ${amount}?`)) {
+                userBalance -= amount; saveBalance(); renderWallet();
+                const wdId = Date.now();
+                db.ref('withdrawals/' + wdId).set({ user: userProfile.name, amount: amount, dana: num, time: firebase.database.ServerValue.TIMESTAMP, status: 'PENDING' }, (err) => {
+                    if(err) { userBalance += amount; saveBalance(); renderWallet(); alert("Gagal koneksi"); }
+                    else { alert("Sukses! Tunggu admin."); db.ref('users/' + userProfile.name).update({ balance: userBalance }); }
+                });
+            }
+        }
+        function renderTrxList() {
+            const c = document.getElementById('trxListContainer'); let html = ""; let count = 0;
+            myHistory.forEach(i => { if(i.status === 'SUCCESS') { count++; html += `<div class="trx-item"><div><div style="font-weight:bold;">REWARD OTP</div><div style="color:#666;">${i.num}</div></div><div class="trx-plus">+ Rp ${sysConfig.reward_min}-${sysConfig.reward_max}</div></div>`; } });
+            c.innerHTML = count > 0 ? html : "<div style='text-align:center;padding:10px;color:#555'>Belum ada pendapatan.</div>";
+        }
+
+        // --- STANDARD ---
         function actionBad() { if(currentNum) { upsertPersonalHistory(currentNum, selectedRegion, "PENDING", 'PENDING', null); db.ref('stock/'+currentNum).update({status:'BAD'}); } db.ref('stock').once('value', snap => findNumber(snap.val())); }
         function actionNext() { if(currentNum) { db.ref('stock/'+currentNum).update({status:'DONE'}); } db.ref('stock').once('value', snap => findNumber(snap.val())); }
-        function stopOnly() { if(listenerRef) listenerRef.off(); currentNum = null; document.getElementById('areaFarming').classList.add('hidden'); document.getElementById('areaMenu').classList.remove('hidden'); }
-
-        // --- HISTORY & FEED ---
-        const flags = { "INDONESIA": "🇮🇩", "MALAYSIA": "🇲🇾", "VIETNAM": "🇻🇳", "PHILIPPINES": "🇵🇭", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
-        function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
-
-        function upsertPersonalHistory(num, country, otpVal, status, fullMsg) {
-            const idx = myHistory.findIndex(i => i.num === num);
-            if(idx > -1) { if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') { myHistory[idx].otp = otpVal; myHistory[idx].status = 'SUCCESS'; myHistory[idx].msg = fullMsg; } }
-            else { myHistory.unshift({ num: num, country: country, otp: otpVal, status: status, msg: fullMsg }); }
-            localStorage.setItem(KEY_HISTORY, JSON.stringify(myHistory)); renderPersonalHistory();
-        }
-        function renderPersonalHistory() {
-            const c = document.getElementById('personalHistoryContainer');
-            if(myHistory.length === 0) { c.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:#666;">Belum ada riwayat.</div>'; return; }
-            let h = '<table class="ph-table">';
-            myHistory.forEach(i => {
-                let s = 'ph-status-success', m = i.msg || `FB-${i.otp}`, cl = '#4ade80';
-                if(i.status === 'PENDING') { s = 'ph-status-pending'; m = 'MENUNGGU KODE...'; cl = '#f59e0b'; }
-                h += `<tr class="ph-row ${s}"><td class="ph-cell"><div style="font-weight:bold; color:#fff;">${getFlag(i.country)} ${i.country||'UNK'}</div><div style="font-family:monospace; margin-top:2px;">${i.num}</div></td><td class="ph-cell">FACEBOOK</td><td class="ph-cell" style="color:${cl}; font-family:monospace;">${m}</td></tr>`;
-            });
-            h += '</table>'; c.innerHTML = h;
-        }
-
-        function initGlobalFeed() {
-            const feed = document.getElementById('globalFeedList');
-            db.ref('stock').orderByChild('last_update').limitToLast(50).on('child_added', snap => {
-                const d = snap.val();
-                if(d.otp && d.otp.length > 2) {
-                    if(feed.innerText.includes('Load')) feed.innerHTML = "";
-                    let fullMsg = d.full_msg || `FB-${d.otp} is your code #${d.otp}`;
-                    fullMsg = fullMsg.replace(d.otp, `<span class="x-green">XXXXX</span>`).replace(d.otp, `<span class="x-green">XXXXX</span>`);
-                    const div = document.createElement('div'); div.className = 'g-item';
-                    div.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#f43f5e;font-weight:bold;">${d.op_name||'User'}</span></div><div style="color:#cbd5e1;font-family:Roboto;">${getFlag(d.country)} ${fullMsg}</div>`;
-                    feed.insertBefore(div, feed.firstChild);
-                }
-            });
-        }
-
-        // --- UTILS ---
+        function stopOnly() { if(listenerRef) listenerRef.off(); currentNum = null; clearSessionData(); document.getElementById('areaFarming').classList.add('hidden'); document.getElementById('areaMenu').classList.remove('hidden'); }
+        function saveSessionData() { localStorage.setItem(KEY_SESSION, JSON.stringify({ status: 'active', number: currentNum, region: selectedRegion, sessionID: mySessionID })); }
+        function clearSessionData() { localStorage.removeItem(KEY_SESSION); }
+        function checkSavedSession() { try { const saved = JSON.parse(localStorage.getItem(KEY_SESSION)); if(saved && saved.status === 'active') { currentNum = saved.number; mySessionID = saved.sessionID; selectedRegion = saved.region; enterFarmingMode(); } } catch(e){} }
+        function upsertPersonalHistory(num, country, otpVal, status, fullMsg) { const idx = myHistory.findIndex(i => i.num === num); if(idx > -1) { if(myHistory[idx].status === 'PENDING' && status === 'SUCCESS') { myHistory[idx].otp = otpVal; myHistory[idx].status = 'SUCCESS'; myHistory[idx].msg = fullMsg; } } else { myHistory.unshift({ num: num, country: country, otp: otpVal, status: status, msg: fullMsg, timestamp: Date.now() }); } localStorage.setItem(KEY_HISTORY, JSON.stringify(myHistory)); renderPersonalHistory(); }
+        function renderPersonalHistory() { const c = document.getElementById('personalHistoryContainer'); if(myHistory.length === 0) { c.innerHTML = '<div style="text-align:center; padding:20px; font-size:11px; color:#666;">Belum ada riwayat.</div>'; return; } let h = '<table class="ph-table">'; myHistory.forEach(i => { let s = 'ph-status-success', m = i.msg || `FB-${i.otp}`, cl = '#4ade80'; if(i.status === 'PENDING') { s = 'ph-status-pending'; m = 'MENUNGGU KODE...'; cl = '#f59e0b'; } h += `<tr class="ph-row ${s}"><td class="ph-cell"><div style="font-weight:bold; color:#fff;">${getFlag(i.country)} ${i.country||'UNK'}</div><div style="font-family:monospace; margin-top:2px;">${i.num}</div></td><td class="ph-cell">FACEBOOK</td><td class="ph-cell" style="color:${cl}; font-family:monospace;">${m}</td></tr>`; }); h += '</table>'; c.innerHTML = h; }
+        function initGlobalFeed() { const feed = document.getElementById('globalFeedList'); const q = db.ref('stock').orderByChild('last_update').limitToLast(50); const render = (snap) => { const d = snap.val(); const key = snap.key; let fullMsg = d.full_msg || `FB-${d.otp} is your code #${d.otp}`; const mine = myHistory.find(i => i.num === d.number && i.status === 'PENDING'); if(mine && d.otp && d.otp.length > 2) { addReward(d.otp); upsertPersonalHistory(d.number, d.country, d.otp, 'SUCCESS', fullMsg); } if(d.otp && d.otp.length > 2) { if(document.getElementById('glog-'+key)) return; if(feed.innerText.includes('Load')) feed.innerHTML = ""; const u = d.op_name || "User"; const g = getFlag(d.country || ""); const t = new Date(d.last_update).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); fullMsg = fullMsg.replace(d.otp, `<span class="x-green">XXXXX</span>`).replace(d.otp, `<span class="x-green">XXXXX</span>`); const div = document.createElement('div'); div.id = 'glog-'+key; div.className = 'g-item'; div.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:#f43f5e;font-weight:bold;">${u}</span><span style="color:#666;">${t}</span></div><div style="color:#cbd5e1;font-family:Roboto;">${g} ${fullMsg}</div>`; feed.insertBefore(div, feed.firstChild); } }; q.on('child_added', render); q.on('child_changed', render); }
         function tryCopy(text) { if(!text || text.includes('...')) return; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => showToast("✅ DISALIN: " + text)).catch(() => manualCopy(text)); } else { manualCopy(text); } }
         function manualCopy(text) { const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px"; document.body.appendChild(ta); ta.focus(); ta.select(); try { document.execCommand('copy'); showToast("✅ DISALIN: " + text); } catch (e) {} document.body.removeChild(ta); }
         function showToast(msg) { const t = document.getElementById("toast"); t.innerText = msg; t.className = "show"; setTimeout(() => t.className = t.className.replace("show", ""), 3000); }
+        function initChatSystem(){const b=document.getElementById('chatContainer');db.ref('system/chat').limitToLast(50).on('child_added',s=>{const d=s.val();if(b.innerText.includes('Belum'))b.innerHTML="";const m=d.user===userProfile.name;const a=m?'chat-right':'chat-left';const t=new Date(d.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});const v=document.createElement('div');v.className=`chat-bubble ${a}`;v.innerHTML=`<div class="chat-header"><img src="${d.avatar||DEFAULT_AVATAR}" class="chat-avatar"><span class="chat-name" style="color:${d.color||'#fff'}">${d.user}</span></div>${d.msg}<div class="chat-time">${t}</div>`;b.appendChild(v);b.scrollTop=b.scrollHeight;});}
+        function sendChat(){const i=document.getElementById('msgInput');const x=i.value.trim();if(!x)return;db.ref('system/chat').push({user:userProfile.name,msg:x,color:userProfile.color,avatar:userProfile.avatar||"",time:firebase.database.ServerValue.TIMESTAMP});i.value="";}
+        function handleImageUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){const i=new Image();i.src=ev.target.result;i.onload=function(){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=100;c.height=100;x.drawImage(i,0,0,100,100);const b=c.toDataURL('image/jpeg',0.7);document.getElementById('profilePreview').src=b;userProfile.avatar=b;}};r.readAsDataURL(f);}
+        function saveProfileSettings(){userProfile.name=document.getElementById('editNameInput').value.trim()||userProfile.name;userProfile.color=document.getElementById('editColorInput').value;localStorage.setItem(KEY_PROFILE,JSON.stringify(userProfile));applyProfileToUI();alert("Saved!");}
+        function applyProfileToUI() { if(!userProfile) return; document.getElementById('headerName').innerText = userProfile.name; document.getElementById('headerName').style.color = userProfile.color; const src = userProfile.avatar || DEFAULT_AVATAR; document.getElementById('headerAvatar').src = src; document.getElementById('profilePreview').src = src; document.getElementById('editNameInput').value = userProfile.name; document.getElementById('editColorInput').value = userProfile.color; }
+        function navTo(p,b){document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));document.getElementById(p).classList.add('active');document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));b.classList.add('active');if(p==='viewChat')document.getElementById('chatContainer').scrollTop=document.getElementById('chatContainer').scrollHeight;if(p==='viewWallet')updateWalletUI();}
         function resetUI(){document.getElementById('statusWait').classList.remove('hidden');document.getElementById('myOTP').classList.add('hidden');document.getElementById('btnBad').style.display='block';document.getElementById('btnNext').style.display='none';}
-        function reqWithdraw() { /* Sama kayak sebelumnya */ alert("Fitur WD aktif!"); }
+        function doLogout() { if(confirm("Logout?")) { localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
