@@ -200,7 +200,7 @@
         try { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); } catch(e){}
         const db = firebase.database();
 
-        const flags = { "SIERRALEONE": "🇸🇱", "IVORYCOAST": "🇨🇮", "ETHIOPIA": "🇪🇹", "SAUDIARABIA": "🇸🇦", "THAILAND": "🇹🇭", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
+        const flags = { "SIERRALEONE": "🇸🇱", "IVORYCOAST": "🇨🇮", "ETHIOPIA": "🇪🇹", "SAUDIARABIA": "🇸🇦", "BENIN": "🇧🇯", "RUSSIA": "🇷🇺", "USA": "🇺🇸", "UK": "🇬🇧", "ETHIOPIA": "🇪🇹", "KENYA": "🇰🇪", "NIGERIA": "🇳🇬", "BRAZIL": "🇧🇷", "SUDAN": "🇸🇩", "MYANMAR": "🇲🇲" };
         function getFlag(n) { return flags[n?.toUpperCase()] || "🌍"; }
 
         // KEYS
