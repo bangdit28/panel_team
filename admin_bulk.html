@@ -1,95 +1,94 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MASTER ADMIN V127 (COMPLETE)</title>
+    <title>MASTER ADMIN V125 (UI FIX)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: monospace; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .box { width: 100%; max-width: 900px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
+        .box { width: 100%; max-width: 800px; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: #111; }
         h2 { margin-top: 0; color: #00ff88; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
-        /* TABS YANG LEBIH RAPI */
-        .tabs-header { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; flex-wrap: wrap; justify-content: center; }
-        .tab-btn { background: #222; border: 1px solid #444; color: #aaa; padding: 8px 15px; cursor: pointer; font-weight: bold; font-size: 11px; margin-bottom: 5px; border-radius: 4px; }
+        /* TABS */
+        .tabs-header { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; flex-wrap: wrap; }
+        .tab-btn { background: #222; border: 1px solid #444; color: #aaa; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 11px; min-width: 80px; }
         .tab-btn.active { background: #00ff88; color: #000; border-color: #00ff88; }
-        /* Warna Khusus Tab Baru */
-        .tab-btn.user-tab.active { background: #d946ef; color: #fff; border-color: #d946ef; }
         .tab-btn.money-tab.active { background: #f43f5e; color: #fff; border-color: #f43f5e; }
         .tab-btn.sys-tab.active { background: #eab308; color: #000; border-color: #eab308; }
-
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* DASHBOARD 4 KOTAK (BALIK LAGI) */
+        /* 🔥 GRID DASHBOARD 4 KOTAK (RESTORED) 🔥 */
         .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #444; }
+        .stat-card { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #444; display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .stat-num { font-size: 32px; font-weight: bold; display: block; margin-bottom: 5px; }
         .stat-label { font-size: 12px; color: #aaa; font-weight: bold; letter-spacing: 1px; }
 
-        /* LIST & ITEMS */
+        /* LISTS */
         .list-container { max-height: 400px; overflow-y: auto; padding-right: 5px; border: 1px solid #222; background: #0a0a0a; margin-top: 10px; }
         .list-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; border-left: 3px solid #555; }
+        .wd-card { border-left: 3px solid #f43f5e !important; background: #1f1212 !important; }
+        .wd-info { display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
         
-        /* FORM & INPUTS */
-        input, select, textarea { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
-        button.action-btn { border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; transition: 0.2s; }
-        .bg-red { background: #d32f2f; } .bg-green { background: #00e676; color:#000; } .bg-blue { background: #2979ff; } .bg-purple { background: #d946ef; }
-        button:hover { opacity: 0.8; transform: scale(1.02); }
-
-        /* KHUSUS TAB SYSTEM */
+        /* INPUTS & BUTTONS */
+        input, select { width: 100%; padding: 10px; background: #000; color: #fff; border: 1px solid #555; box-sizing: border-box; margin-bottom: 5px; }
+        button.action-btn { border: none; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 10px; font-weight: bold; color: #fff; transition: 0.2s; }
+        button.action-btn:hover { opacity: 0.8; transform: scale(1.05); }
+        .bg-red { background: #d32f2f; } .bg-green { background: #00e676; color:#000; } .bg-blue { background: #2979ff; }
+        
+        /* SYSTEM TAB */
         .sys-group { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
         .switch-btn { padding: 10px; width: 100%; border: none; font-weight: bold; cursor: pointer; }
         .sw-on { background: #00e676; color: #000; } .sw-off { background: #d32f2f; color: #fff; }
-
-        /* NOTIF BOX */
-        .notif-box { background: rgba(255, 215, 0, 0.05); border: 1px dashed #ffd700; padding: 15px; border-radius: 8px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2>⚡ V127 ADMIN (COMPLETE)</h2>
+        <h2>⚡ V125 ADMIN (DASHBOARD FIX)</h2>
 
-        <!-- NAVIGASI LENGKAP -->
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab('dash')">📊 DASHBOARD</button>
-            <button class="tab-btn user-tab" onclick="switchTab('users')">👮 MEMBER</button>
             <button class="tab-btn money-tab" onclick="switchTab('money')">💰 KEUANGAN</button>
             <button class="tab-btn sys-tab" onclick="switchTab('system')">⚙️ SYSTEM</button>
             <button class="tab-btn" onclick="switchTab('recycle')">♻️ RECYCLE</button>
-            <button class="tab-btn" onclick="switchTab('monitor')">📂 MONITOR</button>
             <button class="tab-btn" onclick="switchTab('country')">🌍 NEGARA</button>
             <button class="tab-btn" onclick="switchTab('upload')">🛠️ TOOLS</button>
         </div>
 
-        <!-- 1. DASHBOARD (4 KOTAK) -->
+        <!-- DASHBOARD (TAMPILAN DIKEMBALIKAN KE 4 KOTAK) -->
         <div id="dash" class="tab-content active">
             <div class="grid-stats">
+                <!-- 1. AVAILABLE -->
                 <div class="stat-card" style="border-color: #00e676;">
-                    <span id="cAvail" class="stat-num" style="color:#00e676">0</span>
-                    <span class="stat-label">AVAILABLE</span>
+                    <span id="countAvail" class="stat-num" style="color:#00e676">0</span>
+                    <span class="stat-label">AVAILABLE (STOK)</span>
                 </div>
+                <!-- 2. ACTIVE -->
                 <div class="stat-card" style="border-color: #2979ff;">
-                    <span id="cActive" class="stat-num" style="color:#2979ff">0</span>
-                    <span class="stat-label">ACTIVE</span>
+                    <span id="countActive" class="stat-num" style="color:#2979ff">0</span>
+                    <span class="stat-label">ACTIVE (TAKEN)</span>
                 </div>
+                <!-- 3. RECYCLE BIN -->
                 <div class="stat-card" style="border-color: #ff9800;">
-                    <span id="cRecycle" class="stat-num" style="color:#ff9800">0</span>
-                    <span class="stat-label">RECYCLE BIN</span>
+                    <span id="countRecycle" class="stat-num" style="color:#ff9800">0</span>
+                    <span class="stat-label">♻️ RECYCLE BIN</span>
                 </div>
+                <!-- 4. TRASH / DONE -->
                 <div class="stat-card" style="border-color: #ff1744;">
-                    <span id="cTrash" class="stat-num" style="color:#ff1744">0</span>
-                    <span class="stat-label">DONE / BAD</span>
+                    <span id="countTrash" class="stat-num" style="color:#ff1744">0</span>
+                    <span class="stat-label">SELESAI / BAD</span>
                 </div>
             </div>
             
-            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; margin-bottom:10px;">🧹 LEPASKAN NOMOR STUCK ( > 2 MENIT)</button>
+            <button onclick="clearZombies()" class="action-btn bg-blue" style="width:100%; padding:15px; margin-bottom:15px;">🧹 LEPASKAN NOMOR STUCK ( > 2 MENIT)</button>
 
-            <div class="notif-box">
+            <!-- NOTIF -->
+            <div style="background:rgba(255, 215, 0, 0.05); border:1px dashed #ffd700; padding:15px; border-radius:8px;">
                 <label style="color:#ffd700; font-size:11px;">📢 RUNNING TEXT:</label>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                     <input type="text" id="notifMsg" placeholder="Isi pesan...">
@@ -99,26 +98,12 @@
             </div>
         </div>
 
-        <!-- 2. MEMBER / USER MANAGER (BARU) -->
-        <div id="users" class="tab-content">
-            <div style="background:#222; padding:15px; border-radius:8px; margin-bottom:10px;">
-                <label style="font-size:11px; color:#d946ef;">TAMBAH MEMBER BARU:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="newUsername" placeholder="Username (Tanpa Spasi)">
-                    <input type="text" id="newPassword" placeholder="Password">
-                    <button onclick="createUser()" class="action-btn bg-purple">BUAT</button>
-                </div>
-            </div>
-            <div class="list-container" id="userListContainer">Loading...</div>
-        </div>
-
-        <!-- 3. KEUANGAN (BARU) -->
+        <!-- 💰 KEUANGAN -->
         <div id="money" class="tab-content">
-            <div style="text-align:center; color:#aaa; font-size:11px;">Request Penarikan Saldo:</div>
             <div class="list-container" id="wdListContainer">Loading...</div>
         </div>
 
-        <!-- 4. SYSTEM (BARU) -->
+        <!-- ⚙️ SYSTEM SETTINGS -->
         <div id="system" class="tab-content">
             <div class="sys-group">
                 <div style="font-size:11px; color:#aaa; margin-bottom:5px;">HARGA REWARD PER OTP (Rp):</div>
@@ -134,31 +119,27 @@
                     <button onclick="setWalletStatus('ON')" class="switch-btn sw-on">BUKA (ON)</button>
                     <button onclick="setWalletStatus('OFF')" class="switch-btn sw-off">TUTUP (MAINTENANCE)</button>
                 </div>
+                <div id="walletStatusText" style="margin-top:5px; font-size:10px; text-align:center;">...</div>
             </div>
         </div>
 
-        <!-- 5. RECYCLE BIN -->
+        <!-- ♻️ RECYCLE -->
         <div id="recycle" class="tab-content">
             <div style="margin-bottom:10px;"><button onclick="restoreAllRecycle()" class="action-btn bg-green">RESTORE ALL</button> <button onclick="flushRecycle()" class="action-btn bg-red">HAPUS ALL</button></div>
             <div class="list-container" id="recycleListContainer"></div>
         </div>
 
-        <!-- 6. MONITOR RANGE -->
-        <div id="monitor" class="tab-content">
-            <div class="list-container" id="rangeListContainer">Loading...</div>
-        </div>
-
-        <!-- 7. NEGARA -->
+        <!-- 🌍 NEGARA -->
         <div id="country" class="tab-content">
             <div style="display:flex; gap:5px;"><input id="cCode" placeholder="ID"><input id="cName" placeholder="INDONESIA"><button onclick="saveCountry()" class="action-btn bg-green">SAVE</button></div>
             <button onclick="clearAllCountries()" class="action-btn bg-red" style="margin-top:5px;">RESET NEGARA</button>
             <div class="list-container" id="countryListDisplay"></div>
         </div>
 
-        <!-- 8. TOOLS -->
+        <!-- 🛠️ TOOLS -->
         <div id="upload" class="tab-content">
             <select id="countrySelectUpload"></select>
-            <textarea id="numList" placeholder="Paste nomor..." style="height:100px;"></textarea>
+            <textarea id="numList" placeholder="Paste nomor..." style="height:80px;"></textarea>
             <button onclick="uploadStockSafe()" class="action-btn bg-green" style="width:100%;">UPLOAD</button>
             <div style="margin-top:20px; display:flex; gap:10px;">
                 <button onclick="clearTrash()" class="action-btn bg-red" style="flex:1;">CLEAR HISTORY</button>
@@ -183,80 +164,56 @@
         // --- DASHBOARD CORE ---
         let lastUpdate = 0;
         db.ref('stock').on('value', snap => {
-            if (Date.now() - lastUpdate > 1000) { renderAllData(snap.val()); lastUpdate = Date.now(); }
+            if (Date.now() - lastUpdate > 1000) { renderDashboard(snap.val()); lastUpdate = Date.now(); }
         });
 
-        function renderAllData(data) {
+        function renderDashboard(data) {
             let avail=0, active=0, recycle=0, trash=0;
-            let ranges = {};
             let recHTML = "";
 
             if(data) Object.keys(data).forEach(k => {
                 const i = data[k];
-                // STATS
                 if(i.status==='AVAILABLE') avail++;
                 else if(i.status==='TAKEN') active++;
-                else if(i.status==='RECYCLE' || i.status==='BAD') {
+                else if(i.status==='RECYCLE') { // Explicit Recycle Bin
                     recycle++;
                     recHTML += `<div class="list-item" style="border-left-color:#ff9800"><div class="item-info"><span style="color:#ff9800">${i.country}</span> ${i.number}<br><span style="color:#666;font-size:10px">${i.op_name||'-'}</span></div><div><button class="action-btn bg-green" onclick="restoreOne('${k}')">R</button> <button class="action-btn" onclick="navigator.clipboard.writeText('${i.number}')">C</button></div></div>`;
                 }
-                else if(i.status==='DONE') trash++;
-
-                // RANGES
-                const r = i.range_name || "MANUAL";
-                if (!ranges[r]) ranges[r] = { total: 0, avail: 0 };
-                ranges[r].total++;
-                if (i.status === 'AVAILABLE') ranges[r].avail++;
+                else if(i.status==='DONE' || i.status==='BAD') trash++; // Group Done/Bad as Trash
             });
 
-            // Update UI Stats
-            document.getElementById('cAvail').innerText = avail;
-            document.getElementById('cActive').innerText = active;
-            document.getElementById('cRecycle').innerText = recycle;
-            document.getElementById('cTrash').innerText = trash;
+            document.getElementById('countAvail').innerText = avail;
+            document.getElementById('countActive').innerText = active;
+            document.getElementById('countRecycle').innerText = recycle;
+            document.getElementById('countTrash').innerText = trash;
             document.getElementById('recycleListContainer').innerHTML = recHTML || "Kosong";
-
-            // Update Range Monitor
-            let rangeHTML = "";
-            Object.keys(ranges).forEach(k => {
-                rangeHTML += `<div class="list-item"><div class="item-info"><b>${k}</b>: ${ranges[k].avail}/${ranges[k].total}</div><button class="action-btn bg-red" onclick="deleteRange('${k}')">DEL</button></div>`;
-            });
-            document.getElementById('rangeListContainer').innerHTML = rangeHTML || "Kosong";
         }
-
-        // --- MEMBER MANAGEMENT ---
-        db.ref('accounts').on('value', snap => {
-            const d = snap.val(); const c = document.getElementById('userListContainer'); c.innerHTML="";
-            if(d) Object.keys(d).forEach(k => {
-                c.innerHTML += `<div class="list-item" style="border-left-color:#d946ef;"><div class="item-info"><b style="color:#d946ef;">${k}</b> | Pass: ${d[k].password} | Saldo: ${d[k].balance||0}</div><button class="action-btn bg-red" onclick="delUser('${k}')">HAPUS</button></div>`;
-            });
-        });
-        window.createUser = () => {
-            const u = document.getElementById('newUsername').value.trim().toLowerCase();
-            const p = document.getElementById('newPassword').value.trim();
-            if(u&&p) db.ref('accounts/'+u).set({password:p, balance:0, joined:Date.now()});
-        }
-        window.delUser = (u) => { if(confirm("Hapus "+u+"?")) db.ref('accounts/'+u).remove(); }
 
         // --- SYSTEM CONFIG ---
         db.ref('settings/config').on('value', snap => {
             const c = snap.val() || { reward_min: 20, reward_max: 50, wallet_status: 'ON' };
             document.getElementById('rewMin').value = c.reward_min;
             document.getElementById('rewMax').value = c.reward_max;
+            document.getElementById('walletStatusText').innerText = "Status: " + c.wallet_status;
         });
         window.saveRewardConfig = () => db.ref('settings/config').update({ reward_min: parseInt(document.getElementById('rewMin').value), reward_max: parseInt(document.getElementById('rewMax').value) });
         window.setWalletStatus = (s) => db.ref('settings/config').update({ wallet_status: s });
 
-        // --- OTHERS (SAMA SEPERTI V124) ---
+        // --- WD LIST ---
         db.ref('withdrawals').on('value', snap => {
-            const d=snap.val(); const c=document.getElementById('wdListContainer'); c.innerHTML="";
+            const d = snap.val(); const c = document.getElementById('wdListContainer'); c.innerHTML="";
             if(d) Object.keys(d).forEach(k => {
-                if(d[k].status === 'PENDING') c.innerHTML += `<div class="list-item" style="border-left-color:#f43f5e;"><div class="item-info"><span style="color:#f43f5e;font-weight:bold;">${d[k].user}</span> Rp ${d[k].amount} -> ${d[k].dana}</div><div><button class="action-btn bg-green" onclick="accWD('${k}')">ACC</button> <button class="action-btn bg-red" onclick="decWD('${k}','${d[k].user}',${d[k].amount})">TOLAK</button></div></div>`;
+                const i = d[k];
+                if(i.status === 'PENDING') {
+                    c.innerHTML += `<div class="list-item wd-card"><div class="wd-info"><span style="color:#f43f5e;font-weight:bold;">${i.user}</span><span>Rp ${i.amount} -> ${i.dana}</span></div><div><button class="action-btn bg-green" onclick="accWD('${k}')">ACC</button> <button class="action-btn bg-red" onclick="decWD('${k}','${i.user}',${i.amount})">TOLAK</button></div></div>`;
+                }
             });
+            if(c.innerHTML==="") c.innerHTML="<div style='text-align:center;padding:10px;'>Tidak ada request.</div>";
         });
         window.accWD = (k) => { if(confirm("ACC?")) db.ref('withdrawals/'+k).update({status:'SUCCESS'}); }
         window.decWD = (k,u,a) => { if(confirm("Tolak & Refund?")) { db.ref('withdrawals/'+k).update({status:'REJECTED'}); db.ref('users/'+u+'/balance').once('value',s=>db.ref('users/'+u).update({balance:(s.val()||0)+a})); } }
 
+        // --- OTHERS ---
         db.ref('settings/countries').on('value', s => {
             const d=s.val(); const l=document.getElementById('countryListDisplay'); const u=document.getElementById('countrySelectUpload');
             l.innerHTML=""; u.innerHTML="";
@@ -268,24 +225,23 @@
         window.saveCountry=()=>{const c=document.getElementById('cCode').value; const n=document.getElementById('cName').value; if(c&&n)db.ref('settings/countries/'+c).set(n);}
         window.delCountry=(k)=>{if(confirm("Del?"))db.ref('settings/countries/'+k).remove();}
         window.clearAllCountries=()=>{if(confirm("Reset?"))db.ref('settings/countries').remove();}
-        
-        window.switchTab=(id)=>{ document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.target.classList.add('active'); }
         window.uploadStockSafe=()=>{
             const raw=document.getElementById('numList').value; const c=document.getElementById('countrySelectUpload').value;
-            if(!c)return alert("Pilih Negara!"); const lines=raw.split(/\n/); const ts=Date.now();
+            if(!c)return alert("Pilih Negara!");
+            const lines=raw.split(/\n/); const ts=Date.now();
             db.ref('stock').once('value', snap=>{
                 const ex=snap.val()||{}; let u={};
                 lines.forEach(l=>{ let n=l.replace(/\D/g,''); if(n.length>6 && !ex[n]) u[n]={number:n, country:c, status:'AVAILABLE', range_name:"MANUAL", timestamp:ts, otp:""}; });
                 db.ref('stock').update(u, e=>{ if(!e) {alert("Done"); document.getElementById('numList').value="";} });
             });
         }
+        window.switchTab=(id)=>{ document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.target.classList.add('active'); }
         window.restoreOne=(k)=>db.ref('stock/'+k).update({status:'AVAILABLE',owner:null,op_name:null,otp:null});
-        window.restoreAllRecycle=()=>{ if(confirm("All?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k+'/status']='AVAILABLE'; }); db.ref('stock').update(u); }); }
-        window.flushRecycle=()=>{ if(confirm("Flush?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE'||d[k].status==='BAD') u[k]=null; }); db.ref('stock').update(u); }); }
+        window.restoreAllRecycle=()=>{ if(confirm("All?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE') u[k+'/status']='AVAILABLE'; }); db.ref('stock').update(u); }); }
+        window.flushRecycle=()=>{ if(confirm("Flush?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='RECYCLE') u[k]=null; }); db.ref('stock').update(u); }); }
         window.clearZombies=()=>{ db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; const now=Date.now(); Object.keys(d).forEach(k=>{ if(d[k].status==='TAKEN' && (now-(d[k].timestamp||0)>120000)) { u[k+'/status']='RECYCLE'; u[k+'/op_name']='(Timeout)'; } }); db.ref('stock').update(u); }); }
         window.clearTrash=()=>{ if(confirm("Clean History?")) db.ref('stock').once('value',s=>{ const d=s.val(); let u={}; Object.keys(d).forEach(k=>{ if(d[k].status==='DONE'||d[k].status==='BAD')u[k]=null; }); db.ref('stock').update(u); }); }
         window.clearAll=()=>{ if(confirm("RESET ALL?")) db.ref('stock').remove(); }
-        window.deleteRange = (r) => { if(confirm("Del Range?")) db.ref('stock').once('value',s=>{const d=s.val();let u={};Object.keys(d).forEach(k=>{if(d[k].range_name===r)u[k]=null;});db.ref('stock').update(u);}); }
         window.sendNotif = () => db.ref('system/notification').set(document.getElementById('notifMsg').value);
         window.clearNotif = () => db.ref('system/notification').remove();
     </script>
